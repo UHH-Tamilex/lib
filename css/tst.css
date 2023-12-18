@@ -16,7 +16,7 @@ body {
     max-width: 100vw;
     width: 100vw;
     height: 100vh;
-    font-variant-ligatures: no-historical-ligatures;
+    font-variant-ligatures: historical-ligatures no-discretionary-ligatures;
 }
 
 #recordcontainer, .recordcontainer {
