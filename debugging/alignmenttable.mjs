@@ -90,12 +90,13 @@ const makeAlignmentTable = (alignment,lines,par) => {
         if(typeof alignment[0][n] === 'string') {
             td1 = document.createElement('td');
             td1.append(alignment[0][n]);
-            if(alignment[0][n + 1] === Symbol.for('concatleft') ||
-                ( alignment[0][n - 1] === Symbol.for('concatright') &&
-                  td1 !== row1.firstChild )
-              ) {
-
+            if(alignment[0][n + 1] === Symbol.for('concatleft')) {
                 td1.colSpan = 2;
+                td1.classList.add('mismatch');
+            }
+            if(alignment[0][n - 1] === Symbol.for('concatright')) {
+                if(row1.childNodes.length)
+                    td1.colSpan = 2;
                 td1.classList.add('mismatch');
             }
             else if(unequal) td1.classList.add(unequal);
