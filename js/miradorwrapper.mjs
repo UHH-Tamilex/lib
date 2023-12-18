@@ -6,7 +6,35 @@ const miradorImageTools = MiradorModule.miradorImageToolsPlugin;
 const miradorAnnotations = MiradorModule.miradorAnnotationPlugin;
 const _state = {
     winname: 'win1',
-    annoMap: new Map()
+    annoMap: new Map(),
+};
+
+const setFacs = {
+    name: 'set facs attribute',
+    reducers: {
+        facsSet: (state=null,action=null) => {
+            if(action.type === 'mirador/RECEIVE_MANIFEST')
+                return action.manifestJson;
+
+            if(!state) return state;
+
+            if(action.type === 'mirador/SET_CANVAS') {
+                // n-1 because f1 is image 0
+                const items = state.sequences ? 
+                    state.sequences[0].canvases : 
+                    state.items;
+                for(let n=0;n<items.length;n++) {
+                    const id = items[n]['@id'] || items[n].id;
+                    if(id === action.canvasId) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('facs',n+1);
+                        window.history.replaceState({},'',url.toString());
+                    }
+                }
+            }
+            return state;
+        },
+    }
 };
 
 const newMirador = function(id,manifest,start = 0,annoMap = _state.annoMap, annotate = false) {
@@ -14,7 +42,7 @@ const newMirador = function(id,manifest,start = 0,annoMap = _state.annoMap, anno
     //const plugins = annotate ?
     //  [...miradorImageTools,...miradorAnnotations] :
     //  [...miradorImageTools];
-    const plugins = [...miradorImageTools,...miradorAnnotations];
+    const plugins = [...miradorImageTools,...miradorAnnotations,setFacs];
     const opts = {
         id: id,
         windows: [{
@@ -54,6 +82,7 @@ const newMirador = function(id,manifest,start = 0,annoMap = _state.annoMap, anno
         el.innerHTML = '[aria-label="Create new annotation"] { display: none !important;}';
         document.head.appendChild(el);
     }*/
+    
     return viewer;
 };
     
@@ -94,7 +123,8 @@ const jumpTo = function(win,manifest,n) {
     const page = split[0];
     const manif = win.store.getState().manifests[manifest].json;
     // n-1 because f1 is image 0
-    const canvasid = manif.sequences[0].canvases[page-1]['@id'];
+    const items = manif.sequences ? manif.sequences[0].canvases : manif.items;
+    const canvasid = items[page-1]['@id'] || items[page-1].id;
     const act = Mirador.actions.setCanvas(_state.winname,canvasid);
     win.store.dispatch(act);
 
