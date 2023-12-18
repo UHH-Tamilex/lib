@@ -91,7 +91,10 @@ const makeAlignmentTable = (alignment,lines,par) => {
             td1 = document.createElement('td');
             td1.append(alignment[0][n]);
             if(alignment[0][n + 1] === Symbol.for('concatleft') ||
-               alignment[0][n - 1] === Symbol.for('concatright')) {
+                ( alignment[0][n - 1] === Symbol.for('concatright') &&
+                  td1 !== row1.firstChild )
+              ) {
+
                 td1.colSpan = 2;
                 td1.classList.add('mismatch');
             }
