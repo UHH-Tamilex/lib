@@ -3,11 +3,16 @@ const addVariants = () => {
 };
 
 const showPopup = () => {
+    /*
     const popup = document.createElement('div');
     popup.className = 'popup';
-   
-    const selector = document.createElement('select');
-    selector.setAttribute('name','edblock');
+    */
+    //const selector = document.createElement('select');
+    const blackout = document.getElementById('blackout');
+    const popup = document.getElementById('variants-popup');
+    popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
+    const selector = popup.querySelector('select');
+    //selector.setAttribute('name','edblock');
     for(const lg of document.querySelectorAll('.lg')) {
         if(!lg.id) continue;
         const option = document.createElement('option');
@@ -15,36 +20,8 @@ const showPopup = () => {
         option.append(lg.id);
         selector.append(option);
     }
-
-    const container = document.createElement('div');
-    container.className = 'boxen';
-
-    const container1 = document.createElement('div');
-    container1.innerHTML = `
-        <div><input type="checkbox" id="normlem" checked><label>Use normalized readings</label></div>
-        <div><input type="checkbox" id="mergerdgs" checked><label>Merge groups</label></div>
-        <div><label for="teifile">Select alignment file... </label><input type="file" autocomplete="off" id="teifile" name="teifile" accept=".xml"/></div>
-    `;
-
-    container1.querySelector('input[name="teifile"]').addEventListener('change',getFile);
-
-    const container2 = document.createElement('div');
-    container2.innerHTML = '<div id="popup-output"></div>';
-
-    const output = document.createElement('div');
-    output.id = 'popup-output';
-
-    container.appendChild(container1);
-    container.appendChild(container2);
-
-    popup.appendChild(selector);
-    popup.appendChild(container);
-    popup.appendChild(output);
-
-    const blackout = document.createElement('div');
-    blackout.id = 'blackout';
-    blackout.append(popup);
-    document.body.appendChild(blackout);
+    popup.style.display = 'flex';
+    blackout.style.display = 'flex';
     blackout.addEventListener('click',(e) => {
         const targ = e.target.closest('.popup');
         if(!targ)
@@ -68,9 +45,9 @@ const parseString = (str,fname) => {
         return newd;
 };
 const getFile = async () => {
-    const popup = document.querySelector('.popup');
+    const popup = document.getElementById('variants-popup');
     const input = document.getElementById('teifile');
-    const blockid = document.querySelector('select[name="edblock"]').value;
+    const blockid = popup.querySelector('select[name="edblock"]').value;
 
     const file = input.files[0];
     const text = await readOne(file);
@@ -83,20 +60,57 @@ const getFile = async () => {
     });
 
     popup.style.height = '80%';
-    popup.querySelector('.boxen').style.height = 'unset';
+    //popup.querySelector('.boxen').style.height = 'unset';
 
-    const output = document.getElementById('popup-output');
+    const outputboxen = popup.querySelector('.output-boxen');
+    outputboxen.style.display = 'block';
+    const output = outputboxen.querySelector('.popup-output');
     output.innerHTML = '';
     output.style.display = 'block';
     output.style.border = '1px solid black';
     output.style.whiteSpace = 'break-spaces';
     output.style.height = '600px';
-    const html = app ? 
-        Prism.highlight(`<standOff type="apparatus" corresp="#${blockid}"><listApp>\n${app}\n</listApp></standOff>`, Prism.languages.xml,'xml') : 
-        '';
-    output.innerHTML = html;
+    output.style.width = '100%';
+    const standOff = `<standOff type="apparatus" corresp="#${blockid}">\n<listApp>\n${app}\n</listApp>\n</standOff>`;
+    output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
+
+    copyToClipboard(standOff,popup);
 };
 
+const copyToClipboard = (xml,popup) => {
+    navigator.clipboard.writeText(xml).then(
+        () => {
+            const par = popup.querySelector('.popup-output');
+            const tip = document.createElement('div');
+            tip.style.position = 'absolute';
+            tip.style.top = 0;
+            tip.style.right = 0;
+            tip.style.background = 'rgba(0,0,0,0.5)';
+            tip.style.color = 'white';
+            tip.style.padding = '0.5rem';
+            tip.append('Copied to clipboard.');
+            par.appendChild(tip);
+            tip.animate([
+                {opacity: 0},
+                {opacity: 1, easing: 'ease-in'}
+                ],200);
+            setTimeout(() => tip.remove(),1000);
+        },
+        () => {
+            const par = popup.querySelector('.popup-output');
+            const tip = document.createElement('div');
+            tip.style.position = 'absolute';
+            tip.style.top = 0;
+            tip.style.right = 0;
+            tip.style.background = 'rgba(0,0,0,0.5)';
+            tip.style.color = 'red';
+            tip.style.padding = '0.5rem';
+            tip.append('Couldn\'t copy to clipboard.');
+            par.appendChild(tip);
+            setTimeout(() => tip.remove(),1000);
+        }
+    );
+};
 const mergeGroups = (doc) => {
     const els = doc.querySelectorAll('cl');
     for(const el of els) {
