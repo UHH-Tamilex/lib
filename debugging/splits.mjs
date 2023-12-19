@@ -6,7 +6,9 @@ var Transliterate;
 const setTransliterator = (obj) => Transliterate = obj;
 
 const addWordSplits = () => {
-    const selector = document.querySelector('.popup select');
+    const blackout = document.getElementById('blackout');
+    const popup = document.getElementById('splits-popup');
+    const selector = popup.querySelector('select');
     for(const lg of document.querySelectorAll('.lg')) {
         if(!lg.id) continue;
         const option = document.createElement('option');
@@ -15,9 +17,9 @@ const addWordSplits = () => {
         selector.append(option);
     }
     
-    const blackout = document.getElementById('blackout');
-    blackout.querySelector('button').addEventListener('click',showSplits);
+    popup.querySelector('button').addEventListener('click',showSplits);
     blackout.style.display = 'flex';
+    popup.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
 };
 
@@ -32,29 +34,29 @@ const cancelPopup = (e) => {
     for(const textarea of blackout.querySelectorAll('textarea'))
         textarea.value = '';
 
-    document.getElementById('output-boxen').style.display = 'none';
-    document.getElementById('popup-output').innerHTML = '';
-    document.getElementById('popup-warnings').innerHTML = '';
+    const popup = document.getElementById('splits-popup');
+    popup.style.display = 'none';
+    popup.querySelector('.output-boxen').style.display = 'none';
+    popup.querySelector('.popup-output').innerHTML = '';
+    popup.querySelector('.popup-warnings').innerHTML = '';
 
-    const popup = blackout.querySelector('.popup');
     popup.style.height = '50%';
     popup.querySelector('.boxen').style.height = '100%';
-
 };
 
 const showSplits = async () => {
-    const popup = document.querySelector('.popup');
+    const popup = document.getElementById('splits-popup');
     popup.style.height = '80%';
     popup.querySelector('.boxen').style.height = 'unset';
 
     popup.querySelector('button').innerHTML = 'Re-align';
 
-    document.getElementById('output-boxen').style.display = 'flex';
+    popup.querySelector('.output-boxen').style.display = 'flex';
 
-    const output = document.getElementById('popup-output');
+    const output = popup.querySelector('.popup-output');
     output.innerHTML = '';
 
-    const warnings = document.getElementById('popup-warnings');
+    const warnings = popup.querySelector('.popup-warnings');
     warnings.innerHTML = '';
 
     const inputs = popup.querySelectorAll('textarea');
@@ -85,7 +87,7 @@ const showSplits = async () => {
     const textblock = document.getElementById(blockid).querySelector('.text-block');
     const text = Transliterate.getCachedText(textblock);
 
-    const lookup = document.querySelector('.popup input[name="lookup"]').checked;
+    const lookup = popup.querySelector('input[name="lookup"]').checked;
 
     const ret = await alignWordsplits(text,tam,eng,lookup);
 
@@ -98,7 +100,7 @@ const showSplits = async () => {
     const standOff =`<standOff type="wordsplit" corresp="#${blockid}">\n${ret.xml}\n</standOff>`;
     output.innerHTML = Prism.highlight(standOff,Prism.languages.xml,'xml');
     
-    copyToClipboard(standOff);
+    copyToClipboard(standOff,popup);
 };
 
 const refreshTranslation = (lines,wordlist) => {
@@ -123,10 +125,10 @@ const refreshTranslation = (lines,wordlist) => {
     return ret;
 };
 
-const copyToClipboard = (xml) => {
+const copyToClipboard = (xml,popup) => {
     navigator.clipboard.writeText(xml).then(
         () => {
-            const par = document.getElementById('popup-output');
+            const par = popup.querySelector('.popup-output');
             const tip = document.createElement('div');
             tip.style.position = 'absolute';
             tip.style.top = 0;
@@ -143,7 +145,7 @@ const copyToClipboard = (xml) => {
             setTimeout(() => tip.remove(),1000);
         },
         () => {
-            const par = document.getElementById('popup-output');
+            const par = popup.querySelector('.popup-output');
             const tip = document.createElement('div');
             tip.style.position = 'absolute';
             tip.style.top = 0;
