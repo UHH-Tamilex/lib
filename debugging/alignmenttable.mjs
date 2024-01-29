@@ -27,7 +27,6 @@ const checkEquality = (arr1, arr2, n) => {
     if(char2 === '~') {
         if(['y','v'].includes(char1)) {
             const prev = getPrev(arr1,n);
-            console.log(prev);
             if(prev && !glides.get(char1).includes(prev)) 
                 return 'typo';
             return null;
