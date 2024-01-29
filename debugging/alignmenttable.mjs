@@ -8,6 +8,10 @@ const wordClean = (str) => {
 
 const consonants = new Set(['k','ṅ','c','ñ','ṭ','ṇ','t','n','p','m','y','r','l','v','ḷ','ḻ','ṟ','ṉ']);
 
+const glides = new Map([
+    ['y',['i','ī','e','ē','ai']],
+    ['v',['a','ā','u','ū','o','ō','au']]
+]);
 const checkEquality = (arr1, arr2, n) => {
     const char1 = arr1[n];
     const char2 = arr2[n];
@@ -21,7 +25,13 @@ const checkEquality = (arr1, arr2, n) => {
     if(char2 === '')
         return 'typo';
     if(char2 === '~') {
-        if(['y','v'].includes(char1)) return null;
+        if(['y','v'].includes(char1)) {
+            const prev = getPrev(arr1,n);
+            console.log(prev);
+            if(prev && !glides.get(char1).includes(prev)) 
+                return 'typo';
+            return null;
+        }
         else return 'typo';
     }
     if(char2 === '+') {
