@@ -204,7 +204,6 @@ const alignWordsplits = async (text,tam,eng,lookup=false) => {
     const wl = tamilSplit(removeOptions(tam).join(''));
     const aligned = needlemanWunsch(tamilSplit(text),wl,wordsplitscore);
     ///const warnings = warnTypos(aligned);
-    const warnings = [];
     const realigned = jiggleAlignment(aligned,tam);
     
     const wordlist = tam.map((e,i) => {
@@ -213,12 +212,12 @@ const alignWordsplits = async (text,tam,eng,lookup=false) => {
         return {word: e, translation: eng[i]};
     });
     
-    await cleanupWordlist(wordlist,lookup);
+    const warnings = await cleanupWordlist(wordlist,lookup);
 
     const entries = makeEntries(wordlist);
     const rle = formatAlignment(realigned,0);
 
-    const ret = {xml: rle + '\n' + entries.join('\n'), alignment: aligned};
+    const ret = {xml: rle + '\n' + entries.join('\n'), alignment: aligned, warnings: warnings};
     if(lookup)
         ret.wordlist = wordlist;
     return ret;
@@ -395,10 +394,13 @@ const findGrammar = (translation) => {
         ret.push(abbr);
     }
 
-    return {
+    const rett = {
         translation: trimmed,
         gram: ret
     };
+    if(hay.trim() !== '')
+        rett.warning = translation.slice(gram);
+    return rett;
 
     /*
     for(const [affix,gram] of gramAbbreviations) {
@@ -434,6 +436,8 @@ const lookupFeatures = async (str) => {
 };
 
 const cleanupWordlist = async (list,lookup) => {
+    const warnings = [];
+
     const cleanupWord = async (obj) => {
         // we should remove punctuation from the wordlist so it aligns properly
         //obj.word = obj.word.replace(/[\.;]$/,'');
@@ -461,6 +465,7 @@ const cleanupWordlist = async (list,lookup) => {
             //console.log(`Found grammar: ${grammar.gram} in ${obj.translation}`);
             obj.translation = grammar.translation;
             obj.gram = grammar.gram;
+            if(grammar.warning) warnings.push(grammar.warning);
         }
         else if(lookup) {
             const features = await lookupFeatures(obj.bare || obj.word);
@@ -476,6 +481,8 @@ const cleanupWordlist = async (list,lookup) => {
     };
     for(const entry of list)
         await cleanupWord(entry);
+    console.log(warnings);
+    return warnings;
 };
 
 /*
