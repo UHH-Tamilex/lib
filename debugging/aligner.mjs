@@ -398,8 +398,11 @@ const findGrammar = (translation) => {
         translation: trimmed,
         gram: ret
     };
-    if(hay.trim() !== '')
-        rett.warning = translation.slice(gram);
+    if(hay.trim() !== '') {
+        const warning = translation.slice(gram);
+        rett.warning = warning;
+        rett.translation = rett.translation + warning;
+    }
     return rett;
 
     /*
