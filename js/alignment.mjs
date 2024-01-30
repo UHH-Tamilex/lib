@@ -34,18 +34,9 @@ const alignmentXSLT = `<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.or
 <xsl:template match="x:listWit"/>
 <xsl:template match="x:text">
     <xsl:element name="tr">
-        <xsl:element name="th"><xsl:value-of select="../@n"/></xsl:element>
-        <xsl:apply-templates/>
-    </xsl:element>
-</xsl:template>
-<xsl:template match="x:cl">
-    <xsl:apply-templates/>
-</xsl:template>
-<xsl:template match="x:w">
-    <xsl:element name="td">
-        <xsl:attribute name="data-n">
-            <xsl:variable name="n" select="@n"/>
-            <xsl:variable name="abbr" select="//x:witness[@xml:id=$n]/x:abbr[@type='siglum']"/>
+        <xsl:element name="th">
+            <xsl:variable name="n" select="../@n"/>
+            <xsl:variable name="abbr" select="//x:witness[@xml:id=$n]//x:abbr[@type='siglum']"/>
             <xsl:choose>
                 <xsl:when test="$abbr">
                     <xsl:value-of select="$abbr"/>
@@ -54,7 +45,16 @@ const alignmentXSLT = `<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.or
                     <xsl:value-of select="$n"/>
                 </xsl:otherwise>
             </xsl:choose>
-        </xsl:attribute>
+        </xsl:element>
+        <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template>
+<xsl:template match="x:cl">
+    <xsl:apply-templates/>
+</xsl:template>
+<xsl:template match="x:w">
+    <xsl:element name="td">
+        <xsl:attribute name="data-n"><xsl:value-of select="@n"/></xsl:attribute>
         <xsl:choose>
             <xsl:when test="parent::x:cl">
                 <xsl:choose>
