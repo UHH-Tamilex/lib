@@ -46,7 +46,6 @@ const cancelPopup = (e) => {
 
 const showSplits = async () => {
     const popup = document.getElementById('splits-popup');
-    popup.style.height = '80%';
     popup.querySelector('.boxen').style.height = 'unset';
 
     popup.querySelector('button').innerHTML = 'Re-align';
