@@ -43,7 +43,18 @@ const alignmentXSLT = `<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.or
 </xsl:template>
 <xsl:template match="x:w">
     <xsl:element name="td">
-        <xsl:attribute name="data-n"><xsl:value-of select="@n"/></xsl:attribute>
+        <xsl:attribute name="data-n">
+            <xsl:variable name="n" select="@n"/>
+            <xsl:variable name="abbr" select="//x:witness[@xml:id='$n']/x:abbr[@type='siglum']">
+            <xsl:choose>
+                <xsl:when test="$abbr">
+                    <xsl:value-of select="$abbr"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="@n"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:attribute>
         <xsl:choose>
             <xsl:when test="parent::x:cl">
                 <xsl:choose>
