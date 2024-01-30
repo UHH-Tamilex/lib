@@ -160,6 +160,7 @@ a.alignment-pointer:link, a.alignment-pointer:active {
     left: 0;
     text-align: left;
     writing-mode: horizontal-tb;
+    word-break: keep-all;
 }
 
 #alignment-viewer td {
