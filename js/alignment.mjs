@@ -75,7 +75,7 @@ const viewer = async function(url) {
     const xsheet = parseXML(alignmentXSLT);
     const hdoc = await XSLTransform(xsheet, xdoc);
     const blackout = document.createElement('div');
-    blackout.id = 'blackout';
+    blackout.id = 'alignment-blackout';
     const viewer = document.createElement('div');
     viewer.id='alignment-viewer';
     replaceHeaders(hdoc);
@@ -88,7 +88,7 @@ const viewer = async function(url) {
 
 const killViewer = (e) => {
     if(!e.target.closest('#alignment-viewer'))
-        document.getElementById('blackout').remove();
+        document.getElementById('alignment-blackout').remove();
 };
 
 const viewerMouseover = (e) => {

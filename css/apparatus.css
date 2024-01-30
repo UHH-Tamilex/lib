@@ -129,7 +129,7 @@ a.alignment-pointer:link, a.alignment-pointer:active {
     stroke: #2B73B7;
 }
 
-#blackout {
+#alignment-blackout {
     z-index: 10;
     position: fixed;
     display: flex;
