@@ -50,7 +50,8 @@
                         </xsl:when>
                         <xsl:otherwise/>
                     </xsl:choose>
-                    <xsl:apply-templates/>
+                    <xsl:apply-templates select="x:persName"/>
+                    <xsl:apply-templates select="x:orgName"/>
                 </xsl:for-each>
                 <xsl:text>. </xsl:text>
             </xsl:if>
