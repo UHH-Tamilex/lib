@@ -423,15 +423,18 @@ const findGrammar = (translation) => {
 };
 
 const mostPopular = (arr) => {
-    let ret;
-    let max = 0;
+    const ret = {
+        el: null,
+        max: 0
+    };
     for(const a of arr) {
         const len = a[1].length;
-        if(len > max)
-            ret = a;
-            max = len;
+        if(len > ret.max) {
+            ret.el = a;
+            ret.max = len;
+        }
     }
-    return ret;
+    return ret.el;
 };
 
 const lookupFeatures = async (str) => {
@@ -496,7 +499,7 @@ const cleanupWordlist = async (list,lookup) => {
     };
     for(const entry of list)
         await cleanupWord(entry);
-    console.log(warnings);
+    //console.log(warnings);
     return warnings;
 };
 

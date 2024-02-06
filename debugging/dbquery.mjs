@@ -21,7 +21,7 @@ const query = async (str) => {
             wasmUrl.toString()
         );
 
-    const res = await worker.db.exec('select [features citations] from [dictionary] where word = ?',[str]);
+    const res = await worker.db.exec('select features, citations from [dictionary] where word = ?',[str]);
 
     return await res[0]?.values;
 };
