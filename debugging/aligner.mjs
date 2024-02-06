@@ -422,13 +422,25 @@ const findGrammar = (translation) => {
     */
 };
 
+const mostPopular = (arr) => {
+    let ret;
+    let max = 0;
+    for(const a of arr) {
+        const len = a[1].length;
+        if(len > max)
+            ret = a;
+            max = len;
+    }
+    return ret;
+};
+
 const lookupFeatures = async (str) => {
     const newstr = str.replace(/([~+()])/g,'')
                 .replaceAll(/['’*]/g,'u');
     const res = await dbQuery(newstr);
     if(!res) return null;
     
-    const arr = JSON.parse(res);
+    const arr = res.length === 1 ? JSON.parse(res[0][0]) : JSON.parse(mostPopular(res)[0]);
     if(arr.length === 0) return null;
 
     const ret = [];
