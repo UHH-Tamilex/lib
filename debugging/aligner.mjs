@@ -299,7 +299,7 @@ const makeEntries = (arr) => {
             const formatted = newobj.map(f => `<entry>\n${formatEntry(f)}\n</entry>`).join('');
         */
         if(obj.superEntry) {
-            const formatted = obj.superEntry.map(o => formatEntry(o));
+            const formatted = obj.superEntry.map(o => formatEntry(o)).join('\n');
             return `<superEntry type="ambiguous">\n${formatted}\n</superEntry>`;
         }
         else
