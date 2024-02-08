@@ -289,6 +289,7 @@ const makeEntries = (arr) => {
     };
 
     return arr.map(obj => {
+        /*
         const wordsplit = obj.word.split('/');
         if(wordsplit.length > 1) {
             const transsplit = obj.translation.split('/');
@@ -296,6 +297,9 @@ const makeEntries = (arr) => {
             for(let n=0;n<wordsplit.length;n++)
                 newobj.push({word: wordsplit[n], translation: transsplit[n]});
             const formatted = newobj.map(f => `<entry>\n${formatEntry(f)}\n</entry>`).join('');
+        */
+        if(obj.superEntry) {
+            const formatted = obj.superEntry.map(o => formatEntry(o));
             return `<superEntry type="ambiguous">\n${formatted}\n</superEntry>`;
         }
         else
@@ -497,8 +501,20 @@ const cleanupWordlist = async (list,lookup) => {
         */
         
     };
-    for(const entry of list)
-        await cleanupWord(entry);
+    for(const entry of list) {
+        const wordsplit = entry.word.split('/');
+        if(wordsplit.length > 1) {
+            const transsplit = entry.translation.split('/');
+            entry.superEntry = [];
+            for(let n=0;n<wordsplit.length;n++) {
+                const newobj = {word: wordsplit[n], translation: transsplit[n]};
+                await cleanupWord(newobj);
+                entry.superEntry.push(newobj);
+            }
+        }
+        else
+            await cleanupWord(entry);
+    }
     //console.log(warnings);
     return warnings;
 };
