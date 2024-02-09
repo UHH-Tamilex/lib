@@ -62,7 +62,7 @@ const caseAffixes = [
     }],
     ['oṭu',{
         regex: /~?[oō]ṭ[u’*]\+?$/,
-        gram: 'sociative/instrumental',
+        gram: 'sociative',
         translationregex: /-with$/
     }],
     ['āṅku',{
