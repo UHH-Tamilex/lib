@@ -602,6 +602,7 @@ const jiggleAlignment = (aligned, wordlist) => {
     let curword = wordlist.shift().replaceAll(/[\[\]]/g,''); // AGGHHH
     let curcount = 0;
     for(let n=0; n<aligned[1].length; n++) {
+        if(!curword) break; // huh?
         if(curcount === tamilSplit(curword).length) {
             aligned[0] = jiggleWord(tamilSplit(curword), aligned[0], wordstart, n);
             wordstart = n+1;
