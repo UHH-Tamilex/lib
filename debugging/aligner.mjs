@@ -391,20 +391,43 @@ const findGrammar = (translation) => {
     let hay = translation.slice(gram).replaceAll(/[\(\)\-]/g,'');
     
     const ret = [];
-
-    for(const abbr of gramKeys) {
-        const found = hay.indexOf(abbr);
-        if(found === -1) continue;
-        
-        hay = hay.slice(0,found) + hay.slice(found + abbr.length);
-        ret.push(abbr);
+    let hayswarning = false;
+    const hays = hay.split('|');
+    if(hays.length > 1) {
+        hayswarning = -1;
+        for(const hh of hays) {
+            let h = hh;
+            for(const abbr of gramKeys) {
+                const found = h.indexOf(abbr);
+                if(found === -1) continue;
+                
+                h = h.slice(0,found) + h.slice(found + abbr.length);
+                ret.push(abbr);
+            }
+            if(h.trim() !== '')
+                hayswarnings = true;
+        }
+    }
+    else {
+        for(const abbr of gramKeys) {
+            const found = hay.indexOf(abbr);
+            if(found === -1) continue;
+            
+            hay = hay.slice(0,found) + hay.slice(found + abbr.length);
+            ret.push(abbr);
+        }
     }
 
     const rett = {
         translation: trimmed,
         gram: ret
     };
-    if(hay.trim() !== '') {
+    if(hayswarning === true) {
+        const warning = translation.slice(gram);
+        rett.warning = warning;
+        rett.translation = rett.translation + warning;
+    }
+    else if(hayswarning === false && hay.trim() !== '') {
         const warning = translation.slice(gram);
         rett.warning = warning;
         rett.translation = rett.translation + warning;
