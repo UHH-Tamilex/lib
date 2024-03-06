@@ -4,7 +4,7 @@ import dbQuery from './dbquery.mjs';
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
-const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ō','kol','kollō','kollē','koṉ','koṉ-','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṟa','maṉṟamma','mātu','mātō','māḷa','yāḻa','yāḻa-'];
+const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ō','ōteyya','kol','kollō','kollē','koṉ','koṉ-','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṟa','maṉṟamma','mātu','mātō','māḷa','yāḻa','yāḻa-'];
 particlebare.sort((a,b) => b.length - a.length);
 
 const particles = particlebare.map(a => {
@@ -299,7 +299,9 @@ const makeEntries = (arr) => {
             const formatted = newobj.map(f => `<entry>\n${formatEntry(f)}\n</entry>`).join('');
         */
         if(obj.superEntry) {
-            const formatted = obj.superEntry.map(o => formatEntry(o)).join('\n');
+            const formatted = obj.superEntry.map(o => formatEntry(o))
+                                            .map(e => `<entry>${e}</entry>`)
+                                            .join('\n');
             return `<superEntry type="ambiguous">\n${formatted}\n</superEntry>`;
         }
         else
@@ -475,7 +477,7 @@ const cleanupWordlist = async (list,lookup) => {
             obj.particle = particle.particle;
             obj.bare = particle.bare;
         }
-        const affix = findAffix(obj.word,obj.translation);
+        const affix = findAffix(obj.bare||obj.word,obj.translation);
         if(affix) {
             //console.log(`Found affix: ${particle.affix} in ${obj.word}, "${obj.translation}".`);
             obj.translation = affix.translation;
