@@ -4,21 +4,21 @@ import dbQuery from './dbquery.mjs';
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
-const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ō','kol','kollō','kollē','koṉ','koṉ-','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṟa','maṉṟamma','mātu','mātō','māḷa','yāḻa','yāḻa-'];
+const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ō','ōteyya','kol','kollō','kollē','koṉ','koṉ-','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṟa','maṉṟamma','mātu','mātō','māḷa','yāḻa','yāḻa-'];
 particlebare.sort((a,b) => b.length - a.length);
 
 const particles = particlebare.map(a => {
     if(a.endsWith('-')) {
         const aa = a.slice(0,-1);
         if(/u$/.test(aa)) {
-            const regex = aa.replace(/u$/,'[*\'’u]');
+            const regex = aa.replace(/u$/,'[*\'’ui]');
             return [a,new RegExp(`^\\+?~?${regex}\\+?-`)];
         }
         else
             return [a,new RegExp(`^\\+?~?${aa}\\+?-`)];
     }
     if(/u$/.test(a)) {
-        const regex = a.replace(/u$/,'[*\'’u]');
+        const regex = a.replace(/u$/,'[*\'’ui]');
         return [a,new RegExp(`\\+?~?${regex}\\+?$`)];
     }
     else
@@ -62,7 +62,7 @@ const caseAffixes = [
     }],
     ['oṭu',{
         regex: /~?[oō]ṭ[u’*]\+?$/,
-        gram: 'sociative/instrumental',
+        gram: 'sociative',
         translationregex: /-with$/
     }],
     ['āṅku',{
@@ -289,6 +289,7 @@ const makeEntries = (arr) => {
     };
 
     return arr.map(obj => {
+        /*
         const wordsplit = obj.word.split('/');
         if(wordsplit.length > 1) {
             const transsplit = obj.translation.split('/');
@@ -296,6 +297,11 @@ const makeEntries = (arr) => {
             for(let n=0;n<wordsplit.length;n++)
                 newobj.push({word: wordsplit[n], translation: transsplit[n]});
             const formatted = newobj.map(f => `<entry>\n${formatEntry(f)}\n</entry>`).join('');
+        */
+        if(obj.superEntry) {
+            const formatted = obj.superEntry.map(o => formatEntry(o))
+                                            .map(e => `<entry>${e}</entry>`)
+                                            .join('\n');
             return `<superEntry type="ambiguous">\n${formatted}\n</superEntry>`;
         }
         else
@@ -385,20 +391,43 @@ const findGrammar = (translation) => {
     let hay = translation.slice(gram).replaceAll(/[\(\)\-]/g,'');
     
     const ret = [];
-
-    for(const abbr of gramKeys) {
-        const found = hay.indexOf(abbr);
-        if(found === -1) continue;
-        
-        hay = hay.slice(0,found) + hay.slice(found + abbr.length);
-        ret.push(abbr);
+    let hayswarning = false;
+    const hays = hay.split('|');
+    if(hays.length > 1) {
+        hayswarning = -1;
+        for(const hh of hays) {
+            let h = hh;
+            for(const abbr of gramKeys) {
+                const found = h.indexOf(abbr);
+                if(found === -1) continue;
+                
+                h = h.slice(0,found) + h.slice(found + abbr.length);
+                ret.push(abbr);
+            }
+            if(h.trim() !== '')
+                hayswarnings = true;
+        }
+    }
+    else {
+        for(const abbr of gramKeys) {
+            const found = hay.indexOf(abbr);
+            if(found === -1) continue;
+            
+            hay = hay.slice(0,found) + hay.slice(found + abbr.length);
+            ret.push(abbr);
+        }
     }
 
     const rett = {
         translation: trimmed,
         gram: ret
     };
-    if(hay.trim() !== '') {
+    if(hayswarning === true) {
+        const warning = translation.slice(gram);
+        rett.warning = warning;
+        rett.translation = rett.translation + warning;
+    }
+    else if(hayswarning === false && hay.trim() !== '') {
         const warning = translation.slice(gram);
         rett.warning = warning;
         rett.translation = rett.translation + warning;
@@ -471,7 +500,7 @@ const cleanupWordlist = async (list,lookup) => {
             obj.particle = particle.particle;
             obj.bare = particle.bare;
         }
-        const affix = findAffix(obj.word,obj.translation);
+        const affix = findAffix(obj.bare||obj.word,obj.translation);
         if(affix) {
             //console.log(`Found affix: ${particle.affix} in ${obj.word}, "${obj.translation}".`);
             obj.translation = affix.translation;
@@ -497,8 +526,20 @@ const cleanupWordlist = async (list,lookup) => {
         */
         
     };
-    for(const entry of list)
-        await cleanupWord(entry);
+    for(const entry of list) {
+        const wordsplit = entry.word.split('/');
+        if(wordsplit.length > 1) {
+            const transsplit = entry.translation.split('/');
+            entry.superEntry = [];
+            for(let n=0;n<wordsplit.length;n++) {
+                const newobj = {word: wordsplit[n], translation: transsplit[n]};
+                await cleanupWord(newobj);
+                entry.superEntry.push(newobj);
+            }
+        }
+        else
+            await cleanupWord(entry);
+    }
     //console.log(warnings);
     return warnings;
 };
@@ -586,6 +627,7 @@ const jiggleAlignment = (aligned, wordlist) => {
     let curword = wordlist.shift().replaceAll(/[\[\]]/g,''); // AGGHHH
     let curcount = 0;
     for(let n=0; n<aligned[1].length; n++) {
+        if(!curword) break; // huh?
         if(curcount === tamilSplit(curword).length) {
             aligned[0] = jiggleWord(tamilSplit(curword), aligned[0], wordstart, n);
             wordstart = n+1;
