@@ -85,7 +85,7 @@ const gramAbbreviations = [
     ['comp.','comparative'],
     ['dat.','dative'],
     ['f.','feminine'],
-    ['f.s.','feminine singular'],
+    ['f.sg.','feminine singular'],
     ['f.pl.','feminine plural'],
     ['f.v.','finite verb'],
     ['gen.','genitive'],
