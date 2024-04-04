@@ -155,6 +155,9 @@
     word-spacing: 130%;
 }
 
+:lang(en) {
+    word-spacing: normal;
+}
 /*
 :lang(bod), :lang(bo) {
     font-size: 1.9rem;
