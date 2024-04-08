@@ -89,8 +89,7 @@ const showSplits = async () => {
     const lookup = popup.querySelector('input[name="lookup"]').checked;
 
     const ret = await alignWordsplits(text,tam,eng,lookup);
-
-    makeAlignmentTable(ret.alignment,tamlines,warnings);
+    makeAlignmentTable(ret.alignment,tamlines.map(l => l.replaceAll(/\/.+?(?=\s$)/g,'')),warnings);
     
     if(lookup) inputs[1].value = refreshTranslation(tamlines,ret.wordlist);
 
