@@ -1,4 +1,4 @@
-import { createDbWorker } from './sql.js-httpvfs.mjs';
+import { createDbWorker } from './sqljs-httpvfs.mjs';
 
 const sqlWorker = async (url) => {
     const workerUrl = new URL('sql.js-httpvfs/dist/sqlite.worker.js',import.meta.url);
