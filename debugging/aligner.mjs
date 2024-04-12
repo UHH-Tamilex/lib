@@ -11,7 +11,7 @@ const particles = particlebare.map(a => {
     if(a.endsWith('-')) {
         const aa = a.slice(0,-1);
         if(/u$/.test(aa)) {
-            const regex = aa.replace(/u$/,'[*\'’ui]');
+            const regex = aa.replace(/u$/,'[*\'’u]|(i)');
             return [a,new RegExp(`^\\+?~?${regex}\\+?-`)];
         }
         else
