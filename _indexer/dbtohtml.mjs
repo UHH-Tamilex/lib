@@ -19,7 +19,7 @@ const getFirstLetter = (str) => {
 
 const go = () => {
     const template = Fs.readFileSync('wordindex-template.html',{encoding: 'utf-8'});
-    const db = new sqlite3('../wordindex.db');
+    const db = new sqlite3('../../wordindex.db');
 
     const rows = db.prepare('SELECT lemma, form, recognized FROM lemmata ORDER BY formsort ASC').all();
     var out = '';

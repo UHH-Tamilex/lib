@@ -1,4 +1,4 @@
-import { Transliterate } from '../lib/js/transliterate.mjs';
+import { Transliterate } from './transliterate.mjs';
 import createSqlWorker from './sqlWorker.mjs';
 
 const init = () => {
@@ -19,7 +19,7 @@ const init = () => {
 
 const formatCitations = (citations) => {
     return citations.map(c =>
-        `<div><span class="msid" lang="en"><a href="../${c.filename}">${c.siglum}</a></span> <q lang="ta">${c.context}</q></div>`).join('\n');
+        `<div><span class="msid" lang="en"><a href="${c.filename}">${c.siglum}</a></span> <q lang="ta">${c.context}</q></div>`).join('\n');
 };
 
 const docClick = e => {
