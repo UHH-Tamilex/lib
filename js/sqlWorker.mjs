@@ -1,8 +1,8 @@
-import { createDbWorker } from './sqljs-httpvfs.mjs';
+import { createDbWorker } from '../debugging/sqljs-httpvfs.mjs';
 
 const sqlWorker = async (url) => {
-    const workerUrl = new URL('./sqlite.worker.js',import.meta.url);
-    const wasmUrl = new URL('./sql-wasm.wasm',import.meta.url);
+    const workerUrl = new URL('../debugging/sqlite.worker.js',import.meta.url);
+    const wasmUrl = new URL('../debugging/sql-wasm.wasm',import.meta.url);
     const sqlConfig = {
         from: 'inline',
         config: {
