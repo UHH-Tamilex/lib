@@ -116,6 +116,7 @@ const dbSchema = {
     voice: new Set(['passive','causative']),
     mood: new Set(['conditional','imperative','optative','subjunctive']),
     syntax: new Set(['muṟṟeccam','denominative','postposition','adverb']),
+    particlefunctions: new Set(['conc','indef','comp']),
     misc: new Set(['ideophone']),
     rootnoun: new Set(['verbal root as adjective',
                        'verbal root as gerundive',
