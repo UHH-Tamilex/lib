@@ -26,7 +26,9 @@ const gramAbbreviations = [
     ['f.pl.','feminine plural'],
     ['f.v.','finite verb'],
     ['gen.','genitive'],
+    ['ger.','gerundive'],
     ['h.','honorific'],
+    ['indef.','indefinite'],
     ['1.','first person'],
     ['2.','second person'],
     ['3.','third person'],
@@ -69,7 +71,7 @@ const gramAbbreviations = [
     ['v.r.','verbal root'],
     ['v.r.adj.','verbal root as adjective'],
     ['v.r.ger.','verbal root as gerundive'],
-    ['v.r.imp.','verbal root as imperative'],
+    ['v.r.ipt.','verbal root as imperative'],
     ['v.r.inf.','verbal root as infinitive'],
     ['v.r.pey.','verbal root as peyareccam'],
     ['v.r.pey.p.a.','verbal root as peyareccam perfective aspect'],
@@ -83,19 +85,19 @@ const dbSchema = {
     type: new Set(['noun',
                    'proper noun',
                    'pronoun',
+                   'personal pronoun',
                    'interrogative pronoun',
                    'adjective',
                    'verbal noun',
+                   'pronominalized noun',
                    'participial noun',
+                   'verbal root',
+                   'root noun',
                    'finite verb',
                    'peyareccam',
                    'infinitive',
                    'absolutive',
-                   'adverb',
-                   'comparative',
-                   'postposition',
-                   'verbal root',
-                   'root noun'
+                   'habitual future'
                    ]),
     number: new Set(['singular','plural']),
     gender: new Set(['masculine','feminine','neuter']),
@@ -110,9 +112,10 @@ const dbSchema = {
                      'locative',
                      'vocative']),
     person: new Set(['first person','second person','third person','third person honorific']),
-    aspect: new Set(['perfective aspect','imperfective aspect','habitual future','negative']),
-    mood: new Set(['conditional','imperative','optative','causative','subjunctive']),
-    syntax: new Set(['muṟṟeccam','denominative']),
+    aspect: new Set(['perfective aspect','imperfective aspect','negative']),
+    voice: new Set(['passive','causative']),
+    mood: new Set(['conditional','imperative','optative','subjunctive']),
+    syntax: new Set(['muṟṟeccam','denominative','postposition','adverb']),
     misc: new Set(['ideophone']),
     rootnoun: new Set(['verbal root as adjective',
                        'verbal root as gerundive',
@@ -130,7 +133,7 @@ const dbValues = Object.values(dbSchema).reduce((acc,cur) => {
 dbValues.sort((a,b) => b.length - a.length);
 
 const dbKeys = Object.keys(dbSchema);
-const importantKeys = ['type','number','gender','nouncase','person','aspect','mood'];
+const importantKeys = ['type','number','gender','nouncase','person','aspect','voice','mood'];
 const dbops = {
     open: (f) => {
         const db = new sqlite3(f);
@@ -151,10 +154,10 @@ var fulldb;
 const go = () => {
     fulldb = dbops.open('../debugging/index.db');
     const db = dbops.open('../../wordindex.db');
-    db.prepare('DROP TABLE IF EXISTS [dictionary]').run();
+    db.prepare('DROP TABLE IF EXISTS [citations]').run();
     db.prepare('DROP TABLE IF EXISTS [lemmata]').run();
     db.prepare('CREATE TABLE [lemmata] (lemma TEXT PRIMARY KEY, recognized INTEGER, form TEXT, formsort TEXT)').run();
-    db.prepare('CREATE TABLE [dictionary] ('+
+    db.prepare('CREATE TABLE [citations] ('+
         'form TEXT, '+
         'formsort TEXT, '+
         'islemma TEXT, '+
@@ -166,8 +169,10 @@ const go = () => {
         'nouncase TEXT, '+
         'person TEXT, '+
         'aspect TEXT, '+
+        'voice TEXT, '+
         'mood TEXT, '+
-        //'misc TEXT, '+
+        'syntax TEXT, '+
+        'particlefunctions TEXT, '+
         'rootnoun TEXT, '+
         'proclitic TEXT, ' +
         'enclitic TEXT, ' +
@@ -457,7 +462,7 @@ const addToDb = (fname,db) => {
             const to = n < entries.length-1 ? n + 1 : n;
             const context = getContext(entries,from,to,textAlignment);
             */
-            const rows = fulldb.prepare('SELECT islemma, fromlemma, type, number, gender, nouncase, person, aspect, mood, citations FROM dictionary WHERE word = ?').all(ins.form);
+            const rows = fulldb.prepare('SELECT islemma, fromlemma, type, number, gender, nouncase, person, aspect, mood, voice, citations FROM dictionary WHERE word = ?').all(ins.form);
 
             const {islemma, fromlemma} = findLemma(ins.roles,rows);
             /*
@@ -466,7 +471,7 @@ const addToDb = (fname,db) => {
             */
 
             const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, filename: basename},ins.roles);
-            db.prepare('INSERT INTO dictionary VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @mood, @rootnoun, @proclitic, @enclitic, @context, @citation, @filename)').run(dbobj);
+            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @voice, @mood, @syntax, @particlefunctions, @rootnoun, @proclitic, @enclitic, @context, @citation, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(islemma||fromlemma)?.word || ins.form;
             db.prepare('INSERT OR IGNORE INTO lemmata VALUES (@lemma, @recognized, @form, @formsort)').run({
                 lemma: islemma||fromlemma||ins.form,

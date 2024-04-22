@@ -42,17 +42,17 @@ const getEntry = async (targ) => {
         workers.full = await createSqlWorker('index.db');
     let results;
     if(targ.id) {
-        results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, aspect, mood, proclitic, enclitic, context, citation, filename FROM dictionary WHERE islemma = ?',[targ.id]);
+        results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
         if(results.length === 0)
-            results = await workers.full.db.query('SELECT definition, type, number, gender, nouncase, person, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
+            results = await workers.full.db.query('SELECT definition, type, number, gender, nouncase, person, voice, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
     }
     else {
         const lemma = targ.closest('details[id]')?.id;
         const form = targ.closest('details').dataset.entry;
         if(lemma)
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, aspect, mood, proclitic, enclitic, context, citation, filename FROM dictionary WHERE form = ? AND fromlemma = ?',[form,lemma]);
+            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma = ?',[form,lemma]);
         else
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, aspect, mood, proclitic, enclitic, context, citation, filename FROM dictionary WHERE form = ? AND fromlemma IS NULL',[form]);
+            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS NULL',[form]);
     }
     
     const entry = {
