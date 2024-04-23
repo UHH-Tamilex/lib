@@ -18,8 +18,13 @@ const init = () => {
 };
 
 const formatCitations = (citations) => {
-    return citations.map(c =>
-        `<div><span class="msid" lang="en"><a href="${c.filename}">${c.siglum}</a></span> <q lang="ta">${c.context}</q></div>`).join('\n');
+    return '<table><tbody>' + citations.map(c =>
+`<tr>
+    <td><span class="msid" lang="en"><a href="{c.filename}">${c.siglum}</a></span></td>
+    <td><q lang="ta">${c.context}</q></td>
+    <td>${c.translation ? '<span class="context-translation">'+c.translation+'</span>':''}</td>
+    <td>${c.syntax ? ' <span class="syntax">'+c.syntax+'</span>':''}</td>
+</tr>`).join('\n') + '</tbody></table>';
 };
 
 const docClick = e => {
@@ -29,7 +34,7 @@ const docClick = e => {
 
 const workers = {
     local: null,
-    full: null
+    /*full: null*/
 };
 
 const getEntry = async (targ) => {
@@ -38,21 +43,26 @@ const getEntry = async (targ) => {
     
     if(!workers.local) 
         workers.local = await createSqlWorker('../../wordindex.db');
+    /*
     if(!workers.full) 
         workers.full = await createSqlWorker('index.db');
-    let results;
+    */
+    let results = {};
     if(targ.id) {
-        results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
+        results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
+        /*
         if(results.length === 0)
-            results = await workers.full.db.query('SELECT definition, type, number, gender, nouncase, person, voice, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
+            results = await workers.full.db.query('SELECT definition, type, number, gender, nouncase, voice, person, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
+        */
+        Object.assign(results,await workers.local.db.query('SELECT definition FROM lemmata WHERE lemma = ?',[targ.id]));
     }
     else {
         const lemma = targ.closest('details[id]')?.id;
         const form = targ.closest('details').dataset.entry;
         if(lemma)
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma = ?',[form,lemma]);
+            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma = ?',[form,lemma]);
         else
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS NULL',[form]);
+            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS NULL',[form]);
     }
     
     const entry = {
@@ -74,7 +84,9 @@ const getEntry = async (targ) => {
         if(result.citation) entry.citations.push({
             siglum: result.citation,
             filename: result.filename,
-            context: result.context
+            context: result.context,
+            translation: result.def,
+            syntax: result.syntax
         });
     }
     const definition = entry.definition ? `<div>${entry.definition}</div>` : '';
