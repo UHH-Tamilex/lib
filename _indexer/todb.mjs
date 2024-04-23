@@ -157,7 +157,7 @@ const go = () => {
     const db = dbops.open('../../wordindex.db');
     db.prepare('DROP TABLE IF EXISTS [citations]').run();
     db.prepare('DROP TABLE IF EXISTS [lemmata]').run();
-    db.prepare('CREATE TABLE [lemmata] (lemma TEXT PRIMARY KEY, recognized INTEGER, form TEXT, formsort TEXT)').run();
+    db.prepare('CREATE TABLE [lemmata] (lemma TEXT PRIMARY KEY, recognized INTEGER, form TEXT, formsort TEXT, definition TEXT)').run();
     db.prepare('CREATE TABLE [citations] ('+
         'form TEXT, '+
         'formsort TEXT, '+
@@ -463,7 +463,7 @@ const addToDb = (fname,db) => {
             const to = n < entries.length-1 ? n + 1 : n;
             const context = getContext(entries,from,to,textAlignment);
             */
-            const rows = fulldb.prepare('SELECT islemma, fromlemma, type, number, gender, nouncase, person, aspect, mood, voice, citations FROM dictionary WHERE word = ?').all(ins.form);
+            const rows = fulldb.prepare('SELECT islemma, fromlemma, definition, type, number, gender, nouncase, person, aspect, mood, voice, citations FROM dictionary WHERE word = ?').all(ins.form);
 
             const {islemma, fromlemma} = findLemma(ins.roles,rows);
             /*
@@ -474,11 +474,12 @@ const addToDb = (fname,db) => {
             const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, filename: basename},ins.roles);
             db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @voice, @mood, @syntax, @particlefunctions, @rootnoun, @proclitic, @enclitic, @context, @citation, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(islemma||fromlemma)?.word || ins.form;
-            db.prepare('INSERT OR IGNORE INTO lemmata VALUES (@lemma, @recognized, @form, @formsort)').run({
+            db.prepare('INSERT OR IGNORE INTO lemmata VALUES (@lemma, @recognized, @form, @formsort, @definition)').run({
                 lemma: islemma||fromlemma||ins.form,
                 recognized: (islemma || fromlemma) ? 'TRUE' : 'FALSE',
                 form: lemmaform,
-                formsort: Sanscript.t(lemmaform,'iast','tamil')
+                formsort: Sanscript.t(lemmaform,'iast','tamil'),
+                definition: ins.definition || null
             });
         }
         //const superentries = doc.querySelectorAll('standOff[type="wordsplit"] > superEntry');
