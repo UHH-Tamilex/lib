@@ -309,9 +309,8 @@ const getPrevEntry = (entries,n) => {
         const ellipsis = n > 1 ? '…' : '';
         const superEntry = entries[n].closest('superEntry');
         if(superEntry && entries[n].parentNode.firstElementChild === entries[n]) {
-            console.log('yes!');
             const prevEl = superEntry.previousElementSibling;
-            if(!prevEl)
+            if(!prevEl || (prevEl.nodeName !== 'entry' || prevEl.nodeName !== 'superEntry'))
                 return '';
 
             const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastChild : prevEl;
@@ -327,7 +326,8 @@ const getNextEntry = (entries,n) => {
         const superEntry = entries[n].closest('superEntry');
         if(superEntry && entries[n].parentNode.lastElementChild === entries[n]) {
             const nextEl = superEntry.nextElementSibling;
-            if(!nextEl) return '';
+            if(!nextEl || (nextEl.nodeName !== 'entry' || nextEl.nodeName !== 'superEntry'))
+                return '';
 
             const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstChild : nextEl;
             return ellipsis + cleanForm(nextEntry.querySelector('form')) + ' ';
