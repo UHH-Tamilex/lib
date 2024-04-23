@@ -48,13 +48,14 @@ const getEntry = async (targ) => {
         workers.full = await createSqlWorker('index.db');
     */
     let results = {};
+    let canonicaldef;
     if(targ.id) {
         results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
         /*
         if(results.length === 0)
             results = await workers.full.db.query('SELECT definition, type, number, gender, nouncase, voice, person, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
         */
-        Object.assign(results,await workers.local.db.query('SELECT definition FROM lemmata WHERE lemma = ?',[targ.id]));
+        canonicaldef = (await workers.local.db.query('SELECT definition FROM lemmata WHERE lemma = ? LIMIT 1',[targ.id]))[0].definition;
     }
     else {
         const lemma = targ.closest('details[id]')?.id;
@@ -73,7 +74,6 @@ const getEntry = async (targ) => {
 
     for(const result of results) {
         if(result.def) entry.translations.add(result.def);
-        if(result.definition) entry.definition = result.definition;
         if(result.type) entry.grammar.add(result.type);
         if(result.number) entry.grammar.add(result.number);
         if(result.gender) entry.grammar.add(result.gender);
@@ -89,7 +89,7 @@ const getEntry = async (targ) => {
             syntax: result.syntax
         });
     }
-    const definition = entry.definition ? `<div>${entry.definition}</div>` : '';
+    const definition = canonicaldef ? `<div>${canonicaldef}</div>` : '';
     let frag =
 `<div lang="en">
 <div>${[...entry.grammar].join(', ')}</div>
