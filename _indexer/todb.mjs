@@ -308,7 +308,8 @@ const getPrevEntry = (entries,n) => {
     if(n > 0) {
         const ellipsis = n > 1 ? '…' : '';
         const superEntry = entries[n].closest('superEntry');
-        if(superEntry && entries[n].parentNode.firstChild === entries[n]) {
+        if(superEntry && entries[n].parentNode.firstElementChild === entries[n]) {
+            console.log('yes!');
             const prevEl = superEntry.previousElementSibling;
             if(!prevEl)
                 return '';
@@ -324,7 +325,7 @@ const getNextEntry = (entries,n) => {
     if(n < entries.length-1) {
         const ellipsis = n < entries.length-2 ? '…' : '';
         const superEntry = entries[n].closest('superEntry');
-        if(superEntry && entries[n].parentNode.lastChild === entries[n]) {
+        if(superEntry && entries[n].parentNode.lastElementChild === entries[n]) {
             const nextEl = superEntry.nextElementSibling;
             if(!nextEl) return '';
 
