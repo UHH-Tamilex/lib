@@ -299,7 +299,7 @@ const findLemma = (curword, candidates) => {
 
     for(const candidate of candidates) {
         if(isSuperSetOf(candidate, curword))
-            return { islemma: candidate.islemma, fromlemma: candidate.fromlemma };
+            return { islemma: candidate.islemma, fromlemma: candidate.fromlemma, definition: candidate.definition };
     }
     //return { islemma: candidates[0].islemma, fromlemma: candidates[0].fromlemma };
     return { islemma: null, fromlemma: null };
@@ -465,7 +465,7 @@ const addToDb = (fname,db) => {
             */
             const rows = fulldb.prepare('SELECT islemma, fromlemma, definition, type, number, gender, nouncase, person, aspect, mood, voice, citations FROM dictionary WHERE word = ?').all(ins.form);
 
-            const {islemma, fromlemma} = findLemma(ins.roles,rows);
+            const {islemma, fromlemma, definition} = findLemma(ins.roles,rows);
             /*
             const islemma = rows[0]?.islemma || null;
             const fromlemma = rows[0]?.fromlemma || null;
@@ -479,7 +479,7 @@ const addToDb = (fname,db) => {
                 recognized: (islemma || fromlemma) ? 'TRUE' : 'FALSE',
                 form: lemmaform,
                 formsort: Sanscript.t(lemmaform,'iast','tamil'),
-                definition: ins.definition || null
+                definition: definition || null
             });
         }
         //const superentries = doc.querySelectorAll('standOff[type="wordsplit"] > superEntry');
