@@ -307,10 +307,11 @@ const findLemma = (curword, candidates) => {
 const getPrevEntry = (entries,n) => {
     if(n > 0) {
         const ellipsis = n > 1 ? '…' : '';
+
         const superEntry = entries[n].closest('superEntry');
         if(superEntry && entries[n].parentNode.firstElementChild === entries[n]) {
             const prevEl = superEntry.previousElementSibling;
-            if(!prevEl || (prevEl.nodeName !== 'entry' || prevEl.nodeName !== 'superEntry'))
+            if(!prevEl || (prevEl.nodeName !== 'entry' && prevEl.nodeName !== 'superEntry'))
                 return '';
 
             const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastChild : prevEl;
@@ -323,14 +324,15 @@ const getPrevEntry = (entries,n) => {
 const getNextEntry = (entries,n) => {
     if(n < entries.length-1) {
         const ellipsis = n < entries.length-2 ? '…' : '';
+
         const superEntry = entries[n].closest('superEntry');
         if(superEntry && entries[n].parentNode.lastElementChild === entries[n]) {
             const nextEl = superEntry.nextElementSibling;
-            if(!nextEl || (nextEl.nodeName !== 'entry' || nextEl.nodeName !== 'superEntry'))
+            if(!nextEl || (nextEl.nodeName !== 'entry' && nextEl.nodeName !== 'superEntry'))
                 return '';
 
             const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstChild : nextEl;
-            return ellipsis + cleanForm(nextEntry.querySelector('form')) + ' ';
+            return ' ' + cleanForm(nextEntry.querySelector('form')) + ellipsis;
         }
         return ' ' + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
     }
