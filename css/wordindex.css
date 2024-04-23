@@ -66,6 +66,12 @@ details.dict details.dict[open] {
     margin-right: 0.3rem;
 }
 
+.context-translation {
+}
+.syntax {
+    font-style: italic;
+    font-size: 80%;
+}
 .dict-definitions > span:not(:last-child)::after,
 .dict-rdg:not(:last-child)::after, 
 .dict-sandhi > span:not(:last-child)::after {
