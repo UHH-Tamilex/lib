@@ -307,6 +307,15 @@ const findLemma = (curword, candidates) => {
 const getPrevEntry = (entries,n) => {
     if(n > 0) {
         const ellipsis = n > 1 ? '…' : '';
+        const superEntry = entries[n].closest('superEntry');
+        if(superEntry && entries[n].parentNode.firstChild === entries[n]) {
+            const prevEl = superEntry.previousElementSibling;
+            if(!prevEl)
+                return '';
+
+            const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastChild : prevEl;
+            return ellipsis + cleanForm(prevEntry.querySelector('form')) + ' ';
+        }
         return ellipsis + cleanForm(entries[n-1].querySelector('form')) + ' ';
     }
     return '';
@@ -314,6 +323,14 @@ const getPrevEntry = (entries,n) => {
 const getNextEntry = (entries,n) => {
     if(n < entries.length-1) {
         const ellipsis = n < entries.length-2 ? '…' : '';
+        const superEntry = entries[n].closest('superEntry');
+        if(superEntry && entries[n].parentNode.lastChild === entries[n]) {
+            const nextEl = superEntry.nextElementSibling;
+            if(!nextEl) return '';
+
+            const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstChild : nextEl;
+            return ellipsis + cleanForm(nextEntry.querySelector('form')) + ' ';
+        }
         return ' ' + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
     }
     return '';
