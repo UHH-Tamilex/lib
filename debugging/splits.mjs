@@ -59,6 +59,15 @@ const processSuperEntry = (superEntry) => {
 
 const decodeRLE = s => s.replaceAll(/(\d+)([MLRG])/g, (_, count, chr) => chr.repeat(count));
 
+const realNextSibling = (walker) => {
+    let cur = walker.currentNode;
+    while(cur) {
+        const sib = walker.nextSibling();
+        if(sib) return sib;
+        cur = walker.parentNode();
+    }
+    return null;
+};
 const countWalker = el => {
     const walker = document.createTreeWalker(el,NodeFilter.SHOW_ALL);
     let count = 0;
