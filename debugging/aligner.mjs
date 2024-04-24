@@ -298,7 +298,7 @@ const makeEntries = (arr) => {
             const formatted = newobj.map(f => `<entry>\n${formatEntry(f)}\n</entry>`).join('');
         */
         if(obj.superEntry) {
-            const formatted = obj.superEntry.map(o => formatEntry(o))
+            const formatted = obj.superEntry.map(o => o.map(oo => formatEntry(oo)).join(''))
                                             .map(e => `<entry>${e}</entry>`)
                                             .join('\n');
             return `<superEntry type="ambiguous">\n${formatted}\n</superEntry>`;
@@ -531,9 +531,15 @@ const cleanupWordlist = async (list,lookup) => {
             const transsplit = entry.translation.split('/');
             entry.superEntry = [];
             for(let n=0;n<wordsplit.length;n++) {
-                const newobj = {word: wordsplit[n], translation: transsplit[n]};
-                await cleanupWord(newobj);
-                entry.superEntry.push(newobj);
+                const subwords = wordsplit[n].split('|');
+                const subtrans = transsplit[n].split('|');
+                const strand = [];
+                for(let m=0;m<subwords.length;m++) {
+                    const newobj = {word: subwords[m], translation: subtrans[m]};
+                    await cleanupWord(newobj);
+                    strand.push(newobj);
+                }
+                entry.superEntry.push(strand);
             }
         }
         else
