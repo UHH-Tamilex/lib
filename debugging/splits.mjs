@@ -130,7 +130,7 @@ const fillWordSplits = async (e) => {
     for(const word of words) {
         if(word.hasOwnProperty('strands')) {
             tamsplits.push(word.strands.map(arr => arr.map(w => w.tamil).join('|')).join('/'));
-            engsplits.push(engsplit = engsplit + ' ' +  word.strands.map(arr => arr.map(w => w.english).join('|')).join('/'));
+            engsplits.push(word.strands.map(arr => arr.map(w => w.english).join('|')).join('/'));
         }
         else
             tamsplits.push(word.tamil);
