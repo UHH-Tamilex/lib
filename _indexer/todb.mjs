@@ -298,8 +298,9 @@ const findLemma = (curword, candidates) => {
         candidates.sort((a,b) => b.citations.length - a.citations.length);
 
     for(const candidate of candidates) {
-        if(isSuperSetOf(candidate, curword))
+        if(isSuperSetOf(candidate, curword)) {
             return { islemma: candidate.islemma, fromlemma: candidate.fromlemma, definition: candidate.definition };
+        }
     }
     //return { islemma: candidates[0].islemma, fromlemma: candidates[0].fromlemma };
     return { islemma: null, fromlemma: null };
@@ -485,7 +486,7 @@ const addToDb = (fname,db) => {
             */
             const rows = fulldb.prepare('SELECT islemma, fromlemma, definition, type, number, gender, nouncase, person, aspect, mood, voice, citations FROM dictionary WHERE word = ?').all(ins.form);
 
-            const {islemma, fromlemma, definition} = findLemma(ins.roles,rows);
+            const {islemma, fromlemma, worddef} = findLemma(ins.roles,rows);
             /*
             const islemma = rows[0]?.islemma || null;
             const fromlemma = rows[0]?.fromlemma || null;
@@ -493,13 +494,16 @@ const addToDb = (fname,db) => {
 
             const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, filename: basename},ins.roles);
             db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @voice, @mood, @syntax, @particlefunctions, @rootnoun, @proclitic, @enclitic, @context, @citation, @filename)').run(dbobj);
-            const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(islemma||fromlemma)?.word || ins.form;
+            const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(fromlemma)?.word || ins.form;
+            const lemmadef = islemma ? worddef : 
+                fromlemma ? fulldb.prepare('SELECT definition FROM dictionary WHERE islemma = ?').get(fromlemma)?.definition :
+                null;
             db.prepare('INSERT OR IGNORE INTO lemmata VALUES (@lemma, @recognized, @form, @formsort, @definition)').run({
                 lemma: islemma||fromlemma||ins.form,
                 recognized: (islemma || fromlemma) ? 'TRUE' : 'FALSE',
                 form: lemmaform,
                 formsort: Sanscript.t(lemmaform,'iast','tamil'),
-                definition: definition || null
+                definition: lemmadef
             });
         }
         //const superentries = doc.querySelectorAll('standOff[type="wordsplit"] > superEntry');
