@@ -265,6 +265,17 @@ const makeWord = (entry) => {
     return span;
 };
 
+const decodeRLE = s => s.replaceAll(/(\d+)([MLRG])/g, (_, count, chr) => chr.repeat(count));
+
+const countLines = lines => {
+    return lines.reduce((acc,cur) => {
+        const count = lineCounter(cur);
+        const add = acc.length > 0 ? acc.at(-1) : 0;
+        acc.push(count + add);
+        return acc;
+    },[]);
+};
+
 const applymarkup = (standoff) => {
     const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''))?.querySelector('.edition');
     if(!target) return;
@@ -272,17 +283,10 @@ const applymarkup = (standoff) => {
     const cache = new Map();
 
     const lines = [...target.querySelectorAll('.l')];
-    const linecounts = lines.reduce((acc,cur) => {
-        const count = lineCounter(cur);
-        const add = acc.length > 0 ? acc.at(-1) : 0;
-        acc.push(count + add);
-        return acc;
-    },[]);
+    const linecounts = countLines(lines);
     
     const alignmentel = standoff.querySelector('.alignment[data-select="0"]');
-    const alignment = alignmentel.textContent.trim().split(',').map(s =>
-        s.replaceAll(/(\d+)([MLRG])/g, (_, count, chr) => chr.repeat(count))
-        );
+    const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
     target.dataset.alignment = alignment.join(',');
 
     const realcounts = matchCounts(alignment,linecounts);
@@ -361,6 +365,8 @@ const go = () => {
     else if((new URLSearchParams(window.location.search)).get('debugging') === 'true')
         Debugging = true;
 
+    Splitter.setTransliterator(Transliterate);
+
     const lineview = document.querySelector('.line-view-icon');
     lineview.style.display = 'none';
 /*
@@ -382,14 +388,18 @@ const go = () => {
     }
     recordcontainer.querySelector('.teitext').addEventListener('click',lookup);
     
+    const wordsplitbutton = document.getElementById('wordsplitbutton');
     if(document.querySelector('.standOff[data-type="wordsplit"]')) {
-        const wordsplitbutton = document.getElementById('wordsplitbutton');
         wordsplitbutton.style.display = 'block';
         wordsplitbutton.addEventListener('click',wordsplit);
+        if(Debugging) {
+            const splitedit = document.getElementById('wordspliteditbutton');
+            splitedit.style.display = 'block';
+            splitedit.addEventListener('click',Splitter.addWordSplits);
+        }
     }
  
     else if(Debugging) {
-        const wordsplitbutton = document.getElementById('wordsplitbutton');
         wordsplitbutton.style.display = 'block';
         wordsplitbutton.style.border = '1px dashed grey';
         wordsplitbutton.dataset.anno = 'add word splits';
@@ -400,7 +410,6 @@ const go = () => {
         uploader.addEventListener('change',addwordsplit);
         wordsplitbutton.addEventListener('click',() => {uploader.click();});
         */
-        Splitter.setTransliterator(Transliterate);
         wordsplitbutton.addEventListener('click',Splitter.addWordSplits);
     }
 

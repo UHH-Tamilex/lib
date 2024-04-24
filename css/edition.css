@@ -159,6 +159,12 @@ span.invisible {
     cursor: pointer;
     display: none;
 }
+#wordspliteditbutton {
+    position: absolute;
+    top: 46px;
+    left: 35px;
+    display: none;
+}
 #metricalsvg, #translationsvg {
     display: none;
 }

@@ -1,9 +1,13 @@
-import { alignWordsplits } from './aligner.mjs';
+import { alignWordsplits, gramAbbreviations } from './aligner.mjs';
 import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 
 var Transliterate;
 const setTransliterator = (obj) => Transliterate = obj;
+const reverseAbbreviations = new Map(
+    gramAbbreviations.map(arr => [arr[1],arr[0]])
+);
+var curDoc = null;
 
 const addWordSplits = () => {
     const blackout = document.getElementById('blackout');
@@ -15,12 +19,154 @@ const addWordSplits = () => {
         option.value = lg.id;
         option.append(lg.id);
         selector.append(option);
+        fillWordSplits({target: selector});
+        selector.addEventListener('change',fillWordSplits);
     }
     
     popup.querySelector('button').addEventListener('click',showSplits);
     blackout.style.display = 'flex';
     popup.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
+};
+
+const getGrammar = (entry) => {
+    const ret = [];
+    for(const gram of entry.querySelectorAll('gram[type="role"]'))
+        ret.push(reverseAbbreviations.get(gram.textContent));
+    return ret.length > 0 ? '(' + ret.join('|') + ')' : '';
+};
+const processEntry = (entry) => {
+   return {
+        tamil: entry.querySelector('form').textContent.replaceAll(/\(u\)/g,'*'),
+        english: entry.querySelector('def').textContent.replaceAll(/\s+/g,'_') + getGrammar(entry),
+        note: entry.querySelector('note')
+   };
+};
+const processSuperEntry = (superEntry) => {
+    const ret = {
+            type: superEntry.getAttribute('type'),
+            strands: []
+        };
+    for(const strand of superEntry.querySelectorAll(':scope > entry')) {
+        const strandentries = [];
+        for(const entry of strand.querySelectorAll(':scope > entry')) {
+            strandentries.push(processEntry(entry));
+        }
+        ret.strands.push(strandentries);
+    }
+    return ret;
+};
+
+const decodeRLE = s => s.replaceAll(/(\d+)([MLRG])/g, (_, count, chr) => chr.repeat(count));
+
+const countWalker = el => {
+    const walker = document.createTreeWalker(el,NodeFilter.SHOW_ALL);
+    let count = 0;
+    let cur = walker.currentNode;
+    while(cur) {
+        if(cur.nodeType === 1 &&
+           cur.classList.contains('choiceseg') && 
+           cur !== cur.parentNode.children[0]) {
+                cur = realNextSibling(walker);
+                continue;
+        }
+        if(cur.nodeType === 3)
+            count = count + cur.textContent.trim().replaceAll(/[\s\u00AD]/g,'').length;
+        cur = walker.nextNode();
+    }
+    return count;
+};
+const countLines = lines => {
+    return lines.reduce((acc,cur) => {
+        const count = countWalker(cur);
+        const add = acc.length > 0 ? acc.at(-1) : 0;
+        acc.push(count + add);
+        return acc;
+    },[]);
+};
+
+const matchCounts = (alignment,linecounts) => {
+    linecounts = [...linecounts];
+    const realcounts = [];
+    let matchcount = 0;
+    for(let n=0;n<alignment[0].length;n++) {
+        if(matchcount === linecounts[0]) {
+            linecounts.shift();
+            const line2 = alignment[1].slice(0,n);
+            const matches = [...line2].reduce((acc, cur) => cur === 'M' ?  acc + 1 : acc,0);
+            realcounts.push(matches);
+        }
+        if(alignment[0][n] === 'M') matchcount = matchcount + 1;
+    }
+    return realcounts;
+};
+
+const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
+const fillWordSplits = async (e) => {
+    const selected = e.target.options[e.target.options.selectedIndex].value;
+    const filename = window.location.pathname.split('/').pop();
+    if(!curDoc) {
+        const res = await fetch(filename);
+        const xmltext = await res.text();
+        curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
+    }
+    const standOff = curDoc.querySelector(`standOff[corresp="#${selected}"]`);
+
+    if(!standOff) {
+        clearSplits();
+        return;
+    }
+
+    const words = [];
+    for(const child of standOff.children) {
+        if(child.nodeName === 'entry')
+            words.push(processEntry(child));
+        else if(child.nodeName === 'superEntry')
+            words.push(processSuperEntry(child));
+    }
+
+    const tamsplits = [];
+    const engsplits = [];
+    for(const word of words) {
+        if(word.hasOwnProperty('strands')) {
+            tamsplits.push(word.strands.map(arr => arr.map(w => w.tamil).join('|')).join('/'));
+            engsplits.push(engsplit = engsplit + ' ' +  word.strands.map(arr => arr.map(w => w.english).join('|')).join('/'));
+        }
+        else
+            tamsplits.push(word.tamil);
+            engsplits.push(word.english);
+    }
+    const lines = [...document.getElementById(selected).querySelectorAll('.l')];
+    const linecounts = countLines(lines);
+    
+    const alignmentel = standOff.querySelector('interp[select="0"]');
+    const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
+
+    const realcounts = matchCounts(alignment,linecounts);
+    let tamout = '';
+    let engout = '';
+    let wordcount = 0;
+    for(let n=0; n<tamsplits.length;n++) {
+        wordcount = wordcount + firstOption(tamsplits[n]).length;
+        if(wordcount >= realcounts[0]) {
+            tamout = tamout + tamsplits[n] + '\n';
+            engout = engout + engsplits[n] + '\n';
+            realcounts.shift();
+        }
+        else {
+            tamout = tamout + tamsplits[n] + ' ';
+            engout = engout + engsplits[n] + ' ';
+        }
+    }
+    const textareas = document.querySelectorAll('#splits-popup textarea');
+    textareas[0].value = tamout;
+    textareas[1].value = engout;
+};
+
+const clearSplits = () => {
+    const popup = document.getElementById('splits-popup');
+    for(const textarea of popup.querySelectorAll('textarea'))
+        textarea.value = '';
 };
 
 const cancelPopup = (e) => {
@@ -254,6 +400,8 @@ const makeEntries = (list) => {
 
 const Splitter = {
     addWordSplits: addWordSplits,
+    countLines: countLines,
+    decodeRLE: decodeRLE,
     setTransliterator: setTransliterator
 };
 

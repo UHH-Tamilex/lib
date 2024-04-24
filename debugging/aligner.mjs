@@ -639,4 +639,4 @@ const jiggleAlignment = (aligned, wordlist) => {
     return aligned;
 };
 
-export { alignWordsplits, tamilSplit };
+export { alignWordsplits, tamilSplit, gramAbbreviations };
