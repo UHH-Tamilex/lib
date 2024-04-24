@@ -141,9 +141,10 @@ const fillWordSplits = async (e) => {
             tamsplits.push(word.strands.map(arr => arr.map(w => w.tamil).join('|')).join('/'));
             engsplits.push(word.strands.map(arr => arr.map(w => w.english).join('|')).join('/'));
         }
-        else
+        else {
             tamsplits.push(word.tamil);
             engsplits.push(word.english);
+        }
     }
     const lines = [...document.getElementById(selected).querySelectorAll('.l')];
     const linecounts = countLines(lines);
