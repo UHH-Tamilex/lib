@@ -16,7 +16,7 @@
     min-height: 50%;
     height: fit-content;
     background: #f5f2f0;
-    padding: 2rem;
+    padding: 1rem;
     font-size: 1.1rem;
     white-space: pre;
     display: none;
@@ -51,6 +51,17 @@
     height: 100%;
 }
 
+.popup .buttondiv {
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+}
+#alignbutton {
+    margin-right: 0.5rem;
+}
+#saveasbutton {
+    display: none;
+}
 .popup button {
     width: fit-content;
     margin-top: 1rem;
@@ -118,7 +129,6 @@
     justify-content: space-between;
 }
 
-<<<<<<< HEAD
 .output-boxen > div.switcher {
     display: flex;
     writing-mode: vertical-lr;
@@ -154,14 +164,18 @@
 
 th.superEntry {
     border-left: 2px solid black;
+}
 
 .closeicon {
-    padding-top: 0.3rem;
-    padding-right: 0.4rem;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -0.8rem;
+    margin-right: -0.8rem;
+    cursor: pointer;
 }
 
 .closeicon svg {
-    fill: rgba(255,255,248,0.8);
+    fill: rgba(133,133,133,0.8);
 }
 
 .closeicon:hover {

@@ -1,6 +1,7 @@
 import { alignWordsplits, gramAbbreviations } from './aligner.mjs';
 import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
+import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 
 var Transliterate;
 const setTransliterator = (obj) => Transliterate = obj;
@@ -8,6 +9,8 @@ const reverseAbbreviations = new Map(
     gramAbbreviations.map(arr => [arr[1],arr[0]])
 );
 var curDoc = null;
+var newDoc = null;
+const filename = window.location.pathname.split('/').pop();
 
 const addWordSplits = () => {
     const blackout = document.getElementById('blackout');
@@ -19,14 +22,35 @@ const addWordSplits = () => {
         option.value = lg.id;
         option.append(lg.id);
         selector.append(option);
-        fillWordSplits({target: selector});
-        selector.addEventListener('change',fillWordSplits);
     }
+    fillWordSplits({target: selector});
+    selector.addEventListener('change',fillWordSplits);
     
-    popup.querySelector('button').addEventListener('click',showSplits);
+    document.getElementById('alignbutton').addEventListener('click',showSplits);
+    document.getElementById('saveasbutton').addEventListener('click',saveAs);
     blackout.style.display = 'flex';
     popup.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
+    blackout.querySelector('.switcher').addEventListener('click',codePreview);
+};
+
+const codePreview = e => {
+    if(e.target.classList.contains('selected')) return;
+    
+    const output = document.querySelector('#splits-popup .popup-output');
+
+    e.target.classList.add('selected');
+    if(e.target.textContent === 'Preview') {
+        e.target.nextElementSibling.classList.remove('selected');
+        output.querySelector('table').style.display = 'table';
+        output.querySelector('.code').style.display = 'none';
+    }
+    else {
+        e.target.previousSibling.classList.remove('selected');
+        output.querySelector('table').style.display = 'none';
+        output.querySelector('.code').style.display = 'block';
+    }
+
 };
 
 const getGrammar = (entry) => {
@@ -74,7 +98,7 @@ const countWalker = el => {
     let cur = walker.currentNode;
     while(cur) {
         if(cur.nodeType === 1 &&
-           cur.classList.contains('choiceseg') && 
+           cur.nodeName === 'choice' && 
            cur !== cur.parentNode.children[0]) {
                 cur = realNextSibling(walker);
                 continue;
@@ -110,15 +134,16 @@ const matchCounts = (alignment,linecounts) => {
     return realcounts;
 };
 
+const loadDoc = async () => {
+    const res = await fetch(filename);
+    const xmltext = await res.text();
+    curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
+};
+
 const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
 const fillWordSplits = async (e) => {
     const selected = e.target.options[e.target.options.selectedIndex].value;
-    const filename = window.location.pathname.split('/').pop();
-    if(!curDoc) {
-        const res = await fetch(filename);
-        const xmltext = await res.text();
-        curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
-    }
+    if(!curDoc) await loadDoc();
     const standOff = curDoc.querySelector(`standOff[corresp="#${selected}"]`);
 
     if(!standOff) {
@@ -146,7 +171,7 @@ const fillWordSplits = async (e) => {
             engsplits.push(word.english);
         }
     }
-    const lines = [...document.getElementById(selected).querySelectorAll('.l')];
+    const lines = [...curDoc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
     const linecounts = countLines(lines);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');
@@ -180,12 +205,13 @@ const clearSplits = () => {
 };
 
 const cancelPopup = (e) => {
-    const targ = e.target.closest('.popup');
-    if(targ) return;
+    const targ = e.target.closest('.closeicon svg');
+    if(!targ) return;
 
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
-    blackout.querySelector('button').innerHTML = 'Align';
+    document.getElementById('alignbutton').innerHTML = 'Align';
+    document.getElementById('saveasbutton').style.display = 'none';
     blackout.querySelector('select').innerHTML = '';
     for(const textarea of blackout.querySelectorAll('textarea'))
         textarea.value = '';
@@ -195,16 +221,21 @@ const cancelPopup = (e) => {
     popup.querySelector('.output-boxen').style.display = 'none';
     popup.querySelector('.popup-output').innerHTML = '';
     popup.querySelector('.popup-warnings').innerHTML = '';
-
+    
+    /*
     popup.style.height = '50%';
     popup.querySelector('.boxen').style.height = '100%';
+    */
 };
 
 const showSplits = async () => {
+    if(!curDoc) await loadDoc();
+
     const popup = document.getElementById('splits-popup');
     popup.querySelector('.boxen').style.height = 'unset';
 
-    popup.querySelector('button').innerHTML = 'Re-align';
+    document.getElementById('alignbutton').innerHTML = 'Re-align';
+    document.getElementById('saveasbutton').style.display = 'block';
 
     popup.querySelector('.output-boxen').style.display = 'flex';
 
@@ -238,9 +269,14 @@ const showSplits = async () => {
     }
 
     const blockid = popup.querySelector('select').value;
-
+    /*
     const textblock = document.getElementById(blockid).querySelector('.text-block');
     const text = Transliterate.getCachedText(textblock);
+    */
+    const textblock = curDoc.querySelector(`[*|id="${blockid}"]`);
+    const edition = textblock.querySelector('[type="edition"]');
+    let text = edition ? edition.textContent : textblock.textContent;
+    text = text.replaceAll(/[\s\n]/g,'');
 
     const lookup = popup.querySelector('input[name="lookup"]').checked;
 
@@ -252,7 +288,21 @@ const showSplits = async () => {
     output.style.display = 'block';
     output.style.border = '1px solid black';
     const standOff =`<standOff type="wordsplit" corresp="#${blockid}">\n${ret.xml}\n</standOff>`;
-    output.innerHTML = Prism.highlight(standOff,Prism.languages.xml,'xml');
+    const xproc = new XSLTProcessor();
+    const resp = await fetch('lib/debugging/wordlist.xsl');
+    const parser = new DOMParser();
+    const xslsheet = parser.parseFromString(await resp.text(), 'text/xml');
+    xproc.importStylesheet(xslsheet);
+    const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).firstChild;
+    output.appendChild(res);
+    newDoc = curDoc.cloneNode(true);
+    const curStandOff = newDoc.querySelector(`standOff[corresp="#${blockid}"]`);
+    curStandOff.innerHTML = ret.xml;
+    const code = document.createElement('div');
+    code.classList.add('code');
+    code.style.display = 'none';
+    code.innerHTML = Prism.highlight(standOff,Prism.languages.xml,'xml');
+    output.appendChild(code);
     
     copyToClipboard(standOff,popup);
 };
@@ -277,6 +327,20 @@ const refreshTranslation = (lines,wordlist) => {
         ret = ret + '\n';
     }
     return ret;
+};
+
+const saveAs = async () => {
+    const fileHandle = await showSaveFilePicker({
+        suggestedName: filename,
+        types: [
+            { description: 'TEI XML', accept: { 'text/xml': [ 'xml'] } }
+        ],
+    });
+    const serialized = (new XMLSerializer()).serializeToString(newDoc);
+    const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
+    const writer = await fileHandle.createWritable();
+    writer.write(file);
+    writer.close();
 };
 
 const copyToClipboard = (xml,popup) => {
