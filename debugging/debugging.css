@@ -25,6 +25,7 @@
 
 .popup .boxen {
     height: 100%;
+    min-height: 200px;
     flex-grow: 1;
     display: flex;
     flex-direction: row;
@@ -65,7 +66,8 @@
 .output-boxen > div {
     overflow-y: scroll;
     overflow-x: scroll;
-    height: 300px;
+    /*height: 300px;*/
+    max-height: 50vh;
     width: 50%;
 }
 
@@ -76,7 +78,7 @@
 
 .popup-warnings {
     border: 1px dotted red;
-    margin-left: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 .popup-warnings > div {
@@ -105,7 +107,8 @@
 
 .popup-output {
     white-space: pre;
-    height: 300px;
+    /*height: 300px;*/
+    max-height: 50%;
     overflow-y: scroll;
 }
 
@@ -115,3 +118,39 @@
     justify-content: space-between;
 }
 
+.output-boxen > div.switcher {
+    display: flex;
+    writing-mode: vertical-lr;
+    width: fit-content;
+}
+.switcher > div {
+    margin-right: 0.5rem;
+    background: rgba(135,135,135,0.3);
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 0.3rem 0.2rem 0.4rem 0;
+    cursor: pointer;
+}
+
+.switcher > div.selected {
+    border: 1px solid black;
+    border-left: 0;
+    background: none;
+}
+
+.switcher > div:not(.selected):hover {
+    background: #ff9900;
+}
+
+.popup-output table {
+    width: 100%;
+}
+.popup-output tr:nth-of-type(odd) {
+    background: rgba(0,0,0,0.2);
+}
+.popup-output td {
+    vertical-align: baseline;
+}
+
+th.superEntry {
+    border-left: 2px solid black;
+}
