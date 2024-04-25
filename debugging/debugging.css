@@ -115,3 +115,18 @@
     justify-content: space-between;
 }
 
+.closeicon {
+    padding-top: 0.3rem;
+    padding-right: 0.4rem;
+}
+
+.closeicon svg {
+    fill: rgba(255,255,248,0.8);
+}
+
+.closeicon:hover {
+    filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.3));
+}
+.closeicon:hover svg {
+    fill: #ff9900;
+}
