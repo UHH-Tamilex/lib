@@ -155,10 +155,17 @@
 .popup-output table {
     width: 100%;
 }
+.popup-output th {
+    font-size: 1.2rem;
+}
+.popup-output thead th {
+    font-size: 1.1rem;
+}
 .popup-output tr:nth-of-type(odd) {
     background: rgba(0,0,0,0.2);
 }
 .popup-output td {
+    font-size: 1.2rem;
     vertical-align: baseline;
 }
 
