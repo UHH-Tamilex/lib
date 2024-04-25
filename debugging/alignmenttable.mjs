@@ -2,7 +2,7 @@ import { tamilSplit } from './aligner.mjs';
 
 const wordClean = (str) => {
     // remove all but first option from alignment
-    return str.replaceAll(/\/[aāiīuūeēoōkṅcñṭṇtnpmyrlvḻḷṟṉ]+\s/g,'')
+    return str.replaceAll(/\/[aāiīuūeēoōkṅcñṭṇtnpmyrlvḻḷṟṉ\-*~+]+\s/g,'')
               .replaceAll(/\s/g,'');
 };
 
