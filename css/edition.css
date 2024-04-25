@@ -37,6 +37,17 @@ div.lg div.l {
     padding-left: 1rem;
     text-indent: -1rem;
 }
+div.edition {
+    counter-reset: line-numb;
+}
+div.edition div.l:nth-child(5n)::before {
+    counter-increment: line-numb +5;
+    content: counter(line-numb);
+    position: absolute;
+    left: -5px;
+    text-align: right;
+    font-size: 65%;
+}
 
 div.alternate {
     margin-top: 2rem;
