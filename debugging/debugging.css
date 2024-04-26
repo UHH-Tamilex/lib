@@ -133,6 +133,7 @@
 .output-boxen > div.switcher {
     display: flex;
     writing-mode: vertical-lr;
+    overflow: visible;
     width: fit-content;
 }
 .switcher > div {
