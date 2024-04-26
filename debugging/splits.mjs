@@ -333,7 +333,7 @@ const saveAs = async () => {
     const fileHandle = await showSaveFilePicker({
         suggestedName: filename,
         types: [
-            { description: 'TEI XML', accept: { 'text/xml': [ 'xml'] } }
+            { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
         ],
     });
     const serialized = (new XMLSerializer()).serializeToString(newDoc);
