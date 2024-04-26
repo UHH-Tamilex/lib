@@ -49,7 +49,7 @@ const lookup = async (e) => {
 const cancelBlackout = e => {
     const lookup = e.target.closest('#lookupwindow');
     if(lookup) return;
-    document.getElementById('lookupwindow').remove();
+    document.getElementById('lookupwindow')?.remove();
     blackout.style.display = 'none';
     blackout.removeEventListener('click',cancelBlackout);
 };
