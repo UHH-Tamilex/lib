@@ -24,7 +24,7 @@ const wordLookup = async (e) => {
     let fromlemma;
     if(citrow.islemma) {
         allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND islemma IS ?',[clean,citrow.islemma]);
-        definition = await sqlWorker.db.query('SELECT definition FROM lemmata WHERE lemma IS ?',[citrow.islemma]);
+        definition = (await sqlWorker.db.query('SELECT definition FROM lemmata WHERE lemma IS ?',[citrow.islemma]))[0].definition;
     }
     else if(citrow.fromlemma) {
         allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS ?',[clean,citrow.fromlemma]);
