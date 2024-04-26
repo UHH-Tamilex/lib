@@ -43,7 +43,7 @@ const lookup = async (e) => {
     blackout.style.display = 'flex';
     const lookupwindow = document.createElement('div');
     lookupwindow.id = 'lookupwindow';
-    lookupwindow.innerHTML = await WordLookup(word);
+    lookupwindow.innerHTML = (await WordLookup(word)) || 'Word not found.';
     blackout.appendChild(lookupwindow);
     blackout.addEventListener('click',cancelBlackout);
 };
