@@ -33,7 +33,7 @@ const lookup = (e) => {
             clean = Sanscript.t(clone.textContent.replaceAll('\u00AD',''),'tamil','iast');
         }
         //window.open(`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${clean}&amp;searchhws=yes&amp;matchtype=exact`,'lexicon',/*'height=500,width=500'`*/);
-        window.open(`wordindex.html#${clean}`);
+        window.open(`https://uhh-tamilex.github.io/lexicon/#${clean}`);
     }
 };
 
