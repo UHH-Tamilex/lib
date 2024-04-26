@@ -293,7 +293,7 @@ const showSplits = async () => {
     const parser = new DOMParser();
     const xslsheet = parser.parseFromString(await resp.text(), 'text/xml');
     xproc.importStylesheet(xslsheet);
-    const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).firstChild;
+    const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
     output.appendChild(res);
     newDoc = curDoc.cloneNode(true);
     const curStandOff = newDoc.querySelector(`standOff[corresp="#${blockid}"]`);
