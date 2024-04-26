@@ -1,0 +1,102 @@
+import {Sanscript} from './sanscript.mjs';
+import createSqlWorker from './sqlWorker.mjs';
+
+var sqlWorker = null;
+
+const wordLookup = async (e) => {
+    const word = e.target.closest('.word');
+    if(!word) return;
+    let clean = word.dataset.clean;
+    if(!clean) {
+        const clone = word.cloneNode(true);
+        for(const pc of clone.querySelectorAll('.invisible, .ignored'))
+            pc.remove();
+            clean = Sanscript.t(clone.textContent.replaceAll('\u00AD',''),'tamil','iast');
+    }
+    const id = e.target.closest('[id]').id;
+
+    if(!sqlWorker) 
+        sqlWorker = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
+
+    const citrow = (await sqlWorker.db.query('SELECT fromlemma, islemma FROM citations WHERE form = ? AND citation = ?',[clean,id]))[0];
+    let allcits;
+    let definition;
+    let fromlemma;
+    if(citrow.islemma) {
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND islemma IS ?',[clean,citrow.islemma]);
+        definition = await sqlWorker.db.query('SELECT definition FROM lemmata WHERE lemma IS ?',[citrow.islemma]);
+    }
+    else if(citrow.fromlemma) {
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS ?',[clean,citrow.fromlemma]);
+        fromlemma = (await sqlWorker.db.query('SELECT form FROM lemmata WHERE lemma IS ?',[citrow.fromlemma]))[0].form;
+    }
+    else {
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ?',[clean]);
+    }
+
+    if(!allcits || allcits.length === 0) return;
+
+    return formatEntry(clean, allcits, definition, fromlemma);
+};
+
+const formatCitations = citations => {
+    return '<table><tbody>' + citations.map(c =>
+`<tr>
+    <td><span class="msid" lang="en"><a href="${c.filename}">${c.siglum}</a></span></td>
+    <td><q lang="ta">${c.context}</q></td>
+    <td>${c.translation ? '<span class="context-translation">'+c.translation+'</span>':''}</td>
+    <td>${c.syntax ? ' <span class="syntax">'+c.syntax+'</span>':''}</td>
+</tr>`).join('\n') + '</tbody></table>';
+};
+
+
+const formatEntry = (form,results,canonicaldef,fromlemma) => {
+    
+    const entry = {
+        translations: new Set(),
+        grammar: new Set(),
+        citations: []
+    };
+
+    for(const result of results) {
+        if(result.def) entry.translations.add(result.def);
+        if(result.type) entry.grammar.add(result.type);
+        if(result.number) entry.grammar.add(result.number);
+        if(result.gender) entry.grammar.add(result.gender);
+        if(result.nouncase) entry.grammar.add(result.nouncase);
+        if(result.person) entry.grammar.add(result.person);
+        if(result.aspect) entry.grammar.add(result.aspect);
+        if(result.mood) entry.grammar.add(result.mood);
+        if(result.citation) entry.citations.push({
+            siglum: result.citation,
+            filename: result.filename,
+            context: result.context,
+            translation: result.def,
+            syntax: result.syntax || result.rootnoun,
+        });
+    }
+    const definition = canonicaldef ? `<p>${canonicaldef}</p>` : '';
+    const lemma = fromlemma ? `<span class="lemma-head">${fromlemma}</span> ` : '';
+    let frag =
+`<div lang="en">
+<h3>${lemma}${form}</h3>
+<p>${[...entry.grammar].join(', ')}</p>
+${definition}
+</div>`;
+    if(entry.translations.size > 0) {
+        frag = frag + 
+`<div>
+<h4 lang="en">translations in context</h4>
+<p>${[...entry.translations].join(', ')}</p>`;
+    }
+    if(entry.citations.length > 0) {
+        frag = frag + 
+`<h4 lang="en">citations</h4>
+<div class="dict-citations">
+${formatCitations(entry.citations)}
+</div>`;
+    }
+    return frag;
+};
+
+export default wordLookup;

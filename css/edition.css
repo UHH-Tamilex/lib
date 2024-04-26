@@ -183,6 +183,14 @@ span.invisible {
     padding: 5px 4px 1px 5px;
 }
 
+#lookupwindow {
+    max-height: 80vh;
+    background: white;
+    overflow-y: scroll;
+    min-width: 50vw;
+    padding: 2rem;
+}
+
 /*
 .lemmalookup:hover svg {
     filter: drop-shadow(2px 2px 2px #ff9900);
@@ -206,3 +214,10 @@ span.invisible {
     z-index: 3;
 }
 */
+
+.lemma-head {
+    opacity: 0.5;
+}
+.lemma-head::after {
+    content: ' >';
+}

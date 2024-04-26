@@ -5,6 +5,7 @@ import { AlignmentViewer } from './alignment.mjs';
 import Splitter from '../debugging/splits.mjs';
 import { addVariants } from '../debugging/variants.mjs';
 import { Sanscript } from './sanscript.mjs';
+import WordLookup from './wordlookup.mjs';
 import './tooltip.mjs';
 //import { tamilize, iastToTamil } from './transliterate.mjs';
 
@@ -12,7 +13,7 @@ var Debugging = false;
 
 const cachedContent = new Map();
 
-const lookup = (e) => {
+const lookup = async (e) => {
 //if(e.target.nodeName === 'RT' || e.target.classList?.contains('word')) {
     const apointer = e.target.closest('.alignment-pointer');
     if(apointer) {
@@ -20,7 +21,7 @@ const lookup = (e) => {
         AlignmentViewer.viewer(apointer.href);
         return;
     }
-
+    /*
     const word = e.target.closest('.word');
     if(word) {
         //const clean = e.target.dataset.norm.trim();
@@ -32,9 +33,24 @@ const lookup = (e) => {
                 pc.remove();
             clean = Sanscript.t(clone.textContent.replaceAll('\u00AD',''),'tamil','iast');
         }
-        //window.open(`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${clean}&amp;searchhws=yes&amp;matchtype=exact`,'lexicon',/*'height=500,width=500'`*/);
+        //window.open(`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${clean}&amp;searchhws=yes&amp;matchtype=exact`,'lexicon',/*'height=500,width=500'`);
         window.open(`https://uhh-tamilex.github.io/lexicon/#${clean}`);
     }
+    */
+    const blackout = document.getElementById('blackout');
+    blackout.style.display = 'flex';
+    const lookupwindow = document.createElement('div');
+    lookupwindow.id = 'lookupwindow';
+    lookupwindow.innerHTML = await WordLookup(e);
+    blackout.appendChild(lookupwindow);
+    blackout.addEventListener('click',cancelBlackout);
+};
+
+const cancelBlackout = e => {
+    const lookup = e.target.closest('#lookupwindow');
+    if(lookup) return;
+    document.getElementById('lookupwindow').remove();
+    blackout.style.display = 'none';
 };
 
 const cleanup = (doc) => {

@@ -46,12 +46,6 @@ details.dict details.dict[open] {
 }
 */
 
-.lemma-head {
-    opacity: 0.5;
-}
-.lemma-head::after {
-    content: ' >';
-}
 
 .dict-entry {
     padding-left: 1rem;
