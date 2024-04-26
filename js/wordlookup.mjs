@@ -3,9 +3,7 @@ import createSqlWorker from './sqlWorker.mjs';
 
 var sqlWorker = null;
 
-const wordLookup = async (e) => {
-    const word = e.target.closest('.word');
-    if(!word) return;
+const wordLookup = async (word) => {
     let clean = word.dataset.clean;
     if(!clean) {
         const clone = word.cloneNode(true);
@@ -13,7 +11,7 @@ const wordLookup = async (e) => {
             pc.remove();
             clean = Sanscript.t(clone.textContent.replaceAll('\u00AD',''),'tamil','iast');
     }
-    const id = e.target.closest('[id]').id;
+    const id = word.closest('[id]').id;
 
     if(!sqlWorker) 
         sqlWorker = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');

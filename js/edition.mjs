@@ -37,11 +37,13 @@ const lookup = async (e) => {
         window.open(`https://uhh-tamilex.github.io/lexicon/#${clean}`);
     }
     */
+    const word = e.target.closest('.word');
+    if(!word) return;
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'flex';
     const lookupwindow = document.createElement('div');
     lookupwindow.id = 'lookupwindow';
-    lookupwindow.innerHTML = await WordLookup(e);
+    lookupwindow.innerHTML = await WordLookup(word);
     blackout.appendChild(lookupwindow);
     blackout.addEventListener('click',cancelBlackout);
 };
