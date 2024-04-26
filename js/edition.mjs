@@ -51,6 +51,7 @@ const cancelBlackout = e => {
     if(lookup) return;
     document.getElementById('lookupwindow').remove();
     blackout.style.display = 'none';
+    blackout.removeEventListener('click',cancelBlackout);
 };
 
 const cleanup = (doc) => {
