@@ -296,7 +296,12 @@ const showSplits = async () => {
     const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
     output.appendChild(res);
     newDoc = curDoc.cloneNode(true);
-    const curStandOff = newDoc.querySelector(`standOff[corresp="#${blockid}"]`);
+    let curStandOff = newDoc.querySelector(`standOff[corresp="#${blockid}"]`);
+    if(!curStandOff) {
+        curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
+        curStandOff.setAttribute('corresp',`#${blockid}`);
+        newDoc.documentElement.appendChild(curStandOff);
+    }
     curStandOff.innerHTML = ret.xml;
     const code = document.createElement('div');
     code.classList.add('code');
