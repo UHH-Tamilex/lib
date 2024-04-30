@@ -331,7 +331,7 @@ span.type {
     padding: 0.5em 1em;
     margin-bottom: 11px;
     max-width: 300px;
-    z-index: 3;
+    z-index: 10;
 }
 
 #tooltip hr {

@@ -44,18 +44,30 @@
                     <xsl:value-of select="translate($form,'~+()','')"/>
                 </xsl:otherwise>
             </xsl:choose>
+            <xsl:apply-templates select="x:note"/>
         </xsl:element>
-        <xsl:element name="td">
-            <xsl:if test="x:def">
-                <xsl:apply-templates select="x:def"/>
-            </xsl:if>
-        </xsl:element>
+        <xsl:if test="x:def">
+            <xsl:apply-templates select="x:def"/>
+        </xsl:if>
         <xsl:element name="td">
             <xsl:apply-templates select="x:gramGrp[not(@type)]"/>
         </xsl:element>
         <xsl:element name="td">
             <xsl:attribute name="lang">ta-Latn</xsl:attribute>
             <xsl:apply-templates select="x:gramGrp[@type='particle']"/>
+        </xsl:element>
+    </xsl:element>
+</xsl:template>
+
+<xsl:template match="x:note">
+    <xsl:element name="span">
+        <xsl:attribute name="data-anno"/>
+        <xsl:attribute name="class">footnote</xsl:attribute>
+        <xsl:text>*</xsl:text>
+        <xsl:element name="span">
+            <xsl:attribute name="class">anno-inline</xsl:attribute>
+            <xsl:attribute name="lang">en</xsl:attribute>
+            <xsl:apply-templates/>
         </xsl:element>
     </xsl:element>
 </xsl:template>

@@ -4,7 +4,7 @@ import dbQuery from './dbquery.mjs';
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
-const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ō','ōteyya','kol','kollō','kollē','koṉ','koṉ-','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṉāl','maṉṟa','maṉṟamma','mātu','mātō','māḷa','yāḻa','yāḻa-'];
+const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ō','ōteyya','kol','kollō','kollē','koṉ','koṉ-','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṉāl','maṉṟa','maṉṟamma','maṟkollō','mātu','mātō','māḷa','yāḻa','yāḻa-'];
 particlebare.sort((a,b) => b.length - a.length);
 
 const particles = particlebare.map(a => {
@@ -193,7 +193,7 @@ const tamilSplit = (str) => {
     return ret;
 };
 
-const alignWordsplits = async (text,tam,eng,lookup=false) => {
+const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     /*
     if(tam.length !== eng.length) {
         return {xml: null, warnings: ['Tamil and English don\'t match.']};
@@ -211,7 +211,7 @@ const alignWordsplits = async (text,tam,eng,lookup=false) => {
         return {word: e, translation: eng[i]};
     });
     
-    const warnings = await cleanupWordlist(wordlist,lookup);
+    const warnings = await cleanupWordlist(wordlist,notes,lookup);
 
     const entries = makeEntries(wordlist);
     const rle = formatAlignment(realigned,0);
@@ -284,7 +284,8 @@ const makeEntries = (arr) => {
                     '</gramGrp>'
                 : '';
         const particle = e.particle ? `<gramGrp type="particle"><m>${e.particle}</m></gramGrp>\n` : '';
-        return `<entry>\n<form>${formatWord(e.word)}</form>\n<def>${e.translation.replaceAll(/_/g,' ')}</def>\n${bare}${affix}${gram}${particle}${e.wordnote ? formatNote(e.wordnote) : ''}${e.transnote ? formatNote(e.transnote) : ''}</entry>`;
+        //return `<entry>\n<form>${formatWord(e.word)}</form>\n<def>${e.translation.replaceAll(/_/g,' ')}</def>\n${bare}${affix}${gram}${particle}${e.wordnote ? formatNote(e.wordnote) : ''}${e.transnote ? formatNote(e.transnote) : ''}</entry>`;
+        return `<entry>\n<form>${formatWord(e.word)}</form>\n<def>${e.translation.replaceAll(/_/g,' ')}</def>\n${bare}${affix}${gram}${particle}${e.wordnote ? '\n' + e.wordnote : ''}</entry>`;
     };
 
     return arr.map(obj => {
@@ -481,8 +482,9 @@ const lookupFeatures = async (str) => {
     return ret;
 };
 
-const cleanupWordlist = async (list,lookup) => {
+const cleanupWordlist = async (list,notes,lookup) => {
     const warnings = [];
+    const notescopy = [...notes];
 
     const cleanupWord = async (obj) => {
         // we should remove punctuation from the wordlist so it aligns properly
@@ -490,6 +492,10 @@ const cleanupWordlist = async (list,lookup) => {
         //obj.translation = obj.translation.replace(/[\.;]$/,'');
         // BUT now punctuation is removed from the wordsplit completely
         
+        if(obj.translation.endsWith('*')) {
+            obj.translation = obj.translation.slice(0,-1);
+            if(notescopy) obj.wordnote = notescopy.shift();
+        }
         if(obj.translation === '()') obj.translation = '';
 
         const particle = findParticle(obj.word,obj.translation);

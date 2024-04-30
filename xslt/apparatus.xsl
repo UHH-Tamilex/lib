@@ -219,7 +219,7 @@
                 </xsl:when>
                 <xsl:otherwise>
                         <xsl:attribute name="class">lem-inline lem-anchor</xsl:attribute>
-                        <xsl:text>†</xsl:text>
+                        <xsl:text>*</xsl:text>
                 </xsl:otherwise>
             </xsl:choose>
         </span>
@@ -295,7 +295,7 @@
                     <xsl:call-template name="lemma"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <span class="lem lem-anchor">†</span>
+                    <span class="lem lem-anchor">*</span>
                 </xsl:otherwise>
             </xsl:choose>
             <xsl:if test="x:rdg | x:rdgGrp">

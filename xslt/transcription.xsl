@@ -792,7 +792,7 @@
         <xsl:attribute name="class">footnote</xsl:attribute>
         <xsl:choose>
             <xsl:when test="$anchor"><xsl:value-of select="$anchor"/></xsl:when>
-            <xsl:otherwise><xsl:text>†</xsl:text></xsl:otherwise>
+            <xsl:otherwise><xsl:text>*</xsl:text></xsl:otherwise>
         </xsl:choose>
         <xsl:element name="span">
             <xsl:attribute name="class">anno-inline</xsl:attribute>

@@ -67,6 +67,10 @@
                 <xsl:attribute name="rel">stylesheet</xsl:attribute>
                 <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/prism.css</xsl:attribute>
             </xsl:element>
+            <xsl:element name="link">
+                <xsl:attribute name="rel">stylesheet</xsl:attribute>
+                <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/codemirror.css</xsl:attribute>
+            </xsl:element>
         </xsl:if>
         <xsl:element name="link">
             <xsl:attribute name="rel">stylesheet</xsl:attribute>
@@ -182,7 +186,15 @@
                                 <label>Tamil wordsplit</label><textarea></textarea>
                             </div>
                             <div>
-                                <label>Word-by-word translation</label><textarea></textarea>
+                                <label>Word-by-word translation</label>
+                                <div id="wbwbox">
+                                    <textarea></textarea>
+                                    <textarea class="notes"></textarea>
+                                    <div class="switcher" id="notesswitcher">
+                                        <div class="selected">Splits</div>
+                                        <div>Notes</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="buttondiv">
@@ -192,7 +204,7 @@
                         <div class="output-boxen">
                             <div class="popup-warnings"></div>
                             <div class="popup-output"></div>
-                            <div class="switcher">
+                            <div class="switcher" id="previewswitcher">
                                 <div class="selected">Preview</div>
                                 <div>Code</div>
                             </div>
@@ -473,7 +485,7 @@
                     <xsl:call-template name="lemma"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <span class="lem lem-anchor">†</span>
+                    <span class="lem lem-anchor">*</span>
                 </xsl:otherwise>
             </xsl:choose>
             <xsl:if test="x:rdg">
@@ -500,7 +512,7 @@
                 <xsl:call-template name="lemma"/>
             </xsl:when>
             <xsl:otherwise>
-                <span class="lem lem-anchor">†</span>
+                <span class="lem lem-anchor">*</span>
             </xsl:otherwise>
         </xsl:choose>
         <xsl:if test="x:rdg | x:rdgGrp">

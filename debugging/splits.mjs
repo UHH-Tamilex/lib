@@ -2,6 +2,7 @@ import { alignWordsplits, gramAbbreviations } from './aligner.mjs';
 import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
+import { init as cmWrapper } from './cmwrapper.mjs';
 
 var Transliterate;
 const setTransliterator = (obj) => Transliterate = obj;
@@ -10,6 +11,7 @@ const reverseAbbreviations = new Map(
 );
 var curDoc = null;
 var newDoc = null;
+var noteCM = null;
 const filename = window.location.pathname.split('/').pop();
 
 const addWordSplits = () => {
@@ -31,28 +33,53 @@ const addWordSplits = () => {
     blackout.style.display = 'flex';
     popup.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
-    blackout.querySelector('.switcher').addEventListener('click',codePreview);
+    document.getElementById('previewswitcher').addEventListener('click',codePreview);
+    document.getElementById('notesswitcher').addEventListener('click',notesView);
 };
 
 const codePreview = e => {
-    if(e.target.classList.contains('selected')) return;
+    const targ = e.target.closest('.switcher > div');
+    if(!targ || targ.classList.contains('selected')) return;
     
     const output = document.querySelector('#splits-popup .popup-output');
 
-    e.target.classList.add('selected');
-    if(e.target.textContent === 'Preview') {
-        e.target.nextElementSibling.classList.remove('selected');
+    targ.classList.add('selected');
+    if(targ.textContent === 'Preview') {
+        targ.nextElementSibling.classList.remove('selected');
         output.querySelector('table').style.display = 'table';
         output.querySelector('.code').style.display = 'none';
     }
     else {
-        e.target.previousSibling.classList.remove('selected');
+        targ.previousSibling.classList.remove('selected');
         output.querySelector('table').style.display = 'none';
         output.querySelector('.code').style.display = 'block';
     }
 
 };
 
+const notesView = e => {
+    const targ = e.target.closest('.switcher > div');
+    if(!targ || targ.classList.contains('selected')) return;
+    
+    const wbwbox = document.getElementById('wbwbox');
+    const tbs = wbwbox.querySelectorAll('textarea');
+    
+    targ.classList.add('selected');
+    if(targ.textContent === 'Splits') {
+        targ.nextElementSibling.classList.remove('selected');
+        tbs[0].style.display = 'block';
+        //tbs[1].style.display = 'none';
+        noteCM.toTextArea();
+    }
+    else {
+        targ.previousSibling.classList.remove('selected');
+        tbs[0].style.display = 'none';
+        //tbs[1].style.display = 'block';
+        noteCM = cmWrapper(tbs[1]);
+        noteCM.setSize(null,'auto');
+    }
+
+};
 const getGrammar = (entry) => {
     const ret = [];
     for(const gram of entry.querySelectorAll('gram[type="role"]'))
@@ -104,7 +131,10 @@ const countWalker = el => {
                 continue;
         }
         if(cur.nodeType === 3)
-            count = count + cur.textContent.trim().replaceAll(/[\s\u00AD]/g,'').length;
+            count = count + cur.textContent
+                               .trim()
+                               .replaceAll(/[\s\u00AD]/g,'')
+                               .length;
         cur = walker.nextNode();
     }
     return count;
@@ -161,14 +191,20 @@ const fillWordSplits = async (e) => {
 
     const tamsplits = [];
     const engsplits = [];
+    const allnotes = [];
+    const serializer = new XMLSerializer();
     for(const word of words) {
         if(word.hasOwnProperty('strands')) {
             tamsplits.push(word.strands.map(arr => arr.map(w => w.tamil).join('|')).join('/'));
-            engsplits.push(word.strands.map(arr => arr.map(w => w.english).join('|')).join('/'));
+            engsplits.push(word.strands.map(arr => arr.map(w => w.note ? w.english + '*' : w.english).join('|')).join('/'));
+            for(const strand of word.strands)
+                for(const w of strand) 
+                    if(w.note) allnotes.push(serializer.serializeToString(w.note));
         }
         else {
             tamsplits.push(word.tamil);
-            engsplits.push(word.english);
+            engsplits.push(word.note ? word.english + '*' : word.english);
+            if(word.note) allnotes.push(serializer.serializeToString(word.note));
         }
     }
     const lines = [...curDoc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
@@ -196,6 +232,7 @@ const fillWordSplits = async (e) => {
     const textareas = document.querySelectorAll('#splits-popup textarea');
     textareas[0].value = tamout;
     textareas[1].value = engout;
+    textareas[2].value = allnotes.join('\n\n');
 };
 
 const clearSplits = () => {
@@ -228,8 +265,15 @@ const cancelPopup = (e) => {
     */
 };
 
+const getNotes = str => {
+    const tempdoc = (new DOMParser()).parseFromString(`<TEI xmlns="http://www.tei-c.org/ns/1.0">${str}</TEI>`, 'text/xml');
+    const serializer = new XMLSerializer();
+    return [...tempdoc.documentElement.children].map(c => serializer.serializeToString(c));
+};
+
 const showSplits = async () => {
     if(!curDoc) await loadDoc();
+    if(noteCM) noteCM.save();
 
     const popup = document.getElementById('splits-popup');
     popup.querySelector('.boxen').style.height = 'unset';
@@ -278,10 +322,10 @@ const showSplits = async () => {
     let text = edition ? edition.textContent : textblock.textContent;
     text = text.replaceAll(/[\s\n]/g,'');
 
+    const notes = getNotes(inputs[2].value);
     const lookup = popup.querySelector('input[name="lookup"]').checked;
-
-    const ret = await alignWordsplits(text,tam,eng,lookup);
-    makeAlignmentTable(ret.alignment,tamlines.map(l => l.replaceAll(/\/.+?(?=\s$)/g,'')),warnings);
+    const ret = await alignWordsplits(text,tam,eng,notes,lookup);
+    makeAlignmentTable(ret.alignment,tamlines.map(l => l.replaceAll(/\/.+?(?=\s|$)/g,'')),warnings);
     
     if(lookup) inputs[1].value = refreshTranslation(tamlines,ret.wordlist);
 
@@ -308,7 +352,11 @@ const showSplits = async () => {
     code.style.display = 'none';
     code.innerHTML = Prism.highlight(standOff,Prism.languages.xml,'xml');
     output.appendChild(code);
-    
+   
+    const switches = document.getElementById('previewswitcher').children;
+    switches[0].classList.add('selected');
+    switches[1].classList.remove('selected');
+
     copyToClipboard(standOff,popup);
 };
 
@@ -319,6 +367,7 @@ const refreshTranslation = (lines,wordlist) => {
         if(obj.gram && obj.gram.length > 0)
             trans = trans + '(' + obj.gram.join('') + ')';
         if(trans === '') trans = '()';
+        if(obj.wordnote) trans = trans + '*';
         return trans;
     };
 

@@ -273,7 +273,7 @@ const makeWord = (entry) => {
         const noteel = document.createElement('span');
         noteel.className = 'footnote ignored';
         noteel.dataset.anno = '';
-        noteel.append('†');
+        noteel.append('*');
         const annoel = document.createElement('span');
         annoel.lang = note.lang;
         annoel.className = 'anno-inline';

@@ -50,6 +50,13 @@
 .popup textarea {
     background: white;
     height: 100%;
+    font-size: 1rem;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+.popup textarea.notes {
+    display: none;
 }
 
 .popup .buttondiv {
@@ -79,7 +86,7 @@
     overflow-y: scroll;
     overflow-x: scroll;
     /*height: 300px;*/
-    max-height: 50vh;
+    max-height: 40vh;
     width: 50%;
 }
 
@@ -130,7 +137,7 @@
     justify-content: space-between;
 }
 
-.output-boxen > div.switcher {
+div.switcher {
     display: flex;
     writing-mode: vertical-lr;
     overflow: visible;
@@ -192,4 +199,12 @@ th.superEntry {
 }
 .closeicon:hover svg {
     fill: #ff9900;
+}
+
+#wbwbox {
+    display: flex;
+    flex-grow: 1;
+}
+#wbwbox textarea {
+    flex-grow: 1;
 }
