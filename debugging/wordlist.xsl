@@ -46,9 +46,11 @@
             </xsl:choose>
             <xsl:apply-templates select="x:note"/>
         </xsl:element>
+        <xsl:element name="td">
         <xsl:if test="x:def">
             <xsl:apply-templates select="x:def"/>
         </xsl:if>
+        </xsl:element>
         <xsl:element name="td">
             <xsl:apply-templates select="x:gramGrp[not(@type)]"/>
         </xsl:element>
