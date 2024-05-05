@@ -1,3 +1,5 @@
+import alignApparatus from './apparatus.mjs';
+
 const addVariants = () => {
     showPopup();     
 };
@@ -20,13 +22,27 @@ const showPopup = () => {
         option.append(lg.id);
         selector.append(option);
     }
+    document.getElementById('addapparatus').addEventListener('click',alignApparatus);
     popup.style.display = 'flex';
     blackout.style.display = 'flex';
-    blackout.addEventListener('click',(e) => {
-        const targ = e.target.closest('.popup');
-        if(!targ)
-            document.querySelector('#blackout').remove();
-    });
+    blackout.addEventListener('click',cancelPopup);
+};
+
+const cancelPopup = (e) => {
+    const targ = e.target.closest('.closeicon svg');
+    if(!targ) return;
+
+
+    const blackout = document.getElementById('blackout');
+    blackout.style.display = 'none';
+    document.getElementById('alignbutton').innerHTML = 'Align';
+    document.getElementById('saveasbutton').style.display = 'none';
+    blackout.querySelector('select').innerHTML = '';
+    for(const textarea of blackout.querySelectorAll('textarea'))
+        textarea.value = '';
+
+    const popup = document.getElementById('variants-popup');
+    popup.style.display = 'none';
 };
 
 const readOne = async (file) => {
@@ -168,12 +184,12 @@ const curry = f => {
     };
 };
 
+/*
 const fetchFile = async fn => {
     const response = await fetch(fn);
     const str = await response.text();
     return str;
 };
-
 const loadOtherTEI = async (listWit) => {
     const files = new Map();
     const wits = new Map();
@@ -260,7 +276,7 @@ const getTEIRdgs = (rdgs,blockid,witdocs,alignment,dataN) => {
     }
     return newrdgs;
 };
-
+*/
 const makeApp = async (doc, opts) =>  {
     if(opts.mergerdgs) mergeGroups(doc);
 

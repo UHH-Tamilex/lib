@@ -211,19 +211,35 @@
                         </div>
                     </div>
                     <div class="popup" id="variants-popup">
+                        <div class="popup-header">
+                            <span class="closeicon">
+<svg height="32px" width="32px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" version="1.1" style="shape-rendering: geometricprecision; text-rendering: geometricprecision; image-rendering: optimizequality; width: 15px; height: 15px;" viewBox="0 0 847 847" x="0px" y="0px" fill-rule="evenodd" clip-rule="evenodd">
+<g><path class="fil0" d="M423 272l217 -217c99,-99 251,53 151,152l-216 216 216 217c100,99 -52,251 -151,151l-217 -216 -216 216c-99,100 -251,-52 -152,-151l217 -217 -217 -216c-99,-99 53,-251 152,-152l216 217z"></path></g></svg>
+                            </span>
+                        </div>
                         <div class="popup-options">
                             <select name="edblock"></select>
-                            <div>
-                                <input type="checkbox" id="normlem" checked="true"/>
-                                <label>Use normalized readings</label>
+                        </div>
+                          <div class="boxen">
+                            <div id="variantsfileselect">
+                                <label>Apparatus from alignment</label>
+                                <div>
+                                    <input type="checkbox" id="normlem" checked="true"/>
+                                    <label>Use normalized readings</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="mergerdgs" checked="true"/>
+                                    <label>Merge groups</label>
+                                </div>
+                                <div>
+                                    <label for="teifile">Select alignment file... </label>
+                                    <input type="file" autocomplete="off" id="teifile" name="teifile" accept=".xml"/>
+                                </div>
                             </div>
-                            <div>
-                                <input type="checkbox" id="mergerdgs" checked="true"/>
-                                <label>Merge groups</label>
-                            </div>
-                            <div>
-                                <label for="teifile">Select alignment file... </label>
-                                <input type="file" autocomplete="off" id="teifile" name="teifile" accept=".xml"/>
+                            <div id="variantsinput">
+                                <label>Apparatus from text</label>
+                                <textarea></textarea>
+                                <button type="button" id="addapparatus">Add apparatus</button>
                             </div>
                         </div>
                         <!--div class="boxen">
