@@ -1,4 +1,15 @@
 import alignApparatus from './apparatus.mjs';
+import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
+
+var curDoc = null;
+var newDoc = null;
+const filename = window.location.pathname.split('/').pop();
+
+const loadDoc = async () => {
+    const res = await fetch(filename);
+    const xmltext = await res.text();
+    curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
+};
 
 const addVariants = () => {
     showPopup();     
@@ -22,10 +33,67 @@ const showPopup = () => {
         option.append(lg.id);
         selector.append(option);
     }
-    document.getElementById('addapparatus').addEventListener('click',alignApparatus);
+    document.getElementById('addapparatus').addEventListener('click',generateApp);
+    document.getElementById('saveapparatus').addEventListener('click',saveAs);
     popup.style.display = 'flex';
     blackout.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
+};
+
+const saveAs = async () => {
+    const fileHandle = await showSaveFilePicker({
+        suggestedName: filename,
+        types: [
+            { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
+        ],
+    });
+    const serialized = (new XMLSerializer()).serializeToString(newDoc);
+    const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
+    const writer = await fileHandle.createWritable();
+    writer.write(file);
+    writer.close();
+};
+
+const generateApp = async e => {
+
+    if(!curDoc) await loadDoc();
+
+    const popup = document.getElementById('variants-popup');
+    const blockid = popup.querySelector('select[name="edblock"]').value;
+    const listApp = await alignApparatus(curDoc, blockid);
+
+
+    const outputboxen = popup.querySelector('.output-boxen');
+    outputboxen.style.display = 'block';
+    const output = outputboxen.querySelector('.popup-output');
+    output.innerHTML = '';
+    output.style.display = 'block';
+    output.style.border = '1px solid black';
+    output.style.whiteSpace = 'break-spaces';
+    output.style.height = '600px';
+    output.style.width = '100%';
+
+    if(listApp.hasOwnProperty('errors'))
+        output.innerHTML = listApp.errors.join('<br>');
+    else {
+        newDoc = curDoc.cloneNode(true);
+        let curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
+        if(!curStandOff) {
+            curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
+            curStandOff.setAttribute('corresp',`#${blockid}`);
+            curStandOff.setAttribute('type','apparatus');
+        }
+        newDoc.documentElement.appendChild(curStandOff);
+        curStandOff.innerHTML = listApp.output;
+        const standOff = curStandOff.outerHTML;
+        output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
+        if(listApp.warnings) {
+            const warnp = document.createElement('p');
+            warnp.innerHTML = listApp.warnings.join('<br>');
+            output.prepend(warnp);
+        }
+        copyToClipboard(standOff,popup);
+    }
 };
 
 const cancelPopup = (e) => {
@@ -35,14 +103,16 @@ const cancelPopup = (e) => {
 
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
-    document.getElementById('alignbutton').innerHTML = 'Align';
-    document.getElementById('saveasbutton').style.display = 'none';
+    document.getElementById('saveapparatus').style.display = 'none';
     blackout.querySelector('select').innerHTML = '';
-    for(const textarea of blackout.querySelectorAll('textarea'))
-        textarea.value = '';
 
     const popup = document.getElementById('variants-popup');
+    const outputboxen = popup.querySelector('.output-boxen');
+    const output = outputboxen.querySelector('.popup-output');
     popup.style.display = 'none';
+    outputboxen.style.display = 'none';
+    output.innerHTML = '';
+
 };
 
 const readOne = async (file) => {
@@ -75,7 +145,7 @@ const getFile = async () => {
         blockid: blockid
     });
 
-    popup.style.height = '80%';
+    //popup.style.height = '80%';
     //popup.querySelector('.boxen').style.height = 'unset';
 
     const outputboxen = popup.querySelector('.output-boxen');

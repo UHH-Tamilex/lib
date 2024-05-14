@@ -1,26 +1,66 @@
 import { Sanscript } from '../js/sanscript.mjs';
 
-const filename = window.location.pathname.split('/').pop();
-var curDoc = null;
-
-const alignApparatus = async (doc) => {
-    if(!curDoc) await loadDoc();
+const alignApparatus = async (curDoc, blockid) => {
     const popup = document.getElementById('variants-popup');
 
-    const blockid = popup.querySelector('select').value;
     const textblock = curDoc.querySelector(`[*|id="${blockid}"]`);
     const edition = textblock.querySelector('[type="edition"]');
     let text = edition || textblock;
     const textarea = popup.querySelector('textarea');
     const app = processApparatus(textarea.value);
+    
+    const checked = await checkWits(app);
+    if(checked.errors) return checked;
+
     const aligned = alignAppToText(app,text);
+    if(typeof aligned[0] === 'string')
+        return {errors: aligned};
+
     const formatted = formatApparatus(aligned,blockid);
-    console.log(formatted);
     /*
      * const adjusted = adjustApparatus(aligned,eddoc);
      * const formatted = formatApparatus(adjusted);
     */
-    //return formatted;
+    return {
+        output: checked.witnesses ? 
+            formatted + `\n<listWit>\n${checked.witnesses}\n</listWit>` :
+            formatted,
+        warnings: checked.warnings
+    };
+};
+
+const checkWits = async listapp => {
+    const allwits = new Set();
+    for(const app of listapp) {
+        const witset = new Set();
+        const wits = [app.lemma,...app.readings].map(e => e.witnesses).flat();
+        for(const wit of wits) {
+            if(witset.has(wit)) return {errors: [`${wit} reported twice for ${app.lemma.reading}.`]};
+            witset.add(wit);
+            allwits.add(wit);
+        }
+    }
+    const res = await fetch('witnesses.xml');
+    if(res.ok) {
+        const warnings = [];
+        const allels = new Set();
+        const xmltext = await res.text();
+        const witDoc = (new DOMParser()).parseFromString(xmltext,'text/xml');
+        for(const wit of allwits) {
+            const el = witDoc.querySelector(`witness[*|id="${wit.replace(/^#/,'')}"]`);
+            if(!el) warnings.push(`${wit} not recognized.`);
+            else {
+                if(el.parentNode.nodeName === 'witness')
+                    allels.add(el.parentNode.outerHTML);
+                else allels.add(el.outerHTML);
+            }
+        }
+        return { warnings: warnings,
+                 witnesses: [...allels].join('\n')
+        };
+        
+    }
+    return {warnings: ['No witnesses defined.']};
 };
 
 const formatApparatus = (entries,blockid) => {
@@ -36,7 +76,7 @@ const formatApparatus = (entries,blockid) => {
         ${readings.join('\n')}${notes}
         </app>`;
     });
-    return `<standOff type="apparatus" corresp="#${blockid}">\n<listApp>\n${formatted.join('\n')}\n</listApp>\n</standOff>`;
+    return `<listApp>\n${formatted.join('\n')}\n</listApp>`;
 };
 
 const alignAppToText = (app,text) => {
@@ -50,6 +90,7 @@ const alignAppToText = (app,text) => {
         return clone.textContent.replaceAll(/\s/g,'');
     });
     const ret = [];
+    const warnings = [];
     for(const entry of app) {
         if(!entry.line) {
             ret.push({notes: entry.notes});
@@ -60,7 +101,10 @@ const alignAppToText = (app,text) => {
         const searchfrom = edlines.slice(entry.line-1).join('');
         const stripped = entry.lemma.reading.replaceAll(/\s/g,'').replaceAll(/<[^>]+>/g,''); // ugly removal of tags
         const start = searchfrom.indexOf(stripped);
-        if(start === -1) console.log(`warning: lemma "${stripped}" not found`);
+        if(start === -1) {
+            warnings.push(`Lemma "${stripped}" not found.`);
+            continue;
+        }
         const end = start + stripped.length;
         /*
         if(start === -1) { // maybe it spans two cirs and there's a <choice>
@@ -73,13 +117,9 @@ const alignAppToText = (app,text) => {
         const coords = [prepend + start, prepend + end];
         ret.push({coords: coords, lemma: entry.lemma, readings: entry.readings, notes: entry.notes});
     }
-    return ret;
-};
 
-const loadDoc = async () => {
-    const res = await fetch(filename);
-    const xmltext = await res.text();
-    curDoc = (new DOMParser()).parseFromString(xmltext,'text/xml');
+    if(warnings.length > 0) return warnings;
+    return ret;
 };
 
 const processApparatus = (str) => {
@@ -103,6 +143,7 @@ const processApparatus = (str) => {
             const wits = splitWitnesses(e.slice(`-${witstart.index}`));
             return {reading: Sanscript.t(rdg,'tamil','iast'), witnesses: wits};
         });
+        
         return {line: line, cirs: cirs, lemma: entries.shift(), readings: entries};
     });
     return apparatus.filter(l => l);
@@ -123,7 +164,8 @@ const splitWitnesses = (str) => {
         return acc.concat(newsplit);
     },[]);
     const witsclean = wits.map(w => {
-        const clean = w.replace(/[.\s\[\]()]/g,'');
+        const clean = w.replace(/[.\s\[\]()]/g,'')
+                       .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
         return `#${clean}`;
     });
     return witsclean;

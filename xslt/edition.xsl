@@ -239,13 +239,12 @@
                             <div id="variantsinput">
                                 <label>Apparatus from text</label>
                                 <textarea></textarea>
-                                <button type="button" id="addapparatus">Add apparatus</button>
+                                <button type="button" id="addapparatus">Generate apparatus</button>
                             </div>
                         </div>
-                        <!--div class="boxen">
-                        </div-->
                         <div class="output-boxen">
                             <div class="popup-output"></div>
+                            <button type="button" id="saveapparatus">Save as...</button>
                         </div>
                     </div>
                 </div>
