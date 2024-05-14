@@ -103,7 +103,6 @@ const cancelPopup = (e) => {
 
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
-    document.getElementById('saveapparatus').style.display = 'none';
     blackout.querySelector('select').innerHTML = '';
 
     const popup = document.getElementById('variants-popup');
