@@ -174,7 +174,7 @@ const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
 const fillWordSplits = async (e) => {
     const selected = e.target.options[e.target.options.selectedIndex].value;
     if(!curDoc) await loadDoc();
-    const standOff = curDoc.querySelector(`standOff[corresp="#${selected}"]`);
+    const standOff = curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
 
     if(!standOff) {
         clearSplits();
@@ -344,6 +344,7 @@ const showSplits = async () => {
     if(!curStandOff) {
         curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
         curStandOff.setAttribute('corresp',`#${blockid}`);
+        curStanddOff.setAttribute('type','wordsplit');
         newDoc.documentElement.appendChild(curStandOff);
     }
     curStandOff.innerHTML = ret.xml;
