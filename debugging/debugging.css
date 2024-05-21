@@ -187,17 +187,17 @@ th.superEntry {
     justify-content: flex-end;
     margin-top: -0.8rem;
     margin-right: -0.8rem;
-    cursor: pointer;
 }
 
 .closeicon svg {
     fill: rgba(133,133,133,0.8);
+    cursor: pointer;
 }
 
-.closeicon:hover {
+.closeicon svg:hover {
     filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.3));
 }
-.closeicon:hover svg {
+.closeicon svg:hover {
     fill: #ff9900;
 }
 

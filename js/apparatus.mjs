@@ -224,6 +224,8 @@ const highlightrange = (range,classname = 'highlit') => {
     const lemma = document.createElement('span');
     lemma.className = `${classname} temporary`;
     lemma.append(range.extractContents());
+    if(lemma.innerHTML.trim() === '') return; // avoid highlighting blank spaces/lines
+
     range.insertNode(lemma);
     lemma.lang = lemma.parentElement.lang;
     return lemma;

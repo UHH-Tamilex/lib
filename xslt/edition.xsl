@@ -239,13 +239,12 @@
                             <div id="variantsinput">
                                 <label>Apparatus from text</label>
                                 <textarea></textarea>
-                                <button type="button" id="addapparatus">Add apparatus</button>
+                                <button type="button" id="addapparatus">Generate apparatus</button>
                             </div>
                         </div>
-                        <!--div class="boxen">
-                        </div-->
                         <div class="output-boxen">
                             <div class="popup-output"></div>
+                            <button type="button" id="saveapparatus">Save as...</button>
                         </div>
                     </div>
                 </div>
@@ -267,9 +266,17 @@
         <xsl:variable name="id"><xsl:text>#</xsl:text><xsl:value-of select="@xml:id"/></xsl:variable>
         <xsl:variable name="apparatus" select="//x:standOff[@type='apparatus' and @corresp=$id]"/>
         <xsl:if test="$apparatus">
-            <xsl:call-template name="apparatus">
+            <xsl:call-template name="apparatus2">
                 <xsl:with-param name="apparatus" select="$apparatus"/>
             </xsl:call-template>
+        </xsl:if>
+        <xsl:if test=".//x:app">
+            <div>
+                <xsl:attribute name="class">apparatus-block</xsl:attribute>
+                <xsl:call-template name="lang"/>
+                <xsl:attribute name="style">display: none;</xsl:attribute>
+                <xsl:call-template name="apparatus"/>
+            </div>
         </xsl:if>
     </xsl:element>
 </xsl:template>
@@ -458,7 +465,7 @@
 
 <xsl:template match="x:standOff[@type='apparatus']"/>
 
-<xsl:template name="apparatus">
+<xsl:template name="apparatus2">
     <xsl:param name="apparatus"/>
     <xsl:element name="div">
         <xsl:attribute name="class">apparatus-block</xsl:attribute>

@@ -5,6 +5,7 @@ const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
 const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ēmaṉṟa','ō','ōteyya','kol','kollō','kollē','koṉ','koṉmaṟṟu','koṉ-','til','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṉāl','maṉṟa','maṉṟamma','maṟkollō','mātu','mātō','māḷa','yāḻa','yāḻa-'];
+
 particlebare.sort((a,b) => b.length - a.length);
 
 const particles = particlebare.map(a => {
