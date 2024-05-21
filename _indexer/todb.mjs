@@ -315,7 +315,7 @@ const getPrevEntry = (entries,n) => {
             if(!prevEl || (prevEl.nodeName !== 'entry' && prevEl.nodeName !== 'superEntry'))
                 return '';
 
-            const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastChild : prevEl;
+            const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastElementChild : prevEl;
             return ellipsis + cleanForm(prevEntry.querySelector('form')) + ' ';
         }
         return ellipsis + cleanForm(entries[n-1].querySelector('form')) + ' ';
