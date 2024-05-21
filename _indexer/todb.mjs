@@ -332,7 +332,7 @@ const getNextEntry = (entries,n) => {
             if(!nextEl || (nextEl.nodeName !== 'entry' && nextEl.nodeName !== 'superEntry'))
                 return '';
 
-            const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstChild : nextEl;
+            const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstElementChild : nextEl;
             return nextEntry ? 
                 ' ' + cleanForm(nextEntry.querySelector('form')) + ellipsis :
                 '';
