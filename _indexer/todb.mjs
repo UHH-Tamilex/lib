@@ -333,7 +333,9 @@ const getNextEntry = (entries,n) => {
                 return '';
 
             const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstChild : nextEl;
-            return ' ' + cleanForm(nextEntry.querySelector('form')) + ellipsis;
+            return nextEntry ? 
+                ' ' + cleanForm(nextEntry.querySelector('form')) + ellipsis :
+                '';
         }
         return ' ' + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
     }
