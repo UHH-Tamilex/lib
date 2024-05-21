@@ -12,14 +12,14 @@ const particles = particlebare.map(a => {
     if(a.endsWith('-')) {
         const aa = a.slice(0,-1);
         if(/u$/.test(aa)) {
-            const regex = aa.replace(/u$/,'[*\'’u]|\\(i\\)');
+            const regex = aa.replace(/u$/,'(?:[*\'’u]|\\(i\\))');
             return [a,new RegExp(`^\\+?~?${regex}\\+?-`)];
         }
         else
             return [a,new RegExp(`^\\+?~?${aa}\\+?-`)];
     }
     if(/u$/.test(a)) {
-        const regex = a.replace(/u$/,'[*\'’u]\\(i\\)');
+        const regex = a.replace(/u$/,'(?:[*\'’u]|\\(i\\))');
         return [a,new RegExp(`\\+?~?${regex}\\+?$`)];
     }
     else
