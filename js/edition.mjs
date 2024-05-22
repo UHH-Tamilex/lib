@@ -387,7 +387,7 @@ const go = () => {
     Splitter.setTransliterator(Transliterate);
 
     const lineview = document.querySelector('.line-view-icon');
-    lineview.style.display = 'none';
+    if(lineview) lineview.style.display = 'none';
 /*
     const scripttag = document.getElementById('editionscript');
     if(scripttag.dataset.debugging) {
