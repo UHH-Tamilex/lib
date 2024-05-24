@@ -46,6 +46,12 @@ details.dict details.dict[open] {
 }
 */
 
+.lemma-head {
+    opacity: 0.5;
+}
+.lemma-head::after {
+    content: ' >';
+}
 
 .dict-entry {
     padding-left: 1rem;
@@ -127,7 +133,7 @@ details.dict details.dict[open] {
   display: inline-block;
   margin: 1rem;
   position: relative;
-  background: linear-gradient(0deg, rgb(240,202,121) 0%, rgba(50,50,50,0.3) 0%);
+  background: linear-gradient(0deg, rgb(240,202,121) 0%, rgba(50,50,50,0.3) 60%);
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
 }
