@@ -606,7 +606,7 @@ const jiggleWord = (word, text, start, end) => {
             //end = end + 1;
             text[end-1] = CONCATRIGHT;
 
-        else if(wordend === 'l' && ['ṟ','ṉ'].includes(textpostend))
+        else if(wordend === 'l' && ['ṟ','ṉ','n'].includes(textpostend))
             //end = end + 1;
             text[end-1] = CONCATRIGHT;
 
