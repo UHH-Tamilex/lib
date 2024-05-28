@@ -407,7 +407,7 @@ const findGrammar = (translation) => {
                 ret.push(abbr);
             }
             if(h.trim() !== '')
-                hayswarnings = true;
+                hayswarning = true;
         }
     }
     else {
