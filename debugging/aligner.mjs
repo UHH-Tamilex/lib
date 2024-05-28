@@ -202,7 +202,7 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     }
     */
     //const wl = restoreSandhi(removeOptions(tam).join(''));
-    const wl = tamilSplit(removeOptions(tam).join(''));
+    const wl = tamilSplit(removeOptions(tam).replaceAll('|','').join(''));
     const aligned = needlemanWunsch(tamilSplit(text),wl,wordsplitscore);
     ///const warnings = warnTypos(aligned);
     const realigned = jiggleAlignment(aligned,tam);
