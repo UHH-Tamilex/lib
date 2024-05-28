@@ -181,7 +181,7 @@ const warnTypos = (alignment) => {
     return ret;
 };
 */
-const removeOptions = (words) => words.map(w => w.split('/')[0]);
+const removeOptions = (words) => words.map(w => w.split('/')[0].replaceAll('|',''));
 
 const tamilSplit = (str) => {
     const ret = [];
