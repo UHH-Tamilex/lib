@@ -202,10 +202,11 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     }
     */
     //const wl = restoreSandhi(removeOptions(tam).join(''));
-    const wl = tamilSplit(removeOptions(tam).join(''));
-    const aligned = needlemanWunsch(tamilSplit(text),wl,wordsplitscore);
+    const wl = removeOptions(tam);
+    const wordjoin = tamilSplit(wl.join(''));
+    const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
     ///const warnings = warnTypos(aligned);
-    const realigned = jiggleAlignment(aligned,tam);
+    const realigned = jiggleAlignment(aligned,wl);
     
     const wordlist = tam.map((e,i) => {
         // TODO: should we remove hyphens or not?
@@ -619,10 +620,6 @@ const jiggleWord = (word, text, start, end) => {
         if(wordstart === 'n' && ['ṉ','ṇ'].includes(textprestart))
             //start = start - 1;
             text[start-1] = CONCATLEFT;
-
-        else if(wordstart === 'n' && textprestart === 'l')
-            //end = end + 1;
-            text[end-1] = CONCATRIGHT;
 
         else if(wordstart === 't' && ['ṭ','ṟ'].includes(textprestart))
             //start = start - 1;
