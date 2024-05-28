@@ -620,6 +620,10 @@ const jiggleWord = (word, text, start, end) => {
             //start = start - 1;
             text[start-1] = CONCATLEFT;
 
+        else if(wordstart === 'n' && textprestart === 'l')
+            //end = end + 1;
+            text[end-1] = CONCATRIGHT;
+
         else if(wordstart === 't' && ['ṭ','ṟ'].includes(textprestart))
             //start = start - 1;
             text[start-1] = CONCATLEFT;
