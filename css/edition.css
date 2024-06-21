@@ -38,7 +38,7 @@ div.lg div.l {
     text-indent: -1rem;
 }
 div.lg div.l.space {
-    line-height: 3.5rem;
+    margin-top: 2rem;
 }
 div.edition {
     counter-reset: line-numb;
