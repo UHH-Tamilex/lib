@@ -33,9 +33,12 @@ span.choice > span:last-child ruby {
 }
 
 div.lg div.l {
-    line-height: 3.5rem;
+    line-height: 3rem;
     padding-left: 1rem;
     text-indent: -1rem;
+}
+div.lg div.l.space {
+    line-height: 3.5rem;
 }
 div.edition {
     counter-reset: line-numb;
