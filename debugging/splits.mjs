@@ -338,6 +338,12 @@ const showSplits = async () => {
     const xslsheet = parser.parseFromString(await resp.text(), 'text/xml');
     xproc.importStylesheet(xslsheet);
     const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
+    if(document.getElementById('transbutton').lang === 'en')
+        for(const th of res.querySelectorAll('[lang="ta-Latn"]')) {
+            th.textContent = Sanscript.t(th.textContent,'iast','tamil');
+            th.lang = 'ta-Taml';
+        }
+
     output.appendChild(res);
     newDoc = curDoc.cloneNode(true);
     let curStandOff = newDoc.querySelector(`standOff[corresp="#${blockid}"]`);

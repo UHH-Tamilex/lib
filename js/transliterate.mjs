@@ -115,7 +115,7 @@ const Transliterate = (function() {
 
         // switch to Tamil
         const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.get('lang') === 'ta-Taml')
+        if(urlParams.get('script') === 'Taml')
             transliterator.toggle();
     };
 
