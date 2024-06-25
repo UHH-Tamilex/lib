@@ -43,8 +43,11 @@ const lookup = async (e) => {
     blackout.style.display = 'flex';
     const lookupwindow = document.createElement('div');
     lookupwindow.id = 'lookupwindow';
-    lookupwindow.innerHTML = (await WordLookup(word)) || 'Word not found.';
+    lookupwindow.innerHTML = (await WordLookup(word)) || '<p lang="en">Word not found.</p>';
     blackout.appendChild(lookupwindow);
+    Transliterate.refreshCache(lookupwindow);
+    if(document.getElementById('transbutton').lang === 'en')
+            Transliterate.activate(lookupwindow);
     blackout.addEventListener('click',cancelBlackout);
 };
 

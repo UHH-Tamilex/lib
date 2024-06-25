@@ -77,7 +77,7 @@ const formatEntry = (form,results,canonicaldef,fromlemma) => {
     const lemma = fromlemma ? `<span class="lemma-head">${fromlemma}</span> ` : '';
     let frag =
 `<div lang="en">
-<h3>${lemma}${form}</h3>
+<h3 lang="ta">${lemma}${form}</h3>
 <p>${[...entry.grammar].join(', ')}</p>
 ${definition}
 </div>`;
