@@ -112,6 +112,11 @@ const Transliterate = (function() {
         // initialize button
         _state.button = document.getElementById('transbutton');
         button.init(foundTamil);
+
+        // switch to Tamil
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('lang') === 'ta-Taml')
+            transliterator.toggle();
     };
 
     const button = {
@@ -219,7 +224,7 @@ const Transliterate = (function() {
         }
         return maybetamil ? 'grantha' : false;
         */
-    }
+    };
     const prepText = () => {
         // tag codicological units associated with a script first
         const synchs = _state.parEl.querySelectorAll('[data-synch]');
@@ -246,7 +251,7 @@ const Transliterate = (function() {
         const isodefault = _state.scriptToIso.get(_state.defaultSanscript);
         const walker = document.createTreeWalker(_state.parEl,NodeFilter.SHOW_ALL, 
             { acceptNode(node) { return node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('data-synch') ?
-                NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT} });
+                NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;} });
         prepTextWalker(walker,isodefault);
     };
     
