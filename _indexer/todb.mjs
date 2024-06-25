@@ -182,6 +182,8 @@ const go = () => {
         'filename TEXT' +
         ')').run();
     const regex = new RegExp(`^${process.argv[2]}.+\\.xml$`);
+    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+    files.sort(collator.compare);
     Fs.readdir(dir,(err, files) => {
         if(err) return console.log(err);
         for(const f of files) {
