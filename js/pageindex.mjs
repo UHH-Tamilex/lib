@@ -5,11 +5,11 @@ const init = function() {
     const params = new URLSearchParams(window.location.search);
 
     Transliterate.init(document.body);
-
-    if(params.get('script' === 'Taml')) {
+    if(params.get('script') === 'Taml') {
+        console.log('huh');
         const ul = document.querySelector('ul');
         for(const a of ul.querySelectorAll('li > a'))
-            a.href = a.href + '?lang=Taml';
+            a.href = a.href + '?script=Taml';
     }
 
     document.body.addEventListener('copy',events.removeHyphens);
