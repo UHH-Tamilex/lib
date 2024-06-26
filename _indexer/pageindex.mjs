@@ -25,6 +25,7 @@ const go = () => {
         const xmlDoc = parser.parseFromString(xmlTxt,'text/xml');
         const title = xmlDoc.querySelector('titleStmt title').textContent
                       .replaceAll(/\d+/g,"<span class='num trad'>$&</span>");
+        list.push(`<li><a href="${f}">${title}</a></li>`);
     }
     const out = template.replace('<!-- insert list here -->',list.join(''))
                         .replaceAll('<!-- insert title here -->',process.argv[3]);
