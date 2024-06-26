@@ -23,7 +23,8 @@ const go = () => {
         const xmlTxt = Fs.readFileSync(dir + f,{encoding: 'utf-8'});
         const parser = new (new Jsdom.JSDOM('')).window.DOMParser();
         const xmlDoc = parser.parseFromString(xmlTxt,'text/xml');
-        const title = xmlDoc.querySelector('titleStmt title').textContent;
+        const title = xmlDoc.querySelector('titleStmt title').textContent
+                      .replaceAll(/\d+/g,'<span class="num trad">$1</span>');
         list.push(`<li><a href="${f}">${title}</a></li>`);
     }
     const out = template.replace('<!-- insert list here -->',list.join(''))
