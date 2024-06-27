@@ -194,7 +194,8 @@ const go = () => {
 };
 
 const cleanForm = el => {
-    return el.textContent.replaceAll(/\([ui]\)/g,'u')
+    return el.textContent.trim()
+                         .replaceAll(/\([ui]\)/g,'u')
                          .replaceAll(/[+~]/g,'');
 };
 
@@ -211,7 +212,7 @@ const cleanParticle = (el,form) => {
                 return [p, new RegExp(`^\\+?~?${p}\\+?-`)];
         })
     );
-    const particle = el.textContent;
+    const particle = el.textContent.trim();
     const partregex = proMap.get(particle);
     
     if(!partregex) return ['enclitic',particle];
@@ -251,10 +252,10 @@ const getRoles = roles => {
 
 const prepWordEntry = entry => {
     const form = entry.querySelector('form');
-    const simple = entry.querySelector('form[type="simple"]')?.innerHTML;
+    const simple = entry.querySelector('form[type="simple"]')?.innerHTML.trim();
     const particle = entry.querySelector('gramGrp[type="particle"]');
     const roles = entry.querySelectorAll('gram[type="role"]'); 
-    const def = entry.querySelector('def').innerHTML;
+    const def = entry.querySelector('def').innerHTML.trim();
 
     const ret = {
         form: simple || cleanForm(form),
