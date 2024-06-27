@@ -190,6 +190,12 @@ const tamilSplit = (str) => {
     for(let n=0;n<str.length;n++) {
         if(ugh.has(str[n]) && ret[ret.length-1] === 'a')
                 ret[ret.length-1] = 'a' + str[n];
+        /*
+        else if(str[n] === '(' && str[n+1] === 'm' && str[n+2] == ')') {
+            ret.push('(m)');
+            n = n+2;
+        }
+        */
         else
             ret.push(str[n]);
     }
@@ -619,7 +625,10 @@ const jiggleWord = (word, text, start, end) => {
         if(wordend === 'm' && ['m','n'].includes(textpostend))
             //end = end + 1;
             text[end-1] = CONCATRIGHT;
-
+        /*
+        else if(wordend === '(m)' && textpostend === 'm')
+            text[end-1] = CONCATRIGHT;
+        */
         else if(wordend === 'l' && ['ṟ','ṉ','n'].includes(textpostend))
             //end = end + 1;
             text[end-1] = CONCATRIGHT;
@@ -641,13 +650,6 @@ const jiggleWord = (word, text, start, end) => {
         else if(wordstart === 'm' && textprestart === 'm')
             //start = start - 1;
             text[start-1] = CONCATLEFT;
-        else if(wordstart === 'm' && textprestart === ')' &&
-                text[start-3] === 'm' &&
-                text[start-4] === '(') {
-            text[start-1] = CONCATLEFT;
-            text[start-2] = CONCATLEFT;
-            text[start-3] = CONCATLEFT;
-        }
     }
     //return [start,end];
     return text;
