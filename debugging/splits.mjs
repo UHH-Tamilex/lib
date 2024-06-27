@@ -88,8 +88,8 @@ const getGrammar = (entry) => {
 };
 const processEntry = (entry) => {
    return {
-        tamil: entry.querySelector('form').textContent.replaceAll(/\(u\)/g,'*'),
-        english: entry.querySelector('def').textContent.replaceAll(/\s+/g,'_') + getGrammar(entry),
+        tamil: entry.querySelector('form').textContent.trim().replaceAll(/\(u\)/g,'*'),
+        english: entry.querySelector('def').textContent.trim().replaceAll(/\s+/g,'_') + getGrammar(entry),
         note: entry.querySelector('note')
    };
 };
