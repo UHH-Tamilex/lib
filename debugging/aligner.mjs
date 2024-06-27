@@ -1,5 +1,6 @@
 import needlemanWunsch from './needlemanwunsch.mjs';
 import dbQuery from './dbquery.mjs';
+import createSqlWorker from '../js/sqlWorker.mjs';
 
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
@@ -488,7 +489,7 @@ const lookupFeatures = async (str) => {
 const cleanupWordlist = async (list,notes,lookup) => {
     const warnings = [];
     const notescopy = [...notes];
-
+    const worker = lookup ? createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
     const cleanupWord = async (obj) => {
         // we should remove punctuation from the wordlist so it aligns properly
         //obj.word = obj.word.replace(/[\.;]$/,'');
@@ -499,7 +500,8 @@ const cleanupWordlist = async (list,notes,lookup) => {
             obj.translation = obj.translation.slice(0,-1);
             if(notescopy) obj.wordnote = notescopy.shift();
         }
-        if(obj.translation === '()') obj.translation = '';
+        if(obj.translation === '()') 
+                obj.translation = '';
 
         const particle = findParticle(obj.word,obj.translation);
         if(particle) {
@@ -525,6 +527,10 @@ const cleanupWordlist = async (list,notes,lookup) => {
         else if(lookup) {
             const features = await lookupFeatures(obj.bare || obj.word);
             if(features) obj.gram = features;
+            if(obj.translation === '') {
+             const res = obj.translation = await worker.db.query('SELECT def FROM citations WHERE form = ?',[obj.bare || obj.word])[0];
+             if(res) obj.translation = res.join('_');
+            }
         }
         /*
         if(!particle && !affix && !grammar) {
