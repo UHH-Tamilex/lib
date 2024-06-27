@@ -471,9 +471,7 @@ const mostPopular = (arr) => {
 };
 
 const lookupFeatures = async (str) => {
-    const newstr = str.replace(/([~+()])/g,'')
-                .replaceAll(/['’*]/g,'u');
-    const res = await dbQuery(newstr);
+    const res = await dbQuery(str);
     if(!res) return null;
     
     const arr = res.length === 1 ? JSON.parse(res[0][0]) : JSON.parse(mostPopular(res)[0]);
@@ -486,10 +484,15 @@ const lookupFeatures = async (str) => {
     return ret;
 };
 
+const cleanForm =  (str) => {
+    return str.replaceAll(/([~+()])/g,'')
+              .replaceAll(/['’*]/g,'u');
+};
+
 const cleanupWordlist = async (list,notes,lookup) => {
     const warnings = [];
     const notescopy = [...notes];
-    const worker = lookup ? createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
+    const worker = lookup ? await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
     const cleanupWord = async (obj) => {
         // we should remove punctuation from the wordlist so it aligns properly
         //obj.word = obj.word.replace(/[\.;]$/,'');
@@ -524,12 +527,16 @@ const cleanupWordlist = async (list,notes,lookup) => {
             obj.gram = grammar.gram;
             if(grammar.warning) warnings.push(grammar.warning);
         }
-        else if(lookup) {
-            const features = await lookupFeatures(obj.bare || obj.word);
-            if(features) obj.gram = features;
+        if(lookup) {
+            const bare = cleanForm(obj.bare || obj.word);
+            if(!grammar || obj.translation === '') {
+                const features = await lookupFeatures(bare);
+                if(features) obj.gram = features;
+            }
+
             if(obj.translation === '') {
-             const res = obj.translation = await worker.db.query('SELECT def FROM citations WHERE form = ?',[obj.bare || obj.word])[0];
-             if(res) obj.translation = res.join('_');
+                const res = (await worker.db.query('SELECT def FROM citations WHERE form = ? LIMIT 1',[bare]))[0];
+                if(res && res.def) obj.translation = res.def.replaceAll(/\s+/g,'_');
             }
         }
         /*
