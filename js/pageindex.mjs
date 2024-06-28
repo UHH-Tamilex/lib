@@ -6,7 +6,6 @@ const init = function() {
 
     Transliterate.init(document.body);
     if(params.get('script') === 'Taml') {
-        console.log('huh');
         const ul = document.querySelector('ul');
         for(const a of ul.querySelectorAll('li > a'))
             a.href = a.href + '?script=Taml';
