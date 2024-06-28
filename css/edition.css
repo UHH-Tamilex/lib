@@ -224,3 +224,30 @@ span.invisible {
 .lemma-head::after {
     content: ' >';
 }
+.spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 1rem;
+  position: relative;
+  background: linear-gradient(0deg, rgb(240,202,121) 0%, rgba(50,50,50,0.3) 60%);
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+.spinner::after {
+  content: '';  
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: white;
+}
+@keyframes rotation {
+  0% { transform: rotate(0deg) }
+  100% { transform: rotate(360deg)}
+} 
