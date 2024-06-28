@@ -284,10 +284,10 @@ const showSplits = async () => {
     popup.querySelector('.output-boxen').style.display = 'flex';
 
     const output = popup.querySelector('.popup-output');
-    output.innerHTML = '';
+    output.innerHTML = '<div class="spinner"></div>';
 
     const warnings = popup.querySelector('.popup-warnings');
-    warnings.innerHTML = '';
+    warnings.innerHTML = '<div class="spinner"></div>';
 
     const inputs = popup.querySelectorAll('textarea');
     const tamval = Sanscript.t(inputs[0].value.replaceAll(/[\d∞\[\]]/g,'').trim(),'tamil','iast');
