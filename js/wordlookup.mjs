@@ -21,15 +21,15 @@ const wordLookup = async (word) => {
     let definition;
     let fromlemma;
     if(citrow?.islemma) {
-        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND islemma IS ?',[clean,citrow.islemma]);
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND islemma IS ?',[clean,citrow.islemma]);
         definition = (await sqlWorker.db.query('SELECT definition FROM lemmata WHERE lemma IS ?',[citrow.islemma]))[0].definition;
     }
     else if(citrow?.fromlemma) {
-        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS ?',[clean,citrow.fromlemma]);
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS ?',[clean,citrow.fromlemma]);
         fromlemma = (await sqlWorker.db.query('SELECT form FROM lemmata WHERE lemma IS ?',[citrow.fromlemma]))[0].form;
     }
     else {
-        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ?',[clean]);
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ?',[clean]);
     }
 
     if(!allcits || allcits.length === 0) return;
@@ -70,7 +70,7 @@ const formatEntry = (form,results,canonicaldef,fromlemma) => {
             filename: result.filename,
             context: result.context,
             translation: result.def,
-            syntax: result.syntax || result.rootnoun,
+            syntax: result.syntax || result.particlefunctions || result.rootnoun,
         });
     }
     const definition = canonicaldef ? `<p>${canonicaldef}</p>` : '';
