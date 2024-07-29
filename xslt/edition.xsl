@@ -62,12 +62,6 @@
             <xsl:attribute name="rel">stylesheet</xsl:attribute>
             <xsl:attribute name="href"><xsl:value-of select="$root"/>css/apparatus.css</xsl:attribute>
         </xsl:element>
-        <!--xsl:if test="$debugging = 'true'">
-            <xsl:element name="link">
-                <xsl:attribute name="rel">stylesheet</xsl:attribute>
-                <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/codemirror.css</xsl:attribute>
-            </xsl:element>
-        </xsl:if-->
         <xsl:element name="link">
             <xsl:attribute name="rel">stylesheet</xsl:attribute>
             <xsl:attribute name="href"><xsl:value-of select="$root"/>css/wordindex.css</xsl:attribute>
@@ -84,6 +78,10 @@
             <!--xsl:element name="script">
                 <xsl:attribute name="src">debugging/papaparse.min.js</xsl:attribute>
             </xsl:element-->
+            <xsl:element name="link">
+                <xsl:attribute name="rel">stylesheet</xsl:attribute>
+                <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/codemirror.css</xsl:attribute>
+            </xsl:element>
             <xsl:element name="link">
                 <xsl:attribute name="rel">stylesheet</xsl:attribute>
                 <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/prism.css</xsl:attribute>
