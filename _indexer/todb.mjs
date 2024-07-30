@@ -218,7 +218,7 @@ const cleanParticle = (el,form) => {
     
     if(!partregex) return ['enclitic',particle];
     
-    if(form.textContent.match(partregex))
+    if(form.match(partregex))
         return ['proclitic',particle];
 
     return ['enclitic',particle];
