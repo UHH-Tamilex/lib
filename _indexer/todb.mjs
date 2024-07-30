@@ -253,18 +253,19 @@ const getRoles = roles => {
 
 const prepWordEntry = entry => {
     const form = entry.querySelector('form');
+    const clean = cleanForm(form);
     const simple = entry.querySelector('form[type="simple"]')?.innerHTML.trim();
     const particle = entry.querySelector('gramGrp[type="particle"]');
     const roles = entry.querySelectorAll('gram[type="role"]'); 
     const def = entry.querySelector('def').innerHTML.trim();
 
     const ret = {
-        form: simple || cleanForm(form),
+        form: simple || clean,
         def: def,
         roles: roles ? getRoles(roles) : {},
     };
     if(particle) {
-        const [ptype,pform] = cleanParticle(particle,form);
+        const [ptype,pform] = cleanParticle(particle,clean);
         ret[ptype] = pform;
     }
     return ret;
