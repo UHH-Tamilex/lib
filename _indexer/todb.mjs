@@ -97,8 +97,11 @@ const dbSchema = {
                    'peyareccam',
                    'infinitive',
                    'absolutive',
-                   'habitual future'
-                   ]),
+                   'habitual future',
+                   'conditional',
+                   'imperative',
+                   'optative',
+                   'subjunctive']),
     number: new Set(['singular','plural']),
     gender: new Set(['masculine','feminine','neuter']),
     nouncase: new Set(['nominative',
@@ -114,7 +117,6 @@ const dbSchema = {
     person: new Set(['first person','second person','third person','third person honorific']),
     aspect: new Set(['perfective aspect','imperfective aspect','negative']),
     voice: new Set(['passive','causative']),
-    mood: new Set(['conditional','imperative','optative','subjunctive']),
     syntax: new Set(['muṟṟeccam','denominative','postposition','adverb']),
     particlefunctions: new Set(['concessive','indefinite','comparative']),
     misc: new Set(['ideophone']),
@@ -134,7 +136,7 @@ const dbValues = Object.values(dbSchema).reduce((acc,cur) => {
 dbValues.sort((a,b) => b.length - a.length);
 
 const dbKeys = Object.keys(dbSchema);
-const importantKeys = ['type','number','gender','nouncase','person','aspect','voice','mood'];
+const importantKeys = ['type','number','gender','nouncase','person','aspect','voice'];
 const dbops = {
     open: (f) => {
         const db = new sqlite3(f);
@@ -171,7 +173,6 @@ const go = () => {
         'person TEXT, '+
         'aspect TEXT, '+
         'voice TEXT, '+
-        'mood TEXT, '+
         'syntax TEXT, '+
         'particlefunctions TEXT, '+
         'rootnoun TEXT, '+
@@ -489,7 +490,7 @@ const addToDb = (fname,db) => {
             const to = n < entries.length-1 ? n + 1 : n;
             const context = getContext(entries,from,to,textAlignment);
             */
-            const rows = fulldb.prepare('SELECT islemma, fromlemma, definition, type, number, gender, nouncase, person, aspect, mood, voice, citations FROM dictionary WHERE word = ?').all(ins.form);
+            const rows = fulldb.prepare('SELECT islemma, fromlemma, definition, type, number, gender, nouncase, person, aspect, voice, citations FROM dictionary WHERE word = ?').all(ins.form);
 
             const {islemma, fromlemma, worddef} = findLemma(ins.roles,rows);
             /*
@@ -498,7 +499,7 @@ const addToDb = (fname,db) => {
             */
 
             const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, filename: basename},ins.roles);
-            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @voice, @mood, @syntax, @particlefunctions, @rootnoun, @proclitic, @enclitic, @context, @citation, @filename)').run(dbobj);
+            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @voice, @syntax, @particlefunctions, @rootnoun, @proclitic, @enclitic, @context, @citation, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(fromlemma)?.word || ins.form;
             const lemmadef = islemma ? worddef : 
                 fromlemma ? fulldb.prepare('SELECT definition FROM dictionary WHERE islemma = ?').get(fromlemma)?.definition :
