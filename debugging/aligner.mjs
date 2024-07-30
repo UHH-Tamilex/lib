@@ -5,7 +5,7 @@ import createSqlWorker from '../js/sqlWorker.mjs';
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
-const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ummaṟṟu','ē','ēku','ēkamma','ēmaṉṟa','ō','ōo','ōteyya','kol','kollō','kollē','koṉ','koṉmaṟṟu','koṉ-','til','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ēmaṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṉāl','maṉṟa','maṉṟamma','maṟkollō','mātu','mātō','māḷa','yāḻa','yāḻa-'];
+const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ēmaṉṟa','ō','ōo','ōteyya','kol','kollō','kollē','koṉ','koṉmaṟṟu','koṉ-','til','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ēmaṟṟē','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṉāl','maṉṟa','maṉṟamma','maṟkollō','mātu','mātō','māḷa','yāḻa','yāḻa-'];
 
 particlebare.sort((a,b) => b.length - a.length);
 
