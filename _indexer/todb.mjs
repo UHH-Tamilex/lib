@@ -206,11 +206,11 @@ const cleanParticle = (el,form) => {
         proclitics.map(p => {
             const pp = p.slice(0,-1);
             if(/u$/.test(pp)) {
-                const regex = pp.replace(/u$/,'\\(?[ui]\\)?');
-                return [p, new RegExp(`^\\+?~?${regex}\\+?-`)];
+                const regex = pp.replace(/u$/,'[ui]');
+                return [p, new RegExp(`^${regex}\\-`)];
             }
             else
-                return [p, new RegExp(`^\\+?~?${p}\\+?-`)];
+                return [p, new RegExp(`^${p}-`)];
         })
     );
     const particle = el.textContent.trim();
