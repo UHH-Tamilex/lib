@@ -650,6 +650,8 @@ const jiggleWord = (word, text, start, end) => {
         else if(wordstart === 'm' && textprestart === 'm')
             //start = start - 1;
             text[start-1] = CONCATLEFT;
+        else if(wordstart === 'y' && textprestart === 'y')
+            text[start-1] = CONCATLEFT;
     }
     //return [start,end];
     return text;
