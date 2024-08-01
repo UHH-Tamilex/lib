@@ -214,7 +214,6 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
     ///const warnings = warnTypos(aligned);
     const realigned = jiggleAlignment(aligned,wl);
-    
     const wordlist = tam.map((e,i) => {
         // TODO: should we remove hyphens or not?
         //return {word: e, translation: cleanupTranslation(eng[i])};
@@ -225,7 +224,6 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
 
     const entries = makeEntries(wordlist);
     const rle = formatAlignment(realigned,0);
-
     const ret = {xml: rle + '\n' + entries.join('\n'), alignment: aligned, warnings: warnings};
     if(lookup)
         ret.wordlist = wordlist;
@@ -261,11 +259,11 @@ const formatAlignment = (arr) => {
             if(arr1len === 2)
                 a1 = a1 + 'MM';
             else
-                a1 = getChar(arr[1][n]) + 'G';
+                a1 = a1 + getChar(arr[1][n]) + 'G';
         }
         else if(arr1len === 2) {
             a1 = a1 + 'MM';
-            a0 = getChar(arr[0][n]) + 'G';
+            a0 = a0 + getChar(arr[0][n]) + 'G';
         }
         else {
             a0 = a0 + getChar(arr[0][n]);
