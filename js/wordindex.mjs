@@ -50,7 +50,7 @@ const getEntry = async (targ) => {
     let results = {};
     let canonicaldef;
     if(targ.id) {
-        results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
+        results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
         /*
         if(results.length === 0)
             results = await workers.full.db.query('SELECT definition, type, number, gender, nouncase, voice, person, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
@@ -61,9 +61,9 @@ const getEntry = async (targ) => {
         const lemma = targ.closest('details[id]')?.id;
         const form = targ.closest('details').dataset.entry;
         if(lemma)
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma = ?',[form,lemma]);
+            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma = ?',[form,lemma]);
         else
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS NULL',[form]);
+            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS NULL',[form]);
     }
     
     const entry = {
@@ -80,7 +80,6 @@ const getEntry = async (targ) => {
         if(result.nouncase) entry.grammar.add(result.nouncase);
         if(result.person) entry.grammar.add(result.person);
         if(result.aspect) entry.grammar.add(result.aspect);
-        if(result.mood) entry.grammar.add(result.mood);
         if(result.citation) entry.citations.push({
             siglum: result.citation,
             filename: result.filename,

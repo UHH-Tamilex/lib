@@ -21,15 +21,15 @@ const wordLookup = async (word) => {
     let definition;
     let fromlemma;
     if(citrow?.islemma) {
-        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND islemma IS ?',[clean,citrow.islemma]);
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND islemma IS ?',[clean,citrow.islemma]);
         definition = (await sqlWorker.db.query('SELECT definition FROM lemmata WHERE lemma IS ?',[citrow.islemma]))[0].definition;
     }
     else if(citrow?.fromlemma) {
-        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS ?',[clean,citrow.fromlemma]);
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS ?',[clean,citrow.fromlemma]);
         fromlemma = (await sqlWorker.db.query('SELECT form FROM lemmata WHERE lemma IS ?',[citrow.fromlemma]))[0].form;
     }
     else {
-        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, mood, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ?',[clean]);
+        allcits = await sqlWorker.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ?',[clean]);
     }
 
     if(!allcits || allcits.length === 0) return;
@@ -64,7 +64,6 @@ const formatEntry = (form,results,canonicaldef,fromlemma) => {
         if(result.nouncase) entry.grammar.add(result.nouncase);
         if(result.person) entry.grammar.add(result.person);
         if(result.aspect) entry.grammar.add(result.aspect);
-        if(result.mood) entry.grammar.add(result.mood);
         if(result.citation) entry.citations.push({
             siglum: result.citation,
             filename: result.filename,
