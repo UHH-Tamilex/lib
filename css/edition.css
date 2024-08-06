@@ -96,8 +96,8 @@ div.lg div.l.indent8 {
 div.lg div.l.indent9 {
     padding-left: 90%;
 }
-.text-block:first-child { line-height: 3.5rem;}
-.text-block:last-child {line-height: 3.5rem; }
+.text-block:first-child { line-height: 3.5rem; margin-right: 0.25rem;}
+.text-block:last-child {line-height: 3.5rem; margin-left: 0.25rem;}
 rt { padding-bottom: 0.5rem;}
 rt:hover, span.word:hover { background-color: yellow; cursor: pointer; }
 #tooltip { font-size: 1.1rem; }
