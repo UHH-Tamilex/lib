@@ -9,6 +9,14 @@ const alignApparatus = async (curDoc, blockid) => {
     const textarea = popup.querySelector('textarea');
     const app = processApparatus(textarea.value);
     
+    for(const ap of app) {
+        const errors = [];
+        if(ap.lemma.error) errors.push(app.lemma.error);
+        for(const reading of ap.readings)
+            if(reading.error) errors.push(reading.error);
+        if(errors.length > 0) return {errors: errors};
+    }
+
     const checked = await checkWits(app);
     if(checked.errors) return checked;
 
@@ -139,6 +147,7 @@ const processApparatus = (str) => {
 
         const entries = clean.split(';').map(e => {
             const witstart = e.split('').reverse().join('').match(/[\u0b80-\u0bff_><‡\[\]]/);
+            if(!witstart) return {error: `Error parsing "${e}".`};
             const rdg = formatReading(e.slice(0,`-${witstart.index}`));
             const wits = splitWitnesses(e.slice(`-${witstart.index}`));
             return {reading: Sanscript.t(rdg,'tamil','iast'), witnesses: wits};
