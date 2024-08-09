@@ -62,7 +62,7 @@ const checkEquality = (arr1, arr2, n) => {
             return 'typo';
         if(char2 === 'u') {
             const next = getNext(arr1,n);
-            if(next && next === y) return null;
+            if(next && next === 'y') return null;
             else return 'typo';
         }
 
