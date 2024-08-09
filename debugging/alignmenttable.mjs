@@ -57,8 +57,15 @@ const checkEquality = (arr1, arr2, n) => {
         if(char1 !== '') return 'typo';
         else return null;
     }
-    if(char1 === 'i' && ['u','’','*'].includes(char2))
-        return 'typo';
+    if(char1 === 'i')
+        if(char2 === '*')
+            return 'typo';
+        if(char2 === 'u') {
+            const next = getNext(arr1,n);
+            if(next && next === y) return null;
+            else return 'typo';
+        }
+
     if(char2 === 'u' && char1 === '')
         return 'typo';
 
