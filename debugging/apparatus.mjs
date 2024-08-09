@@ -11,7 +11,7 @@ const alignApparatus = async (curDoc, blockid) => {
     
     for(const ap of app) {
         const errors = [];
-        if(ap.lemma && ap.lemma.error) errors.push(app.lemma.error);
+        if(ap.lemma && ap.lemma.error) errors.push(ap.lemma.error);
         if(ap.readings) 
             for(const reading of ap.readings)
                 if(reading.error) errors.push(reading.error);
@@ -153,6 +153,7 @@ const processApparatus = (str,curDoc) => {
             if(!witstart) return {error: `Error parsing "${e}".`};
             const rdg = formatReading(e.slice(0,`-${witstart.index}`));
             const wits = splitWitnesses(e.slice(`-${witstart.index}`));
+            if(!wits) return {error: `Error parsing "${e}".`};
             return {reading: Sanscript.t(rdg,'tamil','iast'), witnesses: wits};
         });
         
@@ -163,18 +164,24 @@ const processApparatus = (str,curDoc) => {
 
 const splitWitnesses = (str) => {
     const wits = str.split(',').reduce((acc,cur) => {
+        if(!acc) return null; // error from last round
         const split = cur.trim().split('+');
         if(split.length === 1) {
             acc.push(split[0]);
             return acc;
         }
-        const initial = split[0].match(/^[^\d]+(?=[\d(])/)[0];
+        const initialmatch = split[0].match(/^[^\d]+(?=[\d(])/);
+        if(!initialmatch) return null; // e.g., errors like "C+3v"
+        const initial = initialmatch[0];
         const newsplit = split.map((el,i) => {
             if(i === 0) return el.replace(/^\(/,'');
             else return initial + el;
         });
         return acc.concat(newsplit);
     },[]);
+
+    if(!wits) return null;
+
     const witsclean = wits.map(w => {
         const clean = w.replace(/[.\s\[\]()]/g,'')
                        .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
