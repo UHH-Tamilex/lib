@@ -7,13 +7,14 @@ const alignApparatus = async (curDoc, blockid) => {
     const edition = textblock.querySelector('[type="edition"]');
     let text = edition || textblock;
     const textarea = popup.querySelector('textarea');
-    const app = processApparatus(textarea.value);
+    const app = processApparatus(textarea.value,curDoc);
     
     for(const ap of app) {
         const errors = [];
-        if(ap.lemma.error) errors.push(app.lemma.error);
-        for(const reading of ap.readings)
-            if(reading.error) errors.push(reading.error);
+        if(ap.lemma && ap.lemma.error) errors.push(app.lemma.error);
+        if(ap.readings) 
+            for(const reading of ap.readings)
+                if(reading.error) errors.push(reading.error);
         if(errors.length > 0) return {errors: errors};
     }
 
@@ -41,6 +42,7 @@ const checkWits = async listapp => {
     const allwits = new Set();
     for(const app of listapp) {
         const witset = new Set();
+        if(!app.hasOwnProperty('lemma') || !app.hasOwnProperty('readings')) continue;
         const wits = [app.lemma,...app.readings].map(e => e.witnesses).flat();
         for(const wit of wits) {
             if(witset.has(wit)) return {errors: [`${wit} reported twice for ${app.lemma.reading}.`]};
@@ -130,12 +132,12 @@ const alignAppToText = (app,text) => {
     return ret;
 };
 
-const processApparatus = (str) => {
+const processApparatus = (str,curDoc) => {
     const apparatus = str.trim().split(/[Ɛ#•$]/).map(l => {
         if(l === '') return null;
 
         const clean = l.trim();
-        const placeres = /^(\d+-?)([a-z\-]+)/.exec(clean);
+        const placeres = /^(\d+-?)([a-z\-]*)/.exec(clean);
         if(!placeres) {
             const note = curDoc.createElementNS('http://www.tei-c.org/ns/1.0','note');
             note.append(clean.replace(/[\[\]]/g,''));
@@ -144,7 +146,8 @@ const processApparatus = (str) => {
 
         const line = placeres[1];
         const cirs = placeres[2];
-
+        //cirs currently not used right now
+        
         const entries = clean.split(';').map(e => {
             const witstart = e.split('').reverse().join('').match(/[\u0b80-\u0bff_><‡\[\]]/);
             if(!witstart) return {error: `Error parsing "${e}".`};
