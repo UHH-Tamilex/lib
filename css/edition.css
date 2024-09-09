@@ -159,7 +159,8 @@ span.invisible {
 #wordsplitbutton, #apparatusbutton {
     position: relative;
     border: 1px solid black;
-    padding: 0;
+    padding: 5px;
+    line-height: 0.7rem;
     width: fit-content;
     cursor: pointer;
     display: none;
@@ -174,7 +175,7 @@ span.invisible {
     display: none;
 }
 #wordsplitsvg, #metricalsvg, #apparatussvg, #translationsvg {
-    padding: 5px 4px 1px 5px;
+    /*padding: 5px 4px 1px 5px;*/
 }
 
 #lookupwindow {
