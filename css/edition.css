@@ -160,10 +160,12 @@ span.invisible {
     position: relative;
     border: 1px solid black;
     padding: 5px;
-    line-height: 0.7rem;
-    width: fit-content;
     cursor: pointer;
     display: none;
+    height: 36px;
+    width: 34px;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 #wordspliteditbutton {
     position: absolute;
