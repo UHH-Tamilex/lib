@@ -264,6 +264,16 @@ blockquote > .cb.diplo:first-child::after {
       text-decoration: none !important;
 }
 
+.text-block {
+    counter-reset: footnote 0;
+}
+
+.footnote.numbered::after {
+    content: counter(footnote);
+    counter-increment: footnote;
+    font-variant-position: super;
+}
+
 [data-anno] .anno-inline {
     display: none;
 }
