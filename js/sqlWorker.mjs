@@ -15,7 +15,7 @@ const sqlWorker = async (url) => {
         [sqlConfig],
         workerUrl.toString(),
         wasmUrl.toString(),
-        10 * 1024 * 1024
+        100 * 1024 * 1024
     );
 
     return worker;
