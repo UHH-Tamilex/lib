@@ -37,7 +37,7 @@ const lookup = async (e) => {
         window.open(`https://uhh-tamilex.github.io/lexicon/#${clean}`);
     }
     */
-    const word = e.target.closest('.word');
+    const word = e.target.closest('.word:not(.nolookup)');
     if(!word) return;
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'flex';
@@ -198,13 +198,20 @@ const lineCounter = (el) => {
     let count = 0;
     let cur = walker.currentNode;
     while(cur) {
-        if(cur.nodeType === 1 &&
-           cur.classList.contains('choiceseg') && 
-           cur !== cur.parentNode.children[0]) {
+        if(cur.nodeType === 1) {
+            if(cur.classList.contains('choiceseg') && 
+               cur !== cur.parentNode.children[0]) {
                 cur = realNextSibling(walker);
                 continue;
+            }
+            /*
+            else if(cur.classList.contains('gap')) {
+                cur = realNextSibling(walker);
+                continue;
+            }
+            */
         }
-        if(cur.nodeType === 3)
+        else if(cur.nodeType === 3)
             count = count + cur.textContent.trim().replaceAll(/[\s\u00AD]/g,'').length;
         cur = walker.nextNode();
     }
@@ -271,6 +278,7 @@ const makeWord = (entry) => {
         annoel.innerHTML = annohtml;
         span.prepend(annoel);
     }
+    else span.classList.add('nolookup');
     const notes = entry.querySelectorAll('.note');
     for(const note of notes) {
         const noteel = document.createElement('span');
