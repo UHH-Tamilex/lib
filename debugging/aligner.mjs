@@ -274,17 +274,20 @@ const formatAlignment = (arr) => {
     return `<interp type="alignment" select="0">${flatarrs[0]},${flatarrs[1]}</interp>`;
 };
 
+const makeGaps = str => str.replaceAll(/‡+/g,m => `<gap quantity="${m.length}" unit="character" reason="lost"/>`);
+
 const makeEntries = (arr) => {
     const formatWord = (w) => {
-        return w.replace(/([~+()])/g,'<pc>$1</pc>')
-                //.replace(/['’*]$/,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
-                .replaceAll(/['’*]/g,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
-                .replaceAll(/\[(.+?)\]/g,'<supplied>$1</supplied>');
-                //.replaceAll(/\[(.+?)\]/g,'$1');
+        const clean = w.replace(/([~+()])/g,'<pc>$1</pc>')
+                     //.replace(/['’*]$/,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
+                       .replaceAll(/['’*]/g,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
+                       .replaceAll(/\[(.+?)\]/g,'<supplied>$1</supplied>');
+                     //.replaceAll(/\[(.+?)\]/g,'$1');
+        return makeGaps(clean);
     };
 
     const formatEntry = (e) => {
-        const bare = e.bare ? `<form type="simple">${e.bare}</form>\n` : '';
+        const bare = e.bare ? `<form type="simple">${makeGaps(e.bare)}</form>\n` : '';
         const affixrole = e.affixrole ? `<gramGrp><gram type="role">${e.affixrole}</gram></gramGrp>` : '';
         const affix = e.affix ? `<gramGrp type="affix"><m>${e.affix}</m>${affixrole}</gramGrp>\n` : '';
         const gram = e.gram ? '<gramGrp>' + 
@@ -292,8 +295,9 @@ const makeEntries = (arr) => {
                     '</gramGrp>'
                 : '';
         const particle = e.particle ? `<gramGrp type="particle"><m>${e.particle}</m></gramGrp>\n` : '';
+        const def = e.translation ? `\n<def>${e.translation.replaceAll(/_/g,' ')}</def>` : '';
         //return `<entry>\n<form>${formatWord(e.word)}</form>\n<def>${e.translation.replaceAll(/_/g,' ')}</def>\n${bare}${affix}${gram}${particle}${e.wordnote ? formatNote(e.wordnote) : ''}${e.transnote ? formatNote(e.transnote) : ''}</entry>`;
-        return `<entry>\n<form>${formatWord(e.word)}</form>\n<def>${e.translation.replaceAll(/_/g,' ')}</def>\n${bare}${affix}${gram}${particle}${e.wordnote ? '\n' + e.wordnote : ''}</entry>`;
+        return `<entry>\n<form>${formatWord(e.word)}</form>${def}\n${bare}${affix}${gram}${particle}${e.wordnote ? '\n' + e.wordnote : ''}</entry>`;
     };
 
     return arr.map(obj => {

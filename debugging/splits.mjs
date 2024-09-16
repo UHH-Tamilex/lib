@@ -87,9 +87,12 @@ const getGrammar = (entry) => {
     return ret.length > 0 ? '(' + ret.join('|') + ')' : '';
 };
 const processEntry = (entry) => {
-   return {
-        tamil: entry.querySelector('form').textContent.trim().replaceAll(/\(u\)/g,'*'),
-        english: entry.querySelector('def').textContent.trim().replaceAll(/\s+/g,'_') + getGrammar(entry),
+    const def = entry.querySelector('def');
+    const grammar = getGrammar(entry);
+    return {
+        tamil: getEditionText(entry.querySelector('form')).trim().replaceAll(/\(u\)/g,'*'),
+        english: def ? def.textContent.trim().replaceAll(/\s+/g,'_') + grammar : 
+                       grammar || '()',
         note: entry.querySelector('note')
    };
 };
@@ -124,11 +127,14 @@ const countWalker = el => {
     let count = 0;
     let cur = walker.currentNode;
     while(cur) {
-        if(cur.nodeType === 1 &&
-           cur.nodeName === 'choice' && 
-           cur !== cur.parentNode.children[0]) {
+        if(cur.nodeType === 1) {
+            if(cur.nodeName === 'choice' && 
+               cur !== cur.parentNode.children[0]) {
                 cur = realNextSibling(walker);
                 continue;
+            }
+            else if(cur.nodeName === 'gap')
+                count = count + parseInt(cur.getAttribute('quantity') || 1);
         }
         if(cur.nodeType === 3)
             count = count + cur.textContent
@@ -271,6 +277,15 @@ const getNotes = str => {
     return [...tempdoc.documentElement.children].map(c => serializer.serializeToString(c));
 };
 
+const getEditionText = el => {
+    const clone = el.cloneNode(true);
+    for(const gap of clone.querySelectorAll('gap')) {
+        const quantity = gap.getAttribute('quantity') || 1;
+        gap.replaceWith('‡'.repeat(quantity));
+    }
+    return clone.textContent;
+};
+
 const showSplits = async () => {
     if(!curDoc) await loadDoc();
     if(noteCM) noteCM.save();
@@ -319,7 +334,7 @@ const showSplits = async () => {
     */
     const textblock = curDoc.querySelector(`[*|id="${blockid}"]`);
     const edition = textblock.querySelector('[type="edition"]');
-    let text = edition ? edition.textContent : textblock.textContent;
+    let text = edition ? getEditionText(edition) : getEditionText(textblock);
     text = text.replaceAll(/[\s\n]/g,'');
 
     const notes = getNotes(inputs[2].value);
