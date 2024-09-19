@@ -488,7 +488,7 @@ const entryLength = el => {
     return gaplen + firstForm.textContent.trim().length;
 };
 
-const findlines = (doc,id,standOff) => {
+const findLines = (doc,id,standOff) => {
     const lines = [...doc.querySelectorAll(`[*|id="${id}"] [type="edition"] l`)];
     const linecounts = countLines(lines);
     
