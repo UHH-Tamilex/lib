@@ -318,8 +318,9 @@ const findLemma = (curword, candidates) => {
     //return { islemma: candidates[0].islemma, fromlemma: candidates[0].fromlemma };
     return { islemma: null, fromlemma: null };
 };
-const isSameLine = (linenum, el) => {
-    return linenum === el.closest('[linenum]').getAttribute('linenum') ? '' : ' /';
+const isSameLine = (linenum, el,postspace) => {
+    return linenum === el.closest('[linenum]').getAttribute('linenum') ? '' : 
+        postspace ? '/ ' : ' /';
 };
 
 const getPrevEntry = (entries,n,linenum) => {
@@ -351,10 +352,10 @@ const getNextEntry = (entries,n,linenum) => {
 
             const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstElementChild : nextEl;
             return nextEntry ? 
-                ' ' + isSameLine(linenum,nextEntry) + cleanForm(nextEntry.querySelector('form')) + ellipsis :
+                ' ' + isSameLine(linenum,nextEntry,true) + cleanForm(nextEntry.querySelector('form')) + ellipsis :
                 '';
         }
-        return ' ' + isSameLine(linenum,entries[n+1]) + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
+        return ' ' + isSameLine(linenum,entries[n+1],true) + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
     }
     return '';
 };
