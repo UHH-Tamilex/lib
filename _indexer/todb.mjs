@@ -339,7 +339,7 @@ const getPrevEntry = (entries,n,linenum) => {
     }
     return '';
 };
-const getNextEntry = (entries,n) => {
+const getNextEntry = (entries,n,linenum) => {
     if(n < entries.length-1) {
         const ellipsis = n < entries.length-2 ? '…' : '';
 
@@ -354,7 +354,7 @@ const getNextEntry = (entries,n) => {
                 ' ' + isSameLine(linenum,nextEntry) + cleanForm(nextEntry.querySelector('form')) + ellipsis :
                 '';
         }
-        return ' ' + isSameLine(linenum, entries[n+1]) + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
+        return ' ' + isSameLine(linenum,entries[n+1]) + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
     }
     return '';
 };
