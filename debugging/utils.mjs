@@ -10,7 +10,7 @@ const realNextSibling = (walker) => {
     return null;
 };
 const countWalker = el => {
-    const walker = el.ownerDocument.createTreeWalker(el,NodeFilter.SHOW_ALL);
+    const walker = el.ownerDocument.createTreeWalker(el,0xFFFFFFFF);
     let count = 0;
     let cur = walker.currentNode;
     while(cur) {
