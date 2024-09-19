@@ -195,7 +195,12 @@ const go = () => {
 };
 
 const cleanForm = el => {
-    return el.textContent.trim()
+    const clone = el.cloneNode(true);
+    for(const gap of clone.querySelectorAll('gap')) {
+        const quantity = gap.getAttribute('quantity') || 1;
+        gap.replaceWith('‡'.repeat(quantity));
+    }
+    return clone.textContent.trim()
                          .replaceAll(/\([ui]\)/g,'u')
                          .replaceAll(/[+~]/g,'');
 };
@@ -252,12 +257,14 @@ const getRoles = roles => {
 };
 
 const prepWordEntry = entry => {
+    const defel = entry.querySelector('def');
+    if(!defel) return null;
+    const def = defel.innerHTML.trim();
     const form = entry.querySelector('form');
     const clean = cleanForm(form);
     const simple = entry.querySelector('form[type="simple"]')?.innerHTML.trim();
     const particle = entry.querySelector('gramGrp[type="particle"]');
     const roles = entry.querySelectorAll('gram[type="role"]'); 
-    const def = entry.querySelector('def').innerHTML.trim();
 
     const ret = {
         form: simple || clean,
@@ -483,6 +490,7 @@ const addToDb = (fname,db) => {
         for(let n=0;n<entries.length;n++) {
             const entry = entries[n];
             const ins = prepWordEntry(entry);
+            if(ins === null) continue;
             const prev = getPrevEntry(entries,n);
             const next = getNextEntry(entries,n);
             const context = prev + cleanForm(entry.querySelector('form')) + next;
