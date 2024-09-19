@@ -4,7 +4,7 @@ import Process from 'process';
 import Jsdom from 'jsdom';
 import sqlite3 from 'better-sqlite3';
 import {Sanscript} from '../js/sanscript.mjs';
-import Splitter from '../debugging/splits.mjs';
+import {decodeRLE,matchCounts,countLines} from '../debugging/utils.mjs';
 
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
@@ -490,12 +490,12 @@ const entryLength = el => {
 
 const findlines = (doc,id,standOff) => {
     const lines = [...doc.querySelectorAll(`[*|id="${id}"] [type="edition"] l`)];
-    const linecounts = Splitter.countLines(lines);
+    const linecounts = countLines(lines);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');
-    const alignment = alignmentel.textContent.trim().split(',').map(s => Splitter.decodeRLE(s));
+    const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
 
-    const realcounts = Splitter.matchCounts(alignment,linecounts);
+    const realcounts = matchCounts(alignment,linecounts);
     const entries = [...standOff.querySelectorAll('entry, superEntry')];
     let linecount = 0;
     let wordcount = 0;

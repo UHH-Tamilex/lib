@@ -552,7 +552,6 @@ const makeEntries = (list) => {
 const Splitter = {
     addWordSplits: addWordSplits,
     countLines: countLines,
-    matchCounts: matchCounts,
     decodeRLE: decodeRLE,
     setTransliterator: setTransliterator
 };
