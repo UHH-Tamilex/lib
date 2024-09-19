@@ -4,6 +4,7 @@ import Process from 'process';
 import Jsdom from 'jsdom';
 import sqlite3 from 'better-sqlite3';
 import {Sanscript} from '../js/sanscript.mjs';
+import Splitter from '../debugging/splits.mjs';
 
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
@@ -317,7 +318,11 @@ const findLemma = (curword, candidates) => {
     //return { islemma: candidates[0].islemma, fromlemma: candidates[0].fromlemma };
     return { islemma: null, fromlemma: null };
 };
-const getPrevEntry = (entries,n) => {
+const isSameLine = (linenum, el) => {
+    return linenum === el.closest('[linenum]').getAttribute('linenum') ? '' : ' /';
+};
+
+const getPrevEntry = (entries,n,linenum) => {
     if(n > 0) {
         const ellipsis = n > 1 ? '…' : '';
 
@@ -328,9 +333,9 @@ const getPrevEntry = (entries,n) => {
                 return '';
 
             const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastElementChild : prevEl;
-            return ellipsis + cleanForm(prevEntry.querySelector('form')) + ' ';
+            return ellipsis + cleanForm(prevEntry.querySelector('form')) + isSameLine(linenum,prevEntry) + ' ';
         }
-        return ellipsis + cleanForm(entries[n-1].querySelector('form')) + ' ';
+        return ellipsis + cleanForm(entries[n-1].querySelector('form')) + isSameLine(linenum,entries[n-1]) + ' ';
     }
     return '';
 };
@@ -346,10 +351,10 @@ const getNextEntry = (entries,n) => {
 
             const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstElementChild : nextEl;
             return nextEntry ? 
-                ' ' + cleanForm(nextEntry.querySelector('form')) + ellipsis :
+                ' ' + isSameLine(linenum,nextEntry) + cleanForm(nextEntry.querySelector('form')) + ellipsis :
                 '';
         }
-        return ' ' + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
+        return ' ' + isSameLine(linenum, entries[n+1]) + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
     }
     return '';
 };
@@ -474,6 +479,36 @@ const getContext = (entries,from,to,textAlignment) => {
     
 };
 */
+
+const entryLength = el => {
+    const firstForm = el.querySelector('form');
+    const gaplen = [...firstForm.querySelectorAll('gap')].reduce(
+       (acc,cur) => acc + cur.getAttribute('quantity') || 1,
+    0);
+    return gaplen + firstForm.textContent.trim().length;
+};
+
+const findlines = (doc,id,standOff) => {
+    const lines = [...doc.querySelectorAll(`[*|id="${id}"] [type="edition"] l`)];
+    const linecounts = Splitter.countLines(lines);
+    
+    const alignmentel = standOff.querySelector('interp[select="0"]');
+    const alignment = alignmentel.textContent.trim().split(',').map(s => Splitter.decodeRLE(s));
+
+    const realcounts = Splitter.matchCounts(alignment,linecounts);
+    const entries = [...standOff.querySelectorAll('entry, superEntry')];
+    let linecount = 0;
+    let wordcount = 0;
+    for(let n=0; n<entries.length;n++) {
+        entries[n].setAttribute('linenum',linecount);
+        wordcount = wordcount + entryLength(entries[n]);
+        if(wordcount >= realcounts[0]) {
+            linecount = linecount + 1;
+            realcounts.shift();
+        }
+    }
+};
+
 const addToDb = (fname,db) => {
     console.log(fname);
     const basename = Path.basename(fname);
@@ -484,15 +519,17 @@ const addToDb = (fname,db) => {
     const standOffs = doc.querySelectorAll('standOff[type="wordsplit"]');
     for(const standOff of standOffs) {
         const citation = standOff.getAttribute('corresp').replace(/^#/,'');
+        findLines(doc,citation,standOff);
         const entries = standOff.querySelectorAll('entry:has(> form)');
         //const textAlignment = restoreAlignment(doc.getElementById(citation), standOff);
-
+        
         for(let n=0;n<entries.length;n++) {
             const entry = entries[n];
             const ins = prepWordEntry(entry);
+            const linenum = entry.closest('[linenum]').getAttribute('linenum');
             if(ins === null) continue;
-            const prev = getPrevEntry(entries,n);
-            const next = getNextEntry(entries,n);
+            const prev = getPrevEntry(entries,n,linenum);
+            const next = getNextEntry(entries,n,linenum);
             const context = prev + cleanForm(entry.querySelector('form')) + next;
             /*
             const from = n > 0 ? n - 1 : n;
