@@ -118,7 +118,7 @@
     <tst:entry key="newa">newa</tst:entry>
     <tst:entry key="pala">pala</tst:entry>
     <tst:entry key="sarada">sarada</tst:entry>
-    <tst:entry key="sinhalese">sinhalese</tst:entry>
+    <tst:entry key="sinhala">sinhala</tst:entry>
     <tst:entry key="telugu">telugu</tst:entry>
     <tst:entry key="tamil">tamil</tst:entry>
     <tst:entry key="dbucan">uchen</tst:entry>
@@ -337,13 +337,15 @@
 
 <tst:entityrend>
     <tst:entry key="prereform">hlig</tst:entry>
-    <tst:entry key="below-base">hlig</tst:entry>
-    <tst:entry key="post-base">hlig</tst:entry>
+    <tst:entry key="below-base">dlig</tst:entry>
+    <tst:entry key="post-base">dlig</tst:entry>
+    <tst:entry key="vowel-sign">aalt</tst:entry>
 </tst:entityrend>
 <tst:rendnames>
     <tst:entry key="prereform">prereform</tst:entry>
     <tst:entry key="below-base">below-base ligature</tst:entry>
     <tst:entry key="post-base">post-base ligature</tst:entry>
+    <tst:entry key="vowel-sign">vowel sign</tst:entry>
 </tst:rendnames>
 
 <tst:entitynames>
