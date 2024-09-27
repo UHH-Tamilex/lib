@@ -149,7 +149,7 @@ const processApparatus = (str,curDoc) => {
         //cirs currently not used right now
         
         const entries = clean.split(';').map(e => {
-            const witstart = e.split('').reverse().join('').match(/[\u0b80-\u0bff_><‡\[\]]/);
+            const witstart = e.split('').reverse().join('').match(/[\u0b80-\u0bff_\/><‡\[\]]/);
             if(!witstart) return {error: `Error parsing "${e}".`};
             const rdg = formatReading(e.slice(0,`-${witstart.index}`));
             const wits = splitWitnesses(e.slice(`-${witstart.index}`));
@@ -196,7 +196,8 @@ const formatReading = (str) => {
          .trim()
          .replace(/‡+/g,(match) => `<gap reason="lost" quantity="${match.length}" unit="character"/>`)
          .replace(/<sic>(_+)<\/sic>/g,(match,p1) => `<space quantity="${p1.length}" unit="character"/>`)
-         .replace(/\[/g,'<sic>').replace(/\]/g,'</sic>');
+         .replace(/\[/g,'<sic>').replace(/\]/g,'</sic>')
+         .replace(/\//g,'<note xml:lang="en">om.</note>');
 };
 
 export default alignApparatus;
