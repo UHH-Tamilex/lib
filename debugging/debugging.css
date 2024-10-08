@@ -12,12 +12,13 @@
 }
 
 .popup {
-    width: 75%;
+    width: 100%;
     min-height: 50%;
     height: fit-content;
-    max-height: 80%;
+    max-height: 100vh;
     background: #f5f2f0;
     padding: 1rem;
+    margin: 1rem;
     font-size: 1.1rem;
     white-space: pre;
     display: none;
