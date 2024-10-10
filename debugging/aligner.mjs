@@ -1,6 +1,7 @@
 import needlemanWunsch from './needlemanwunsch.mjs';
 import dbQuery from './dbquery.mjs';
 import createSqlWorker from '../js/sqlWorker.mjs';
+import {gramAbbreviations} from './abbreviations.mjs';
 
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
@@ -74,72 +75,6 @@ const caseAffixes = [
     }]
 ];
 caseAffixes.sort((a,b) => b[0].length - a[0].length);
-
-const gramAbbreviations = [
-    ['abl.','ablative'],
-    ['abs.','absolutive'],
-    ['acc.','accusative'],
-    ['adj.','adjective'],
-    ['adv.','adverb'],
-    ['caus.','causative'],
-    ['conc.','concessive'],
-    ['cond.','conditional'],
-    ['comp.','comparative'],
-    ['dat.','dative'],
-    ['den.','denominative'],
-    ['f.','feminine'],
-    ['f.sg.','feminine singular'],
-    ['f.pl.','feminine plural'],
-    ['f.v.','finite verb'],
-    ['gen.','genitive'],
-    ['h.','honorific'],
-    ['1.','first person'],
-    ['2.','second person'],
-    ['3.','third person'],
-    ['hab.fut.','habitual future'],
-    ['i.a.','imperfect aspect'],
-    ['id.','ideophone'],
-    ['inf.','infinitive'],
-    ['inst.','instrumental'],
-    ['inter.pron.','interrogative pronoun'],
-    ['ipt.','imperative'],
-    ['loc.','locative'],
-    ['m.','masculine'],
-    ['m.sg.','masculine singular'],
-    ['m.pl.','masculine plural'],
-    ['muṟ.','muṟṟeccam'],
-    ['n.','noun'],
-    ['n.sg.','neuter singular'],
-    ['n.pl.','neuter plural'],
-    ['neg.','negative'],
-    ['obl.','oblique'],
-    ['opt.','optative'],
-    ['p.a.','perfective aspect'],
-    ['p.n.','proper name'],
-    ['part.n.','participial noun'],
-    ['pey.','peyareccam'],
-    ['pl.','plural'],
-    ['post.','postposition'],
-    ['sub.','subjunctive'],
-    ['pron.','pronoun'],
-    ['pron.n.','pronominalised noun'],
-    ['r.n.','root noun'],
-    ['sg.','singular'],
-    ['soc.','sociative'],
-    ['suff.','suffix'],
-    ['v.n.','verbal noun'],
-    ['v.r.','verbal root'],
-    ['v.r.adj.','verbal root as adjective'],
-    ['v.r.ger.','verbal root as gerundive'],
-    ['v.r.ipt.','verbal root as imperative'],
-    ['v.r.inf.','verbal root as infinitive'],
-    ['v.r.pey.','verbal root as peyareccam'],
-    ['v.r.pey.p.a.','verbal root as peyareccam perfective aspect'],
-    ['v.r.pey.i.a.','verbal root as peyareccam imperfective aspect'],
-    ['voc.','vocative']
-];
-
-gramAbbreviations.sort((a,b) => b[0].length - a[0].length);
 
 const gramKeys = gramAbbreviations.map(a => a[0]);
 
