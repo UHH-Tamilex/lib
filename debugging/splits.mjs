@@ -362,7 +362,7 @@ const showSplits = async () => {
     output.innerHTML = '';
     output.appendChild(res);
     newDoc = curDoc.cloneNode(true);
-    let curStandOff = newDoc.querySelector(`standOff[corresp="#${blockid}"]`);
+    let curStandOff = newDoc.querySelector(`standOff[type="wordsplit"][corresp="#${blockid}"]`);
     if(!curStandOff) {
         curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
         curStandOff.setAttribute('corresp',`#${blockid}`);
