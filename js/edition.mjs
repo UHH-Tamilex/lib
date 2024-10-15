@@ -312,65 +312,103 @@ const applymarkup = (standoff) => {
     
     const cache = new Map();
 
-    const lines = [...target.querySelectorAll('.l')];
-    const linecounts = countLines(lines);
-    
     const alignmentel = standoff.querySelector('.alignment[data-select="0"]');
     const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
     target.dataset.alignment = alignment.join(',');
 
-    const realcounts = matchCounts(alignment,linecounts);
-
     const entries = [...standoff.querySelectorAll(':scope > .fs')];
-    let wordcount = 0;
-    let linenum = 0;
-    cache.set(lines[linenum],lines[linenum].cloneNode(true));
-    lines[linenum].innerHTML = '';
-    for(const entry of entries) {
-        if(wordcount >= realcounts[linenum]) {
-            linenum = linenum + 1;
-            cache.set(lines[linenum],lines[linenum].cloneNode(true));
-            lines[linenum].innerHTML = '';
-        }
 
-        if(entry.classList.contains('superentry')) {
-            const choice = document.createElement('span');
-            choice.className = 'choice';
-            if(entry.classList.contains('ambiguous'))
-                choice.classList.add('inline');
+    const lines = [...target.querySelectorAll('.l')];
+    if(lines.length > 0) {
+        const linecounts = countLines(lines);
+        const realcounts = matchCounts(alignment,linecounts);
 
-            for(const seg of entry.querySelectorAll(':scope > .fs')) {
-                const segel = document.createElement('span');
-                segel.className = 'choiceseg';
-                const subentries = seg.querySelectorAll('.fs');
-                if(subentries.length > 0) {
-                    for(const subentry of subentries) {
-                        const word = makeWord(subentry);
+        let wordcount = 0;
+        let linenum = 0;
+        cache.set(lines[linenum],lines[linenum].cloneNode(true));
+        lines[linenum].innerHTML = '';
+        for(const entry of entries) {
+            if(wordcount >= realcounts[linenum]) {
+                linenum = linenum + 1;
+                cache.set(lines[linenum],lines[linenum].cloneNode(true));
+                lines[linenum].innerHTML = '';
+            }
+
+            if(entry.classList.contains('superentry')) {
+                const choice = document.createElement('span');
+                choice.className = 'choice';
+                if(entry.classList.contains('ambiguous'))
+                    choice.classList.add('inline');
+
+                for(const seg of entry.querySelectorAll(':scope > .fs')) {
+                    const segel = document.createElement('span');
+                    segel.className = 'choiceseg';
+                    const subentries = seg.querySelectorAll('.fs');
+                    if(subentries.length > 0) {
+                        for(const subentry of subentries) {
+                            const word = makeWord(subentry);
+                            segel.appendChild(word);
+                            //if(seg.dataset.select === '0')
+                            if(seg === seg.parentElement.firstElementChild)
+                                wordcount = wordcount + wordLength(word);
+                        }
+                    }
+                    else {
+                        const word = makeWord(seg);
                         segel.appendChild(word);
                         //if(seg.dataset.select === '0')
                         if(seg === seg.parentElement.firstElementChild)
                             wordcount = wordcount + wordLength(word);
                     }
+                    choice.appendChild(segel);
                 }
-                else {
-                    const word = makeWord(seg);
-                    segel.appendChild(word);
-                    //if(seg.dataset.select === '0')
-                    if(seg === seg.parentElement.firstElementChild)
-                        wordcount = wordcount + wordLength(word);
-                }
-                choice.appendChild(segel);
+                lines[linenum].appendChild(choice);
             }
-            lines[linenum].appendChild(choice);
-        }
 
-        else {
-            const word = makeWord(entry);
-            lines[linenum].appendChild(word);
-            wordcount = wordcount + wordLength(word);
+            else {
+                const word = makeWord(entry);
+                lines[linenum].appendChild(word);
+                wordcount = wordcount + wordLength(word);
+            }
+        }
+    } else {
+        cache.set(target,target.cloneNode(true));
+        target.innerHTML = '';
+        for(const entry of entries) {
+
+            if(entry.classList.contains('superentry')) {
+                const choice = document.createElement('span');
+                choice.className = 'choice';
+                if(entry.classList.contains('ambiguous'))
+                    choice.classList.add('inline');
+
+                for(const seg of entry.querySelectorAll(':scope > .fs')) {
+                    const segel = document.createElement('span');
+                    segel.className = 'choiceseg';
+                    const subentries = seg.querySelectorAll('.fs');
+                    if(subentries.length > 0) {
+                        for(const subentry of subentries) {
+                            const word = makeWord(subentry);
+                            segel.appendChild(word);
+                            //if(seg.dataset.select === '0')
+                        }
+                    }
+                    else {
+                        const word = makeWord(seg);
+                        segel.appendChild(word);
+                        //if(seg.dataset.select === '0')
+                    }
+                    choice.appendChild(segel);
+                }
+                target.appendChild(choice);
+            }
+
+            else {
+                const word = makeWord(entry);
+                target.appendChild(word);
+            }
         }
     }
-
     cachedContent.set(target,cache);
 };
 
