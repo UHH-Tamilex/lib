@@ -111,7 +111,7 @@ const go = () => {
         'citation TEXT, ' +
         'filename TEXT' +
         ')').run();
-    const regex = new RegExp(`^${process.argv[2]}.+?\\.xml$`);
+    const regex = new RegExp(`^${process.argv[2]}.*\\.xml$`);
     Fs.readdir(dir,(err, files) => {
         if(err) return console.log(err);
         const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
