@@ -38,16 +38,17 @@ const wordLookup = async (word) => {
 };
 
 const formatCitations = citations => {
-    const link = c.line ? 
-        encodeURIComponent(`c.filename?highlight=[id="${c.siglum}"] l:nth-of-type[${c.line}]`)
-        : c.filename;
-    return '<table><tbody>' + citations.map(c =>
-`<tr>
+    return '<table><tbody>' + citations.map(c => {
+        const link = c.line ? 
+            encodeURIComponent(`c.filename?highlight=[id="${c.siglum}"] l:nth-of-type[${c.line}]`)
+            : c.filename;
+
+        return `<tr>
     <td><span class="msid" lang="en"><a href="${link}">${c.siglum}</a></span></td>
     <td><q lang="ta">${c.context}</q></td>
     <td>${c.translation ? '<span class="context-translation">'+c.translation+'</span>':''}</td>
     <td>${c.syntax ? ' <span class="syntax">'+c.syntax+'</span>':''}</td>
-</tr>`).join('\n') + '</tbody></table>';
+</tr>`;}).join('\n') + '</tbody></table>';
 };
 
 
