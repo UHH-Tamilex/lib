@@ -428,9 +428,10 @@ const removemarkup = (standoff) => {
 };
 
 const go = () => {
+    const searchparams = new URLSearchParams(window.location.search);
     if(document.getElementById('editionscript').dataset.debugging === 'true')
         Debugging = true;
-    else if((new URLSearchParams(window.location.search)).get('debugging') === 'true')
+    else if(searchparams.get('debugging') === 'true')
         Debugging = true;
 
     Splitter.setTransliterator(Transliterate);
@@ -501,7 +502,15 @@ const go = () => {
     }
     //wordsplit({target: analyzebutton});
     //cleanup(document);
-    
+   
+    const highlight = searchparams.get('highlight');
+    if(highlight) {
+        const found = document.querySelector(highlight);
+        if(found) found.classList.add('lightlit');
+        document.addEventListener('click',() => {
+            found.classList.remove('lightlit');
+        },{once: true});
+    }
 
     if(document.querySelector('.app')) {
         ApparatusViewer.init();

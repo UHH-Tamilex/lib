@@ -51,6 +51,7 @@ section div.wide {
 
 .lightlit {
     background: rgba(255,255,128,0.5);
+    width: fit-content;
 }
 /*
 .app-inline:hover .rdgs-inline, .app-inline:hover .lem-wit {
