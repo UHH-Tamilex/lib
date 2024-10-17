@@ -109,6 +109,7 @@ const go = () => {
         'enclitic TEXT, ' +
         'context TEXT, ' +
         'citation TEXT, ' +
+        'line INTEGER, ' +
         'filename TEXT' +
         ')').run();
     const regex = new RegExp(`^${process.argv[2]}.*\\.xml$`);
@@ -473,8 +474,8 @@ const addToDb = (fname,db) => {
             const fromlemma = rows[0]?.fromlemma || null;
             */
 
-            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: `${citation}.${linenum}`, filename: basename},ins.roles);
-            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @voice, @syntax, @particlefunctions, @rootnoun, @proclitic, @enclitic, @context, @citation, @filename)').run(dbobj);
+            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: linenum, filename: basename},ins.roles);
+            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @type, @number, @gender, @nouncase, @person, @aspect, @voice, @syntax, @particlefunctions, @rootnoun, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(fromlemma)?.word || ins.form;
             const lemmadef = islemma ? worddef : 
                 fromlemma ? fulldb.prepare('SELECT definition FROM dictionary WHERE islemma = ?').get(fromlemma)?.definition :
