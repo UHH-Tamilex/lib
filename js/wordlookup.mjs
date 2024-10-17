@@ -40,7 +40,7 @@ const wordLookup = async (word) => {
 const formatCitations = citations => {
     return '<table><tbody>' + citations.map(c => {
         const link = c.line ? 
-            encodeURIComponent(`c.filename?highlight=[id="${c.siglum}"] l:nth-of-type[${c.line}]`)
+            encodeURIComponent(`${c.filename}?highlight=[id="${c.siglum}"]%20l:nth-of-type[${c.line}]`)
             : c.filename;
 
         return `<tr>
