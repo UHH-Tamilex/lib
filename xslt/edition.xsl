@@ -479,6 +479,7 @@
             <xsl:attribute name="href"><xsl:value-of select="$apparatus/@source"/></xsl:attribute>
             <xsl:attribute name="data-anno">Textual alignment of this section</xsl:attribute>
             <xsl:attribute name="class">alignment-pointer</xsl:attribute>
+            <xsl:attribute name="lang">zxx</xsl:attribute>
                 <svg width="235.08" height="188" version="1.1" viewBox="0 0 235.08 188" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
                 <style type="text/css">
                     .st0{fill:none;stroke:rgb(168,81,16);stroke-width:10;stroke-linecap:round;stroke-linejoin:round;}
