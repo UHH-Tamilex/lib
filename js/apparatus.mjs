@@ -384,6 +384,30 @@ const Events = {
             switchReading(rdg,msid.dataset.id);
             msid.addEventListener('mouseout',restoreReading.bind(null,rdg),{once: true});
         }
+        const anchor = e.target.closest('.anchor');
+        if(anchor) {
+            const note = document.querySelector(`[data-target='#${anchor.id}']`);
+            if(note) {
+                anchor.classList.add('highlit');
+                note.classList.add('highlit');
+                document.addEventListener('mouseout',() => {
+                    anchor.classList.remove('highlit');
+                    note.classList.remove('highlit');
+                },{once: true});
+            }
+        }
+        const note = e.target.closest('.anchored-note');
+        if(note) {
+            const anchor = document.querySelector(note.dataset.target);
+            if(anchor) {
+                anchor.classList.add('highlit');
+                note.classList.add('highlit');
+                document.addEventListener('mouseout',() => {
+                    anchor.classList.remove('highlit');
+                    note.classList.remove('highlit');
+                },{once: true});
+            }
+        }
     },
 
     docMouseout(e) {

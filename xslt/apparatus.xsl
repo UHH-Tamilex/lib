@@ -394,4 +394,10 @@
     <xsl:text> </xsl:text>
 </xsl:template>
 
+<xsl:template match="x:anchor">
+    <span>
+        <xsl:attribute name="class">anchor</xsl:attribute>
+        <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
+    </span>
+</xsl:template>
 </xsl:stylesheet>
