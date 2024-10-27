@@ -267,19 +267,23 @@
         <xsl:apply-templates/>
         <xsl:variable name="id"><xsl:text>#</xsl:text><xsl:value-of select="@xml:id"/></xsl:variable>
         <xsl:variable name="apparatus" select="//x:standOff[@type='apparatus' and @corresp=$id]"/>
-        <xsl:if test="$apparatus">
-            <xsl:call-template name="apparatus2">
-                <xsl:with-param name="apparatus" select="$apparatus"/>
-            </xsl:call-template>
-        </xsl:if>
-        <xsl:if test=".//x:app">
-            <div>
-                <xsl:attribute name="class">apparatus-block</xsl:attribute>
-                <xsl:call-template name="lang"/>
-                <xsl:attribute name="style">display: none;</xsl:attribute>
-                <xsl:call-template name="apparatus"/>
-            </div>
-        </xsl:if>
+        <xsl:variable name="parallels" select="//x:standOff[@type='parallels' and @corresp=$id]"/>
+        <xsl:choose>
+            <xsl:when test="$apparatus">
+                <xsl:call-template name="apparatus2">
+                    <xsl:with-param name="apparatus" select="$apparatus"/>
+                    <xsl:with-param name="parallels" select="$parallels"/>
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:when test=".//x:app">
+                <div>
+                    <xsl:attribute name="class">apparatus-block</xsl:attribute>
+                    <xsl:call-template name="lang"/>
+                    <xsl:attribute name="style">display: none;</xsl:attribute>
+                    <xsl:call-template name="apparatus"/>
+                </div>
+            </xsl:when>
+        </xsl:choose>
     </xsl:element>
 </xsl:template>
 <xsl:template match="x:div/x:p">
@@ -495,8 +499,30 @@
                 </svg>
         </xsl:element>
     </xsl:if>
+    <xsl:if test="$parallels">
+        <xsl:call-template name="notesblock">
+            <xsl:with-param name="standOff" select="$parallels"/>
+        </xsl:call-template>
+    </xsl:if>
     </xsl:element>
 </xsl:template>
+
+<xsl:template name="notesblock">
+    <xsl:param name="standOff"/>
+    <xsl:element name="hr">
+        <xsl:attribute name="class">apparatus-divider</xsl:attribute>
+    </xsl:element>
+    <xsl:for-each select="$standOff/x:note">
+        <span class="anchored-note">
+            <xsl:attribute name="data-target">
+                    <xsl:value-of select="@target"/>
+            </xsl:attribute>
+            <xsl:call-template name="lang"/>
+            <xsl:apply-templates/>
+        </span>
+    </xsl:for-each>
+</xsl:template>
+
 <xsl:template match="x:standOff/x:listApp">
     <xsl:for-each select="x:app">
         <xsl:call-template name="app"/>
