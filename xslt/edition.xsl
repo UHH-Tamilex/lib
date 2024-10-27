@@ -473,6 +473,7 @@
 
 <xsl:template name="apparatus2">
     <xsl:param name="apparatus"/>
+    <xsl:param name="parallels"/>
     <xsl:element name="div">
         <xsl:attribute name="class">apparatus-block</xsl:attribute>
         <xsl:attribute name="style">display: none;</xsl:attribute>
