@@ -73,7 +73,7 @@ const init = function() {
 };
 
 const findCorresp = (corresps) => {
-    const str = corresps.map(c => `[data-corresp='${c}']`).join(' ');
+    const str = corresps.map(c => `[data-corresp~='${c}']`).join(' ');
     const el = document.querySelector(str);
     return el || false;
 };

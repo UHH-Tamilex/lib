@@ -525,8 +525,11 @@
 </xsl:template>
 
 <xsl:template match="x:standOff/x:listApp">
+    <xsl:variable name="corresp" select="translate(../@corresp,'#','')"/>
     <xsl:for-each select="x:app">
-        <xsl:call-template name="app"/>
+        <xsl:call-template name="app">
+            <xsl:with-param name="corresp" select="$corresp"/>
+        </xsl:call-template>
     </xsl:for-each>
 </xsl:template>
 
@@ -558,11 +561,14 @@
 </xsl:template>
 
 <xsl:template name="app">
+    <xsl:param name="corresp"/>
     <xsl:element name="span">
         <xsl:attribute name="class">app</xsl:attribute>
         <xsl:choose>
             <xsl:when test="x:lem">
-                <xsl:call-template name="lemma"/>
+                <xsl:call-template name="lemma">
+                    <xsl:with-param name="corresp" select="$corresp"/>
+                </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
                 <span class="lem lem-anchor">*</span>
@@ -571,7 +577,9 @@
         <xsl:if test="x:rdg | x:rdgGrp">
             <span>
                 <xsl:for-each select="./x:rdg | ./x:rdgGrp">
-                    <xsl:call-template name="reading"/>
+                    <xsl:call-template name="reading">
+                        <xsl:with-param name="corresp" select="$corresp"/>
+                    </xsl:call-template>
                 </xsl:for-each>
             </span>
         </xsl:if>
@@ -583,6 +591,7 @@
     <xsl:text> </xsl:text>
 </xsl:template>
 <xsl:template name="lemma">
+    <xsl:param name="corresp"/>
     <!--xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/-->
     <!--xsl:if test="$debugging = 'true'">
         <xsl:element name="span">
@@ -602,7 +611,7 @@
             <xsl:attribute name="class">lem-wit</xsl:attribute>
             <xsl:call-template name="splitwit">
                 <xsl:with-param name="mss" select="x:lem/@wit"/>
-                <!--xsl:with-param name="corresp" select="$corresp"/-->
+                <xsl:with-param name="corresp" select="$corresp"/>
             </xsl:call-template>
         </span>
     </xsl:if>
@@ -610,6 +619,7 @@
 </xsl:template>
 
 <xsl:template name="reading">
+    <xsl:param name="corresp"/>
     <!--xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/-->
     <span>
         <xsl:attribute name="class">rdg</xsl:attribute>
@@ -639,13 +649,13 @@
         <span>
             <xsl:attribute name="class">rdg-wit</xsl:attribute>
             <xsl:call-template name="splitwit">
-                <!--xsl:with-param name="corresp" select="$corresp"/-->
+                <xsl:with-param name="corresp" select="$corresp"/>
             </xsl:call-template>
         </span>
     </span>
     <xsl:text> </xsl:text>
 </xsl:template>
-<xsl:template match="x:lg">
+<!--xsl:template match="x:lg">
     <xsl:element name="div">
         <xsl:attribute name="class">lg</xsl:attribute>
         <xsl:if test="@corresp">
@@ -657,6 +667,6 @@
         <xsl:call-template name="lang"/>
         <xsl:apply-templates select="x:l"/>
     </xsl:element>
-</xsl:template>
+</xsl:template-->
 
 </xsl:stylesheet>
