@@ -137,6 +137,30 @@ const tamilSplit = (str) => {
     return ret;
 };
 
+const getWordList = (tam,eng,alignment) => {
+    const ret = [];
+    let count = 0;
+    for(let n=0;n<tam.length;n++) {
+        const el = {word: tam[n], sandhi: null, translation: eng[n]};
+        let endcount = count + tam[n].length;
+        el.sandhi = alignment[0].slice(count,endcount);
+        
+        const firstchar = el.sandhi.shift();
+        if(firstchar === CONCATLEFT)
+            el.sandhi.unshift(alignment[0].at(count-1));
+        else
+            el.sandhi.unshift(firstchar);
+
+        const lastchar = el.sandhi.pop();
+        if(lastchar === CONCATRIGHT)
+            el.sandhi.push(alignment[0].at(endcount));
+        else
+            el.sandhi.push(lastchar);
+
+        count = endcount;
+    }
+};
+
 const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     /*
     if(tam.length !== eng.length) {
@@ -145,15 +169,20 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     */
     //const wl = restoreSandhi(removeOptions(tam).join(''));
     const wl = removeOptions(tam);
-    const wordjoin = tamilSplit(wl.join(''));
+    const tokenized = wl.map(w => tamilSplit(w));
+    const wordjoin = tokenized.flat();
     const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
     ///const warnings = warnTypos(aligned);
     const realigned = jiggleAlignment(aligned,wl);
+    const wordlist = getWordList(tam,eng,realigned);
+    console.log(wordlist);
+    /*
     const wordlist = tam.map((e,i) => {
         // TODO: should we remove hyphens or not?
         //return {word: e, translation: cleanupTranslation(eng[i])};
         return {word: e, translation: eng[i]};
     });
+    */
     
     const warnings = await cleanupWordlist(wordlist,notes,lookup);
 
