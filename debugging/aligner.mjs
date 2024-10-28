@@ -157,6 +157,7 @@ const getWordList = (tam,eng,alignment) => {
         else
             el.sandhi.push(lastchar);
 
+        ret.push(el);
         count = endcount;
     }
     return ret;
