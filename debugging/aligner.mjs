@@ -141,7 +141,7 @@ const getWordList = (tam,eng,alignment) => {
     const ret = [];
     let count = 0;
     for(let n=0;n<tam.length;n++) {
-        const el = {word: tam[n], sandhi: null, translation: eng[n]};
+        const el = {word: tam[n].join(''), sandhi: null, translation: eng[n]};
         let endcount = count + tam[n].length;
         el.sandhi = alignment[0].slice(count,endcount);
         
