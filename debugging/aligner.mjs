@@ -176,7 +176,7 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
     ///const warnings = warnTypos(aligned);
     const realigned = jiggleAlignment(aligned,wl);
-    const wordlist = getWordList(tam,eng,realigned);
+    const wordlist = getWordList(tokenized,eng,realigned);
     console.log(wordlist);
     /*
     const wordlist = tam.map((e,i) => {
