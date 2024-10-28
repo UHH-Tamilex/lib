@@ -159,6 +159,7 @@ const getWordList = (tam,eng,alignment) => {
 
         count = endcount;
     }
+    return ret;
 };
 
 const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
