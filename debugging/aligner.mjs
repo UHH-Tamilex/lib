@@ -166,33 +166,33 @@ const updateGramAndParts = (obj) => {
     }
 };
 
-const updateSandhiForm = (el,metricaltext) => {
-    el.sandhi = metricaltext.slice(count,endcount);
+const updateSandhiForm = (el,metricaltext,start,end) => {
+    el.sandhi = metricaltext.slice(start,end);
     const firstchar = el.sandhi.shift();
     if(firstchar === CONCATLEFT)
-        el.sandhi.unshift(metricaltext.at(count-1));
+        el.sandhi.unshift(metricaltext.at(start-1));
     else
         el.sandhi.unshift(firstchar);
 
     const lastchar = el.sandhi.pop();
     if(lastchar === CONCATRIGHT)
-        el.sandhi.push(metricaltext.at(endcount));
+        el.sandhi.push(metricaltext.at(end));
     else
         el.sandhi.push(lastchar);
 };
 
 const getWordList = (tam,eng,alignment) => {
     const ret = [];
-    let count = 0;
+    let start = 0;
     for(let n=0;n<tam.length;n++) {
         const el = {word: tam[n].join(''), sandhi: null, translation: eng[n]};
-        let endcount = count + tam[n].length;
+        let end = start + tam[n].length;
 
-        updateSandhiForm(el,alignment[0]);
+        updateSandhiForm(el,alignment[0],start,end);
         updateGramAndParts(el);
 
         ret.push(el);
-        count = endcount;
+        end = start;
     }
     return ret;
 };
