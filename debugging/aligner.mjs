@@ -166,16 +166,17 @@ const updateGramAndParts = (obj) => {
     }
 };
 
-const updateSandhiForm = (el) => {
+const updateSandhiForm = (el,metricaltext) => {
+    el.sandhi = metricaltext.slice(count,endcount);
     const firstchar = el.sandhi.shift();
     if(firstchar === CONCATLEFT)
-        el.sandhi.unshift(alignment[0].at(count-1));
+        el.sandhi.unshift(metricaltext.at(count-1));
     else
         el.sandhi.unshift(firstchar);
 
     const lastchar = el.sandhi.pop();
     if(lastchar === CONCATRIGHT)
-        el.sandhi.push(alignment[0].at(endcount));
+        el.sandhi.push(metricaltext.at(endcount));
     else
         el.sandhi.push(lastchar);
 };
@@ -187,9 +188,7 @@ const getWordList = (tam,eng,alignment) => {
         const el = {word: tam[n].join(''), sandhi: null, translation: eng[n]};
         let endcount = count + tam[n].length;
 
-        el.sandhi = alignment[0].slice(count,endcount);
-        
-        updateSandhiForm(el);
+        updateSandhiForm(el,alignment[0]);
         updateGramAndParts(el);
 
         ret.push(el);
