@@ -137,19 +137,19 @@ const tamilSplit = (str) => {
     return ret;
 };
 
-const updateGramAndParts = (obj) => {
+const updateNotes = (obj,notes) => {
+    if(obj.translation.endsWith('*')) {
+        obj.translation = obj.translation.slice(0,-1);
+        if(notes) obj.wordnote = notes.shift();
+    }
+};
+
+const updateParticles = (obj) => {
     // we should remove punctuation from the wordlist so it aligns properly
     //obj.word = obj.word.replace(/[\.;]$/,'');
     //obj.translation = obj.translation.replace(/[\.;]$/,'');
     // BUT now punctuation is removed from the wordsplit completely
     
-    if(obj.translation.endsWith('*')) {
-        obj.translation = obj.translation.slice(0,-1);
-        if(notescopy) obj.wordnote = notescopy.shift();
-    }
-    if(obj.translation === '()') 
-            obj.translation = '';
-
     const particle = findParticle(obj.word,obj.translation);
     if(particle) {
         //console.log(`Found particle: ${particle.particle} in ${obj.word}, "${obj.translation}".`);
@@ -188,9 +188,9 @@ const getWordList = (tam,eng,alignment) => {
         const el = {word: tam[n].join(''), sandhi: null, translation: eng[n]};
         let end = start + tam[n].length;
 
+        // TODO: should we remove hyphens or not?
         updateSandhiForm(el,alignment[0],start,end);
-        updateGramAndParts(el);
-
+        
         ret.push(el);
         end = start;
     }
@@ -213,7 +213,6 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     const wordlist = getWordList(tokenized,eng,realigned);
     /*
     const wordlist = tam.map((e,i) => {
-        // TODO: should we remove hyphens or not?
         //return {word: e, translation: cleanupTranslation(eng[i])};
         return {word: e, translation: eng[i]};
     });
@@ -501,6 +500,13 @@ const cleanupWordlist = async (list,notes,lookup) => {
     const notescopy = [...notes];
     const worker = lookup ? await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
     const cleanupWord = async (obj) => {
+        updateNotes(obj,notescopy);
+
+        if(obj.translation === '()') // after removing note marker
+                obj.translation = '';
+
+        updateParticles(obj);
+
         const grammar = findGrammar(obj.translation);
         if(grammar) {
             //console.log(`Found grammar: ${grammar.gram} in ${obj.translation}`);
