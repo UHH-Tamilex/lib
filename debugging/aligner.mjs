@@ -137,25 +137,60 @@ const tamilSplit = (str) => {
     return ret;
 };
 
+const updateGramAndParts = (obj) => {
+    // we should remove punctuation from the wordlist so it aligns properly
+    //obj.word = obj.word.replace(/[\.;]$/,'');
+    //obj.translation = obj.translation.replace(/[\.;]$/,'');
+    // BUT now punctuation is removed from the wordsplit completely
+    
+    if(obj.translation.endsWith('*')) {
+        obj.translation = obj.translation.slice(0,-1);
+        if(notescopy) obj.wordnote = notescopy.shift();
+    }
+    if(obj.translation === '()') 
+            obj.translation = '';
+
+    const particle = findParticle(obj.word,obj.translation);
+    if(particle) {
+        //console.log(`Found particle: ${particle.particle} in ${obj.word}, "${obj.translation}".`);
+        obj.translation = particle.translation;
+        obj.particle = particle.particle;
+        obj.bare = particle.bare;
+    }
+    const affix = findAffix(obj.bare||obj.word,obj.translation);
+    if(affix) {
+        //console.log(`Found affix: ${particle.affix} in ${obj.word}, "${obj.translation}".`);
+        obj.translation = affix.translation;
+        obj.affix = affix.affix;
+        if(affix.gram) obj.affixrole = affix.gram;
+    }
+};
+
+const updateSandhiForm = (el) => {
+    const firstchar = el.sandhi.shift();
+    if(firstchar === CONCATLEFT)
+        el.sandhi.unshift(alignment[0].at(count-1));
+    else
+        el.sandhi.unshift(firstchar);
+
+    const lastchar = el.sandhi.pop();
+    if(lastchar === CONCATRIGHT)
+        el.sandhi.push(alignment[0].at(endcount));
+    else
+        el.sandhi.push(lastchar);
+};
+
 const getWordList = (tam,eng,alignment) => {
     const ret = [];
     let count = 0;
     for(let n=0;n<tam.length;n++) {
         const el = {word: tam[n].join(''), sandhi: null, translation: eng[n]};
         let endcount = count + tam[n].length;
+
         el.sandhi = alignment[0].slice(count,endcount);
         
-        const firstchar = el.sandhi.shift();
-        if(firstchar === CONCATLEFT)
-            el.sandhi.unshift(alignment[0].at(count-1));
-        else
-            el.sandhi.unshift(firstchar);
-
-        const lastchar = el.sandhi.pop();
-        if(lastchar === CONCATRIGHT)
-            el.sandhi.push(alignment[0].at(endcount));
-        else
-            el.sandhi.push(lastchar);
+        updateSandhiForm(el);
+        updateGramAndParts(el);
 
         ret.push(el);
         count = endcount;
@@ -177,7 +212,6 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     ///const warnings = warnTypos(aligned);
     const realigned = jiggleAlignment(aligned,wl);
     const wordlist = getWordList(tokenized,eng,realigned);
-    console.log(wordlist);
     /*
     const wordlist = tam.map((e,i) => {
         // TODO: should we remove hyphens or not?
@@ -468,32 +502,6 @@ const cleanupWordlist = async (list,notes,lookup) => {
     const notescopy = [...notes];
     const worker = lookup ? await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
     const cleanupWord = async (obj) => {
-        // we should remove punctuation from the wordlist so it aligns properly
-        //obj.word = obj.word.replace(/[\.;]$/,'');
-        //obj.translation = obj.translation.replace(/[\.;]$/,'');
-        // BUT now punctuation is removed from the wordsplit completely
-        
-        if(obj.translation.endsWith('*')) {
-            obj.translation = obj.translation.slice(0,-1);
-            if(notescopy) obj.wordnote = notescopy.shift();
-        }
-        if(obj.translation === '()') 
-                obj.translation = '';
-
-        const particle = findParticle(obj.word,obj.translation);
-        if(particle) {
-            //console.log(`Found particle: ${particle.particle} in ${obj.word}, "${obj.translation}".`);
-            obj.translation = particle.translation;
-            obj.particle = particle.particle;
-            obj.bare = particle.bare;
-        }
-        const affix = findAffix(obj.bare||obj.word,obj.translation);
-        if(affix) {
-            //console.log(`Found affix: ${particle.affix} in ${obj.word}, "${obj.translation}".`);
-            obj.translation = affix.translation;
-            obj.affix = affix.affix;
-            if(affix.gram) obj.affixrole = affix.gram;
-        }
         const grammar = findGrammar(obj.translation);
         if(grammar) {
             //console.log(`Found grammar: ${grammar.gram} in ${obj.translation}`);
