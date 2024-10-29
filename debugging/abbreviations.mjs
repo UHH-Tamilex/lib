@@ -4,6 +4,7 @@ const gramAbbreviations = [
     ['acc.','accusative'],
     ['adj.','adjective'],
     ['adv.','adverb'],
+    ['aux.','auxiliary'],
     ['caus.','causative'],
     ['conc.','concessive'],
     ['cond.','conditional'],
