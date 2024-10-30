@@ -434,8 +434,6 @@ const go = () => {
     else if(searchparams.get('debugging') === 'true')
         Debugging = true;
 
-    Splitter.setTransliterator(Transliterate);
-
     const lineview = document.querySelector('.line-view-icon');
     if(lineview) lineview.style.display = 'none';
 /*

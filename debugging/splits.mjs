@@ -4,8 +4,6 @@ import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 import { init as cmWrapper } from './cmwrapper.mjs';
 
-var Transliterate;
-const setTransliterator = (obj) => Transliterate = obj;
 const reverseAbbreviations = new Map(
     gramAbbreviations.map(arr => [arr[1],arr[0]])
 );
