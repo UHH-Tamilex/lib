@@ -55,6 +55,7 @@ const caseAffixes = [
         regex: /~?iṉum\+?$/,
         translationregex: /iṉum$/
     }],
+    /*
     ['am',{
         regex: /~?am\+?$/,
         translationregex: /am$/
@@ -63,6 +64,7 @@ const caseAffixes = [
         regex: /~?a\+?$/,
         translationregex: /a$/
     }],
+    */
     ['oṭu',{
         regex: /~?[oō]ṭ[u’*]\+?$/,
         gram: 'sociative',
@@ -84,7 +86,9 @@ const wordsplitscore = (a,b) => {
     const vowels = 'aāiīuūoōeē'.split('');
     if(a === ' ' || b === ' ') return -2;
     if(a === b) return 1;
-    if(['-','*','\'','’','(',')'].includes(b)) return -2;
+    if(a === 'i' && b === '[i]') return 1;
+    if(['m','ṅ','n','ñ'].includes(a) && b === '[m]') return 1;
+    if(['-','*','\'','’','(',')','(a)','(m)'].includes(b)) return -2;
     if(['y','v'].includes(a) && b === '~') return 1; // is this needed?
     if(vowels.includes(a) && vowels.includes(b)) return -0.5;
     return -1;
@@ -120,20 +124,31 @@ const warnTypos = (alignment) => {
 const removeOptions = (words) => words.map(w => w.split('/')[0].replaceAll('|',''));
 
 const tamilSplit = (str) => {
+    const tokarr = ['ai','au','(m)','(a)','[i]','[m]'];
+    const tokens = new Set(tokarr);
+    const maxlength = Math.max(...tokarr.map(s => s.length));
     const ret = [];
-    const ugh = new Set(['i','u']);
-    for(let n=0;n<str.length;n++) {
-        if(ugh.has(str[n]) && ret[ret.length-1] === 'a')
-                ret[ret.length-1] = 'a' + str[n];
-        /*
-        else if(str[n] === '(' && str[n+1] === 'm' && str[n+2] == ')') {
-            ret.push('(m)');
-            n = n+2;
+    let cache = '';
+    for(let n=0;n<str.length || cache !== '';n++) {
+        const diff = maxlength - cache.length;
+        if(diff > 0 && n < str.length) {
+            cache = cache + str[n];
+            if(diff > 1) continue;
         }
-        */
-        else
-            ret.push(str[n]);
+        for(let m=0;m<maxlength;m++) {
+            const candidate = cache.slice(0,maxlength - m);
+            if(tokens.has(candidate)) {
+                ret.push(candidate);
+                cache = cache.slice(maxlength-m);
+                break;
+            }
+            if(m === maxlength - 1) {
+                ret.push(candidate);
+                cache = cache.slice(1);
+            }
+        }
     }
+    //if(cache) for(const c of cache) ret.push(c);
     return ret;
 };
 
@@ -149,7 +164,8 @@ const updateParticles = (obj) => {
     //obj.word = obj.word.replace(/[\.;]$/,'');
     //obj.translation = obj.translation.replace(/[\.;]$/,'');
     // BUT now punctuation is removed from the wordsplit completely
-    
+   
+    // TODO: obj.translation parameter will be deprecated
     const particle = findParticle(obj.word,obj.translation);
     if(particle) {
         //console.log(`Found particle: ${particle.particle} in ${obj.word}, "${obj.translation}".`);
@@ -157,6 +173,7 @@ const updateParticles = (obj) => {
         obj.particle = particle.particle;
         obj.bare = particle.bare;
     }
+    // TODO: findAffix will be deprecated
     const affix = findAffix(obj.bare||obj.word,obj.translation);
     if(affix) {
         //console.log(`Found affix: ${particle.affix} in ${obj.word}, "${obj.translation}".`);
@@ -166,60 +183,114 @@ const updateParticles = (obj) => {
     }
 };
 
-const updateSandhiForm = (el,metricaltext,start,end) => {
-    el.sandhi = metricaltext.slice(start,end);
-    const firstchar = el.sandhi.shift();
-    if(firstchar === CONCATLEFT)
-        el.sandhi.unshift(metricaltext.at(start-1));
-    else
-        el.sandhi.unshift(firstchar);
-
-    const lastchar = el.sandhi.pop();
-    if(lastchar === CONCATRIGHT)
-        el.sandhi.push(metricaltext.at(end));
-    else
-        el.sandhi.push(lastchar);
+const updateMarks = obj => {
+    const sandhi = obj.sandhi;
+    const nosandhi = obj.tokenized;
+    for(let n=0;n<sandhi.length;n++) {
+        switch (nosandhi[n]) {
+            case '~':
+               nosandhi[n] = `<m type="glide">${sandhi[n]}</m>`;
+               break;
+            case '+':
+                nosandhi[n] = `<m type="gemination">${sandhi[n]}</m>`;
+                sandhi[n] = '';
+                break;
+            case '*':
+            case '\'':
+                nosandhi[n] = '<m type="elided">u</m>';
+                break;
+            case '(m)':
+                nosandhi[n] = '<m type="elided">m</m>';
+                break;
+            case '(a)':
+                nosandhi[n] = '<m type="elided">a</m>';
+                break;
+            case '[i]':
+                nosandhi[n] = '<m type="inserted">i</m>';
+                break;
+            case '[m]':
+                nosandhi[n] = '<m type="inserted">m</m>';
+        }
+    }
 };
 
-const getWordList = (tam,eng,alignment) => {
+const getSandhiform = (sandhisequence,start,end) => {
+    const ret = sandhisequence.slice(start,end);
+
+    const firstchar = ret.shift();
+    if(firstchar === CONCATLEFT)
+        ret.unshift(sandhisequence.at(start-1));
+    else
+        ret.unshift(firstchar);
+
+    const lastchar = ret.pop();
+    if(lastchar === CONCATRIGHT)
+        ret.push(sandhisequence.at(end));
+    else
+        ret.push(lastchar);
+
+    return ret;
+};
+/**
+ * Returns a list of words as an Object {{word: string, sandhi: Array, translation: string}}
+ * @param {[].<string>} tam Tamil wordsplit
+ * @param {[].<string>} eng Word-by-word gloss
+ * @param {[].<string,CONCATLEFT,CONCATRIGHT>} sandhisequence Aligned metrical text
+ * @param {[].<string>} notes List of notes
+ * @param {boolean} lookup Whether to do grammar lookup
+ * @returns {words: [].<{}>, warnings: [].<string>}
+ **/
+const getWordlist = async (tam,eng,sandhisequence,notes,lookup) => {
+    const warnings = [];
+    const worker = lookup ? await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
     const ret = [];
+
     let start = 0;
     for(let n=0;n<tam.length;n++) {
-        const el = {word: tam[n].join(''), sandhi: null, translation: eng[n]};
-        let end = start + tam[n].length;
-
         // TODO: should we remove hyphens or not?
-        updateSandhiForm(el,alignment[0],start,end);
+        const entry = {word: tam[n], 
+                       tokenized: tamilSplit(tam[n]), 
+                       sandhi: null, 
+                       translation: eng[n]
+                      };
+        let end = start + entry.tokenized.length;
         
-        ret.push(el);
-        end = start;
+        entry.sandhi = getSandhiform(sandhisequence,start,end);
+
+        const wordsplit = entry.word.split('/');
+        if(wordsplit.length > 1) {
+            const transsplit = entry.translation.split('/');
+            entry.superEntry = [];
+            for(let n=0;n<wordsplit.length;n++) {
+                const {words: strand, warnings: morewarnings} = await getWordlist(
+                        wordsplit[n].split('|'),
+                        transsplit[n].split('|'),
+                        [...entry.sandhi], // so updateMarks won't run on the same object twice
+                        notes,
+                        lookup
+                    );
+                for(const w of morewarnings) warnings.push(w);
+                entry.superEntry.push(strand);
+            }
+        }
+        else
+            await cleanupWord(entry,lookup,notes,warnings,worker);
+
+        ret.push(entry);
+        start = end;
     }
-    return ret;
+    return {words: ret, warnings: warnings};
 };
 
 const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
-    /*
-    if(tam.length !== eng.length) {
-        return {xml: null, warnings: ['Tamil and English don\'t match.']};
-    }
-    */
     //const wl = restoreSandhi(removeOptions(tam).join(''));
     const wl = removeOptions(tam);
-    const tokenized = wl.map(w => tamilSplit(w));
-    const wordjoin = tokenized.flat();
+    const wordjoin = tamilSplit(wl.join(''));
     const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
-    ///const warnings = warnTypos(aligned);
     const realigned = jiggleAlignment(aligned,wl);
-    const wordlist = getWordList(tokenized,eng,realigned);
-    /*
-    const wordlist = tam.map((e,i) => {
-        //return {word: e, translation: cleanupTranslation(eng[i])};
-        return {word: e, translation: eng[i]};
-    });
-    */
-    
-    const warnings = await cleanupWordlist(wordlist,notes,lookup);
 
+    const {words: wordlist, warnings: warnings}  = await getWordlist(tam,eng,realigned[0],[...notes],lookup);
+    //const warnings = await cleanupWordlist(wordlist,notes,lookup);
     const entries = makeEntries(wordlist);
     const rle = formatAlignment(realigned,0);
     const ret = {xml: rle + '\n' + entries.join('\n'), alignment: aligned, warnings: warnings};
@@ -495,69 +566,73 @@ const cleanForm =  (str) => {
               .replaceAll(/['’*]/g,'u');
 };
 
+const cleanupWord = async (obj,lookup,notes,warnings,worker) => {
+
+    updateMarks(obj);
+
+    updateNotes(obj,notes);
+
+    if(obj.translation === '()') // after removing note marker
+            obj.translation = '';
+
+    updateParticles(obj);
+
+    const grammar = findGrammar(obj.translation);
+    if(grammar) {
+        //console.log(`Found grammar: ${grammar.gram} in ${obj.translation}`);
+        obj.translation = grammar.translation;
+        obj.gram = grammar.gram;
+        if(grammar.warning) warnings.push(grammar.warning);
+    }
+    if(lookup) {
+        const bare = cleanForm(obj.bare || obj.word);
+        if(!grammar || obj.translation === '') {
+            const features = await lookupFeatures(bare);
+            if(features) obj.gram = features;
+        }
+
+        if(obj.translation === '') {
+            const res = (await worker.db.query('SELECT def FROM citations WHERE form = ? LIMIT 1',[bare]))[0];
+            if(res && res.def) obj.translation = res.def.replaceAll(/\s+/g,'_');
+        }
+    }
+    /*
+    if(!particle && !affix && !grammar) {
+        const maybeParticle = obj.translation.match(/\(.+\)-?/);
+        if(maybeParticle) console.log(`What about ${maybeParticle[0]} in "${obj.translation}"?`);
+    }
+    */
+    
+};
+
+/*
 const cleanupWordlist = async (list,notes,lookup) => {
     const warnings = [];
     const notescopy = [...notes];
     const worker = lookup ? await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
-    const cleanupWord = async (obj) => {
-        updateNotes(obj,notescopy);
-
-        if(obj.translation === '()') // after removing note marker
-                obj.translation = '';
-
-        updateParticles(obj);
-
-        const grammar = findGrammar(obj.translation);
-        if(grammar) {
-            //console.log(`Found grammar: ${grammar.gram} in ${obj.translation}`);
-            obj.translation = grammar.translation;
-            obj.gram = grammar.gram;
-            if(grammar.warning) warnings.push(grammar.warning);
-        }
-        if(lookup) {
-            const bare = cleanForm(obj.bare || obj.word);
-            if(!grammar || obj.translation === '') {
-                const features = await lookupFeatures(bare);
-                if(features) obj.gram = features;
-            }
-
-            if(obj.translation === '') {
-                const res = (await worker.db.query('SELECT def FROM citations WHERE form = ? LIMIT 1',[bare]))[0];
-                if(res && res.def) obj.translation = res.def.replaceAll(/\s+/g,'_');
-            }
-        }
-        /*
-        if(!particle && !affix && !grammar) {
-            const maybeParticle = obj.translation.match(/\(.+\)-?/);
-            if(maybeParticle) console.log(`What about ${maybeParticle[0]} in "${obj.translation}"?`);
-        }
-        */
-        
-    };
     for(const entry of list) {
         const wordsplit = entry.word.split('/');
         if(wordsplit.length > 1) {
             const transsplit = entry.translation.split('/');
             entry.superEntry = [];
             for(let n=0;n<wordsplit.length;n++) {
-                const subwords = wordsplit[n].split('|');
-                const subtrans = transsplit[n].split('|');
-                const strand = [];
-                for(let m=0;m<subwords.length;m++) {
-                    const newobj = {word: subwords[m], translation: subtrans[m]};
-                    await cleanupWord(newobj);
-                    strand.push(newobj);
-                }
+                const strand = getWordlist(
+                        wordsplit[n].split('|'),
+                        transsplit[n].split('|'),
+                        [...entry.sandhi] // so updateMarks won't run on the same object twice
+                    );
+                for(const obj of strand)
+                    await cleanupWord(obj,lookup,notescopy,warnings,worker);
+
                 entry.superEntry.push(strand);
             }
         }
         else
-            await cleanupWord(entry);
+            await cleanupWord(entry,lookup,notescopy,warnings,worker);
     }
-    //console.log(warnings);
     return warnings;
 };
-
+*/
 /*
 const mergeWordlists = (doc, list1, list2) => {
     const newlist1 = markSegs(doc,list1,0);
@@ -603,7 +678,7 @@ const jiggleWord = (word, text, start, end) => {
     const textprestart = text[start-2];
     if(textend === '') { // assimilated final
 
-        if(wordend === 'm' && ['m','n'].includes(textpostend))
+        if(['m','(m)'].includes(wordend) && ['m','n'].includes(textpostend))
             //end = end + 1;
             text[end-1] = CONCATRIGHT;
         /*

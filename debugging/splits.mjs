@@ -301,8 +301,8 @@ const showSplits = async () => {
     const output = popup.querySelector('.popup-output');
     output.innerHTML = '<div style="display: flex;width: 100%;justify-content:center"><div class="spinner"></div></div>';
 
-    const warnings = popup.querySelector('.popup-warnings');
-    warnings.innerHTML = '';
+    const debugbox = popup.querySelector('.popup-warnings');
+    debugbox.innerHTML = '';
 
     const inputs = popup.querySelectorAll('textarea');
     const tamval = Sanscript.t(inputs[0].value.replaceAll(/[\d∞\[\]]/g,'').trim(),'tamil','iast').replaceAll(/u\*/g,'*');
@@ -319,7 +319,7 @@ const showSplits = async () => {
         for(let n=0;n<tamlines.length;n++) {
             if(tamlines[n].trim().split(/\s+/).length !== englines[n].trim().split(/\s+/).length) {
                 
-                warnings.innerHTML = (`<div>Line ${n+1}: Tamil & English don't match.</div>`);
+                debugbox.innerHTML = (`<div>Line ${n+1}: Tamil & English don't match.</div>`);
                 output.style.border = 'none';
                 output.style.display = 'none';
                 return;
@@ -340,8 +340,9 @@ const showSplits = async () => {
     const notes = getNotes(inputs[2].value);
     const lookup = popup.querySelector('input[name="lookup"]').checked;
     const ret = await alignWordsplits(text,tam,eng,notes,lookup);
-    makeAlignmentTable(ret.alignment,tamlines.map(l => l.replaceAll(/\/.+?(?=\s|$)/g,'')),warnings);
+    const tables = makeAlignmentTable(ret.alignment,tamlines.map(l => l.replaceAll(/\/.+?(?=\s|$)/g,'')),ret.warnings);
     
+    debugbox.append(...tables);
     if(lookup) inputs[1].value = refreshTranslation(tamlines,ret.wordlist);
 
     output.style.display = 'block';

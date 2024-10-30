@@ -90,7 +90,8 @@ const getPrev = (arr,n) => {
     return false;
 };
 
-const makeAlignmentTable = (alignment,lines,par) => {
+const makeAlignmentTable = (alignment,lines,warnings) => {
+    const ret = [];
     let charcounts = lines.reduce((acc,cur) => {
         const i = tamilSplit(wordClean(cur)).length;
         if(acc.length > 0)
@@ -141,7 +142,7 @@ const makeAlignmentTable = (alignment,lines,par) => {
 
             atab.appendChild(row1);
             atab.appendChild(row2);
-            par.appendChild(atab);
+            ret.push(atab);
             atab = document.createElement('table');
             row1 = document.createElement('tr');
             row2 = document.createElement('tr');
@@ -152,8 +153,18 @@ const makeAlignmentTable = (alignment,lines,par) => {
 
     atab.appendChild(row1);
     atab.appendChild(row2);
-    par.appendChild(atab);
+    ret.push(atab);
     }
+
+    if(warnings.length > 0)
+        for(const warning of warnings) {
+            const ws = document.createElement('div');
+            ws.innerHTML = `<b>${warning}</b> not recognized.`;
+            ws.className = 'warningbox';
+            ret.unshift(ws);
+        }
+
+    return ret;
 
 };
 

@@ -209,3 +209,9 @@ th.superEntry {
 #wbwbox textarea {
     flex-grow: 1;
 }
+
+.warningbox {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px dotted red;
+}
