@@ -189,10 +189,12 @@ const updateMarks = obj => {
     for(let n=0;n<sandhi.length;n++) {
         switch (nosandhi[n]) {
             case '~':
-               nosandhi[n] = `<m type="glide">${sandhi[n]}</m>`;
-               break;
+                if(typeof sandhi[n] === "string")
+                    nosandhi[n] = `<m type="glide">${sandhi[n]}</m>`;
+                break;
             case '+':
-                nosandhi[n] = `<m type="gemination">${sandhi[n]}</m>`;
+               if(typeof sandhi[n] === "string")
+                    nosandhi[n] = `<m type="gemination">${sandhi[n]}</m>`;
                 sandhi[n] = '';
                 break;
             case '*':
