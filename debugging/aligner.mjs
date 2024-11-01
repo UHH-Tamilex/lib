@@ -3,6 +3,10 @@ import dbQuery from './dbquery.mjs';
 import createSqlWorker from '../js/sqlWorker.mjs';
 import {gramAbbreviations} from './abbreviations.mjs';
 
+const _state = {
+    worker: null
+};
+
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
@@ -189,14 +193,11 @@ const updateMarks = obj => {
     for(let n=0;n<sandhi.length;n++) {
         switch (nosandhi[n]) {
             case '~':
-               if(typeof sandhi[n] === 'string')
-                   nosandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
+               nosandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
                break;
             case '+':
-                if(typeof sandhi[n] === 'string') {
-                    nosandhi[n] = `<c type="geminated">${sandhi[n]}</c>`;
-                    sandhi[n] = '';
-                }
+                nosandhi[n] = `<c type="geminated">${sandhi[n]}</c>`;
+                sandhi[n] = '';
                 break;
             case '*':
             case '\'':
@@ -245,24 +246,32 @@ const getSandhiform = (sandhisequence,start,end) => {
  **/
 const getWordlist = async (tam,eng,alignment,notes,lookup) => {
     const warnings = [];
-    const worker = lookup ? await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
     const ret = [];
 
     let start = 0;
     for(let n=0;n<tam.length;n++) {
         // TODO: should we remove hyphens or not?
-
-        if(alignment[1][start] === '') start = start + 1; // better solution for this?
-
+        
+        let startchar = alignment[1][start];
+        while(startchar === '') {
+            start = start + 1; // better solution for this?
+            startchar = alignment[1][start];
+        }
         const entry = {word: tam[n], 
-                       tokenized: tamilSplit(tam[n]), 
+                       tokenized: tamilSplit(tam[n].split('/')[0].replaceAll('|','')), 
                        sandhi: null, 
                        translation: eng[n]
                       };
-        let end = start + entry.tokenized.length;
+
+        let reallen = entry.tokenized.length;
+        for(let m=0;m<reallen;m++) {
+            const endchar = alignment[1][start + m];
+            if(endchar === '') reallen = reallen + 1;
+        }
+        //let end = start + entry.tokenized.length;
+        const end = start + reallen;
         
-        const sandhisequence = alignment[0]; 
-        entry.sandhi = getSandhiform(sandhisequence,start,end);
+        entry.sandhi = getSandhiform(alignment[0],start,end);
         
         const wordsplit = entry.word.split('/');
         if(wordsplit.length > 1) {
@@ -272,10 +281,7 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
                 const {words: strand, warnings: morewarnings} = await getWordlist(
                         wordsplit[n].split('|'),
                         transsplit[n].split('|'),
-                        [
-                            [...entry.sandhi], // so updateMarks won't run on the same object twice
-                            alignment[1].slice(start,end)
-                        ],
+                        [alignment[0].slice(start,end),alignment[1].slice(start,end)],
                         notes,
                         lookup
                     );
@@ -284,7 +290,7 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
             }
         }
         else
-            await cleanupWord(entry,lookup,notes,warnings,worker);
+            await cleanupWord(entry,lookup,notes,warnings);
 
         ret.push(entry);
         start = end;
@@ -298,6 +304,9 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     const wordjoin = tamilSplit(wl.join(''));
     const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
     const realigned = jiggleAlignment(aligned,wl);
+
+    if(lookup && !_state.worker)
+        _state.worker = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
 
     const {words: wordlist, warnings: warnings}  = await getWordlist(tam,eng,realigned,[...notes],lookup);
     //const warnings = await cleanupWordlist(wordlist,notes,lookup);
@@ -582,7 +591,7 @@ const cleanForm = str => {
               .replaceAll(/['’*]/g,'u');
 };
 
-const cleanupWord = async (obj,lookup,notes,warnings,worker) => {
+const cleanupWord = async (obj,lookup,notes,warnings) => {
 
     updateMarks(obj);
 
@@ -592,7 +601,6 @@ const cleanupWord = async (obj,lookup,notes,warnings,worker) => {
             obj.translation = '';
 
     updateParticles(obj);
-    console.log(obj);
 
     const grammar = findGrammar(obj.translation);
     if(grammar) {
@@ -609,7 +617,7 @@ const cleanupWord = async (obj,lookup,notes,warnings,worker) => {
         }
 
         if(obj.translation === '') {
-            const res = (await worker.db.query('SELECT def FROM citations WHERE form = ? LIMIT 1',[bare]))[0];
+            const res = (await _state.worker.db.query('SELECT def FROM citations WHERE form = ? LIMIT 1',[bare]))[0];
             if(res && res.def) obj.translation = res.def.replaceAll(/\s+/g,'_');
         }
     }
