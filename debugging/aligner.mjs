@@ -251,6 +251,9 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
     let start = 0;
     for(let n=0;n<tam.length;n++) {
         // TODO: should we remove hyphens or not?
+
+        if(alignment[1][start] === '') start = start + 1; // better solution for this?
+
         const entry = {word: tam[n], 
                        tokenized: tamilSplit(tam[n]), 
                        sandhi: null, 
@@ -258,8 +261,6 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
                       };
         let end = start + entry.tokenized.length;
         
-        if(alignment[1][start]) start = start + 1; // better solution for this?
-
         const sandhisequence = alignment[0]; 
         entry.sandhi = getSandhiform(sandhisequence,start,end);
         
