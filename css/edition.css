@@ -259,6 +259,10 @@ span.invisible {
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
 }
+#blackout .spinner {
+  width: 80px;
+  height: 80px;
+}
 .spinner::after {
   content: '';  
   box-sizing: border-box;
@@ -270,6 +274,11 @@ span.invisible {
   height: 35px;
   border-radius: 50%;
   background: white;
+}
+#blackout .spinner:after {
+    width: 75px;
+    height: 75px;
+    background: #989895;
 }
 @keyframes rotation {
   0% { transform: rotate(0deg) }
