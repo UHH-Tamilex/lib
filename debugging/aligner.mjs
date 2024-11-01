@@ -243,7 +243,7 @@ const getSandhiform = (sandhisequence,start,end) => {
  * @param {boolean} lookup Whether to do grammar lookup
  * @returns {words: [].<{}>, warnings: [].<string>}
  **/
-const getWordlist = async (tam,eng,sandhisequence,notes,lookup) => {
+const getWordlist = async (tam,eng,alignment,notes,lookup) => {
     const warnings = [];
     const worker = lookup ? await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db') : null;
     const ret = [];
@@ -258,8 +258,11 @@ const getWordlist = async (tam,eng,sandhisequence,notes,lookup) => {
                       };
         let end = start + entry.tokenized.length;
         
-        entry.sandhi = getSandhiform(sandhisequence,start,end);
+        if(alignment[1][start]) start = start + 1; // better solution for this?
 
+        const sandhisequence = alignment[0]; 
+        entry.sandhi = getSandhiform(sandhisequence,start,end);
+        
         const wordsplit = entry.word.split('/');
         if(wordsplit.length > 1) {
             const transsplit = entry.translation.split('/');
@@ -268,7 +271,10 @@ const getWordlist = async (tam,eng,sandhisequence,notes,lookup) => {
                 const {words: strand, warnings: morewarnings} = await getWordlist(
                         wordsplit[n].split('|'),
                         transsplit[n].split('|'),
-                        [...entry.sandhi], // so updateMarks won't run on the same object twice
+                        [
+                            [...entry.sandhi], // so updateMarks won't run on the same object twice
+                            alignment[1].slice(start,end)
+                        ],
                         notes,
                         lookup
                     );
@@ -292,7 +298,7 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
     const realigned = jiggleAlignment(aligned,wl);
 
-    const {words: wordlist, warnings: warnings}  = await getWordlist(tam,eng,realigned[0],[...notes],lookup);
+    const {words: wordlist, warnings: warnings}  = await getWordlist(tam,eng,realigned,[...notes],lookup);
     //const warnings = await cleanupWordlist(wordlist,notes,lookup);
     const entries = makeEntries(wordlist);
     const rle = formatAlignment(realigned,0);
