@@ -50,10 +50,10 @@ const getEntry = async (targ) => {
     let results = {};
     let canonicaldef;
     if(targ.id) {
-        results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
+        results = await workers.local.db.query('SELECT def, pos, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE islemma = ?',[targ.id]);
         /*
         if(results.length === 0)
-            results = await workers.full.db.query('SELECT definition, type, number, gender, nouncase, voice, person, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
+            results = await workers.full.db.query('SELECT definition, pos, number, gender, nouncase, voice, person, aspect, mood FROM dictionary WHERE islemma = ?',[targ.id]);
         */
         canonicaldef = (await workers.local.db.query('SELECT definition FROM lemmata WHERE lemma = ? LIMIT 1',[targ.id]))[0].definition;
     }
@@ -61,9 +61,9 @@ const getEntry = async (targ) => {
         const lemma = targ.closest('details[id]')?.id;
         const form = targ.closest('details').dataset.entry;
         if(lemma)
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma = ?',[form,lemma]);
+            results = await workers.local.db.query('SELECT def, pos, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma = ?',[form,lemma]);
         else
-            results = await workers.local.db.query('SELECT def, type, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS NULL',[form]);
+            results = await workers.local.db.query('SELECT def, pos, number, gender, nouncase, person, voice, aspect, syntax, particlefunctions, rootnoun, proclitic, enclitic, context, citation, filename FROM citations WHERE form = ? AND fromlemma IS NULL',[form]);
     }
     
     const entry = {
@@ -74,7 +74,7 @@ const getEntry = async (targ) => {
 
     for(const result of results) {
         if(result.def) entry.translations.add(result.def);
-        if(result.type) entry.grammar.add(result.type);
+        if(result.pos) entry.grammar.add(result.pos);
         if(result.number) entry.grammar.add(result.number);
         if(result.gender) entry.grammar.add(result.gender);
         if(result.nouncase) entry.grammar.add(result.nouncase);
