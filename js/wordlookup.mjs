@@ -7,7 +7,7 @@ const wordLookup = async (word) => {
     let clean = word.dataset.clean;
     if(!clean) {
         const clone = word.cloneNode(true);
-        for(const pc of clone.querySelectorAll('.invisible, .ignored'))
+        for(const pc of clone.querySelectorAll('.invisible, .ignored, .character.inserted'))
             pc.remove();
             clean = Sanscript.t(clone.textContent.replaceAll('\u00AD',''),'tamil','iast');
     }

@@ -11,16 +11,34 @@ const loadDoc = async () => {
     curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
 
-const addVariants = () => {
-    showPopup();     
-};
+const switchType = e => {
+    const targ = e.target.closest('.switcher > div');
+    if(!targ || targ.classList.contains('selected')) return;
+    
+    
+    const fileselect = document.getElementById('variantsfileselect');
+    const textinput = document.getElementById('variantsinput');
 
-const showPopup = () => {
+    targ.classList.add('selected');
+    if(targ.textContent === 'From file') {
+        targ.nextElementSibling.classList.remove('selected');
+        fileselect.style.display = 'block';
+        textinput.style.display = 'none';
+    }
+    else {
+        targ.previousSibling.classList.remove('selected');
+        fileselect.style.display = 'none';
+        textinput.style.display = 'flex';
+    }
+
+};
+const addVariants = () => {
     /*
     const popup = document.createElement('div');
     popup.className = 'popup';
     */
     //const selector = document.createElement('select');
+    document.getElementById('variantsswitcher').addEventListener('click',switchType);
     const blackout = document.getElementById('blackout');
     const popup = document.getElementById('variants-popup');
     popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
@@ -93,6 +111,8 @@ const generateApp = async e => {
             output.prepend(warnp);
         }
         copyToClipboard(standOff,popup);
+
+        document.getElementById('saveapparatus').style.display = 'block';
     }
 };
 
@@ -134,6 +154,8 @@ const getFile = async () => {
     const input = document.getElementById('teifile');
     const blockid = popup.querySelector('select[name="edblock"]').value;
 
+    if(!curDoc) await loadDoc();
+
     const file = input.files[0];
     const text = await readOne(file);
     const xml = parseString(text,file.name);
@@ -156,10 +178,22 @@ const getFile = async () => {
     output.style.whiteSpace = 'break-spaces';
     output.style.height = '600px';
     output.style.width = '100%';
-    const standOff = `<standOff type="apparatus" corresp="#${blockid}">\n<listApp>\n${app}\n</listApp>\n</standOff>`;
-    output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
 
+    newDoc = curDoc.cloneNode(true);
+    let curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
+    if(!curStandOff) {
+        curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
+        curStandOff.setAttribute('corresp',`#${blockid}`);
+        curStandOff.setAttribute('type','apparatus');
+    }
+    newDoc.documentElement.appendChild(curStandOff);
+    curStandOff.innerHTML = app;
+    //const standOff = `<standOff type="apparatus" corresp="#${blockid}">\n<listApp>\n${app}\n</listApp>\n</standOff>`;
+    const standOff = curStandOff.outerHTML;
+    output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
     copyToClipboard(standOff,popup);
+
+    document.getElementById('saveapparatus').style.display = 'block';
 };
 
 const copyToClipboard = (xml,popup) => {
@@ -215,7 +249,15 @@ const mergeGroups = (doc) => {
     }
 };
 
-const getWitList = (doc, arr) => {
+const makeSorter = order => {
+    return (a,b) => {
+        const aindex = order.indexOf(a);
+        const bindex = order.indexOf(b);
+        return aindex > bindex;
+    };
+};
+
+const getWitList = (doc, sorter, arr) => {
     const listWit = doc.querySelector('listWit');
     const wits = new Set(arr);
     const newwits = new Set();
@@ -241,14 +283,18 @@ const getWitList = (doc, arr) => {
         }
         else newwits.add(wit);
     }
-
-    return `wit="${[...newwits].map(w => '#' + w).join(' ')}"`;
+    if(sorter)
+        return `wit="${[...newwits].sort(sorter).map(w => '#' + w).join(' ')}"`;
+    else
+        return `wit="${[...newwits].map(w => '#' + w).join(' ')}"`;
 };
 
 const curry = f => {
     return a => {
         return b => {
-            return f(a,b);
+            return c => {
+                return f(a,b,c);
+            };
         };
     };
 };
@@ -346,10 +392,19 @@ const getTEIRdgs = (rdgs,blockid,witdocs,alignment,dataN) => {
     return newrdgs;
 };
 */
+
+const getWitOrder = el => {
+    return [...el.querySelectorAll('witness')].map(w => w.getAttribute('xml:id'));
+};
+
 const makeApp = async (doc, opts) =>  {
     if(opts.mergerdgs) mergeGroups(doc);
+    
+    const curListWit = curDoc.querySelector('listWit');
 
-    const curriedWitList = curry(getWitList)(doc);
+    const sorter = curListWit ? makeSorter(getWitOrder(curListWit)) : null;
+    
+    const curriedWitList = curry(getWitList)(doc)(sorter);
     
     //const witdocs = await loadOtherTEI(doc.querySelector('listWit'));
 
@@ -428,7 +483,8 @@ const makeApp = async (doc, opts) =>  {
         ret = ret + app;
     }
 
-    return ret + new XMLSerializer().serializeToString(doc.querySelector('listWit'));
+    return `<listApp>\n${ret}\n</listApp>\n` + 
+        (curListWit ? '' : new XMLSerializer().serializeToString(doc.querySelector('listWit')));
 };
 
 export { addVariants };

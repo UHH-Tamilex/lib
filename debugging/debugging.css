@@ -23,6 +23,7 @@
     white-space: pre;
     display: none;
     flex-direction: column;
+    border-radius: 0.3rem;
 }
 
 .popup .boxen {
@@ -215,3 +216,34 @@ th.superEntry {
     margin-bottom: 0.5rem;
     border-bottom: 1px dotted red;
 }
+
+#variants-popup {
+    width: 600px;
+}
+
+#variantsinput {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+}
+#variantsswitcher {
+    flex-grow: 0;
+    flex-direction: row;
+    border-left: 1px solid black;
+}
+#variantsinput textarea {
+    width: 550px;
+    box-sizing: border-box;
+}
+.boxenbox {
+    display: flex;
+    flex-grow: 1;
+}
+.boxenbox .boxen {
+    flex-direction: column;
+}
+
+#saveapparatus {
+    display: none;
+}
+

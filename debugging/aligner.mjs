@@ -189,29 +189,30 @@ const updateMarks = obj => {
     for(let n=0;n<sandhi.length;n++) {
         switch (nosandhi[n]) {
             case '~':
-                if(typeof sandhi[n] === "string")
-                    nosandhi[n] = `<m type="glide">${sandhi[n]}</m>`;
-                break;
+               if(typeof sandhi[n] === 'string')
+                   nosandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
+               break;
             case '+':
-               if(typeof sandhi[n] === "string")
-                    nosandhi[n] = `<m type="gemination">${sandhi[n]}</m>`;
-                sandhi[n] = '';
+                if(typeof sandhi[n] === 'string') {
+                    nosandhi[n] = `<c type="geminated">${sandhi[n]}</c>`;
+                    sandhi[n] = '';
+                }
                 break;
             case '*':
             case '\'':
-                nosandhi[n] = '<m type="elided">u</m>';
+                nosandhi[n] = '<c type="elided">u</c>';
                 break;
             case '(m)':
-                nosandhi[n] = '<m type="elided">m</m>';
+                nosandhi[n] = '<c type="uncertain">m</c>';
                 break;
             case '(a)':
-                nosandhi[n] = '<m type="elided">a</m>';
+                nosandhi[n] = '<c type="uncertain">a</c>';
                 break;
             case '[i]':
-                nosandhi[n] = '<m type="inserted">i</m>';
+                nosandhi[n] = '<c type="inserted">i</c>';
                 break;
             case '[m]':
-                nosandhi[n] = '<m type="inserted">m</m>';
+                nosandhi[n] = '<c type="inserted">m</c>';
         }
     }
 };
@@ -349,14 +350,16 @@ const makeGaps = str => str.replaceAll(/‡+/g,m => `<gap quantity="${m.length}"
 
 const makeEntries = (arr) => {
     const formatWord = (w) => {
+        /*
         const clean = w.replace(/([~+()])/g,'<pc>$1</pc>')
                      //.replace(/['’*]$/,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
                        .replaceAll(/['’*]/g,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
                        .replaceAll(/\[(.+?)\]/g,'<supplied>$1</supplied>');
                      //.replaceAll(/\[(.+?)\]/g,'$1');
+        */
+        const clean = w.join('');
         return makeGaps(clean);
     };
-
     const formatEntry = (e) => {
         const bare = e.bare ? `<form type="simple">${makeGaps(e.bare)}</form>\n` : '';
         const affixrole = e.affixrole ? `<gramGrp><gram type="role">${e.affixrole}</gram></gramGrp>` : '';
@@ -368,7 +371,7 @@ const makeEntries = (arr) => {
         const particle = e.particle ? `<gramGrp type="particle"><m>${e.particle}</m></gramGrp>\n` : '';
         const def = e.translation ? `\n<def>${e.translation.replaceAll(/_/g,' ')}</def>` : '';
         //return `<entry>\n<form>${formatWord(e.word)}</form>\n<def>${e.translation.replaceAll(/_/g,' ')}</def>\n${bare}${affix}${gram}${particle}${e.wordnote ? formatNote(e.wordnote) : ''}${e.transnote ? formatNote(e.transnote) : ''}</entry>`;
-        return `<entry>\n<form>${formatWord(e.word)}</form>${def}\n${bare}${affix}${gram}${particle}${e.wordnote ? '\n' + e.wordnote : ''}</entry>`;
+        return `<entry>\n<form>${formatWord(e.tokenized)}</form>${def}\n${bare}${affix}${gram}${particle}${e.wordnote ? '\n' + e.wordnote : ''}</entry>`;
     };
 
     return arr.map(obj => {
@@ -394,7 +397,10 @@ const makeEntries = (arr) => {
 
 const cleanBare = (str) => {
     //str = str.replaceAll(/[~+-.]/g,'').replace(/['’*]$/,'u');
-    str = str.replaceAll(/[\[\]~+.]/g,'').replace(/-$|^-/,'').replaceAll(/['’*]/g,'u');
+    str = str.replaceAll(/[~+.]/g,'')
+             .replaceAll(/\[[im]\]/g,'')
+             .replace(/-$|^-/,'')
+             .replaceAll(/['’*]/g,'u');
     /*
     if(str.match(/[iīeē]y$/))
         return str.slice(0,-1); // inserted glide
@@ -422,25 +428,26 @@ const findHyphen = (str, index,affix) => {
 
 const findParticle = (word,translation) => {
     for(const [particle,regex] of particles) {
-        const cleanword = word.replaceAll(/[\[\]]/g,'');
-        const wordmatch = cleanword.match(regex);
+        //word = word.replaceAll(/[\[\]]/g,'');
+        const wordmatch = word.match(regex);
         const transmatch = translation.match(regex);
         if(wordmatch) {
             if(transmatch)
+                // TODO: transmatch will be deprecated
                 return {
                     //translation: translation.slice(0,translation.length-transmatch[0].length),
                     translation: translation.replace(regex,''),
                     particle: cleanBare(particle),
-                    //bare: cleanBare(cleanword.slice(0,cleanword.length-wordmatch[0].length))
-                    bare: cleanBare(cleanword.replace(regex,''))
+                    //bare: cleanBare(word.slice(0,word.length-wordmatch[0].length))
+                    bare: cleanBare(word.replace(regex,''))
                 };
             else {
-                const hyphen = findHyphen(cleanword,wordmatch.index,particle);
+                const hyphen = findHyphen(word,wordmatch.index,particle);
                 if(hyphen)
                     return {
                         translation: translation,
                         particle: cleanBare(particle),
-                        bare: cleanBare(cleanword.replace(regex,''))
+                        bare: cleanBare(word.replace(regex,''))
                     };
             }
         }
@@ -563,7 +570,7 @@ const lookupFeatures = async (str) => {
     return ret;
 };
 
-const cleanForm =  (str) => {
+const cleanForm = str => {
     return str.replaceAll(/([~+()])/g,'')
               .replaceAll(/['’*]/g,'u');
 };
@@ -578,6 +585,7 @@ const cleanupWord = async (obj,lookup,notes,warnings,worker) => {
             obj.translation = '';
 
     updateParticles(obj);
+    console.log(obj);
 
     const grammar = findGrammar(obj.translation);
     if(grammar) {

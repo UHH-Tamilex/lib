@@ -57,17 +57,27 @@ const checkEquality = (arr1, arr2, n) => {
         if(char1 !== '') return 'typo';
         else return null;
     }
-    if(char1 === 'i')
+    if(char1 === 'i') {
         if(char2 === '*')
             return 'typo';
+        if(char2 === '[i]')
+            return null;
         if(char2 === 'u') {
             const next = getNext(arr1,n);
             if(next && next === 'y') return null;
             else return 'typo';
         }
-
+    }
     if(char2 === 'u' && char1 === '')
         return 'typo';
+    
+    if(char2 === '[m]')
+        if(char1 === 'm') return null;
+        else return 'typo';
+
+    if(char2 === '[i]')
+        if(char1 === 'i') return null;
+        else return 'typo';
 
     return 'mismatch';
 };

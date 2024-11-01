@@ -98,7 +98,7 @@ const highlight = {
         }
     },
 };
-
+/*
 const suggestLemmata = (lemma, par) => {
     if(document.getElementById('transbutton').lang === 'en') {
         Transliterate.revert(par);
@@ -145,7 +145,7 @@ const showRangeCoords = (startel,coord) => {
             {opacity: 1, easing: 'ease-in'}
             ], 200);
 };
-
+*/
 const rangeFromCoords = (positions, lem, target) => {
     const range = document.createRange();
 
@@ -246,8 +246,10 @@ const matchCounts = (alignment,m,pos='start') => {
         }
         if(alignment[0][n] === 'M') matchcount = matchcount + 1;
     }
-
-    const matches = [...alignment[1]].reduce((acc, cur) => cur === 'M' ?  acc + 1 : acc,0) - 1;
+    
+    // no match; go to end of the block
+    const matches = [...alignment[1]].reduce((acc, cur) => cur === 'M' ?  acc + 1 : acc,0); //-1;
+    // why was there -1 here??
     return matches;
 };
 
@@ -305,15 +307,17 @@ const highlightcoord = (positions, lem, target, highlightfn = highlightrange) =>
 };
 
 const unhighlight = (targ) => {
-    const highlit = /*par*/document.querySelectorAll('.highlit');
+    let highlit = /*par*/document.querySelectorAll('.highlit');
     if(highlit.length === 0) return;
     
     targ = targ ? targ.closest('div.wide') : highlit[0].closest('div.wide');
     const par = targ.querySelector('.text-block'); // or .edition?
     if(!par) return;
     
-    if(document.getElementById('transbutton').lang === 'en')
+    if(document.getElementById('transbutton').lang === 'en') {
         Transliterate.revert(par);
+        highlit = document.querySelectorAll('.highlit'); // in case things changed (via jiggle)
+    }
     
     for(const h of highlit) {
         if(h.classList.contains('temporary')) {

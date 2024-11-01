@@ -64,7 +64,7 @@
 
 <xsl:template match="x:pc"/>
 <xsl:template match="x:c">
-    <xsl:if test="not(@type='inserted')">
+    <xsl:if test="@type='elided' or @type='uncertain'">
         <xsl:apply-templates/>
     </xsl:if>
 </xsl:template>

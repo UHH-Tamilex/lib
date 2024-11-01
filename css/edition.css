@@ -111,7 +111,12 @@ rt:hover, span.word:not(.nolookup):hover { background-color: yellow; cursor: poi
     from { margin-right: 0; }
     to { margin-right: 0.5rem; }
 }
+
 span.word.split {
+    margin-right: 0.5rem;
+}
+
+.animation span.word.split {
     animation-duration: 0.5s;
     animation-name: slideout;
     animation-iteration-count: 1;
@@ -147,9 +152,15 @@ span.invisible {
 #topbar > div {
     margin: 0 0 1rem 0;
 }
-#topbar > div:hover {
+#topbar > div:not(.disabled):hover {
     background: #ff9900;
     border: 1px solid #ff9900;
+    cursor: pointer;
+}
+
+.disabled {
+    opacity: 0.4;
+    border: 1px solid rgba(0,0,0,0.4);
 }
 
 #transbutton {
@@ -161,7 +172,6 @@ span.invisible {
     position: relative;
     border: 1px solid black;
     padding: 5px;
-    cursor: pointer;
     display: none;
     height: 36px;
     width: 34px;
@@ -174,6 +184,13 @@ span.invisible {
     left: 35px;
     display: none;
 }
+#apparatuseditbutton {
+    position: absolute;
+    top: 97px;
+    left: 35px;
+    display: none;
+}
+
 #metricalsvg, #translationsvg {
     display: none;
 }
@@ -219,6 +236,18 @@ span.invisible {
 .lemma-head::after {
     content: ' >';
 }
+
+.character {
+    color: rgba(17,17,17,0.5);
+}
+    
+.character.uncertain::before {
+    content: '(';
+}
+.character.uncertain::after {
+    content: ')';
+}
+
 .spinner {
   width: 40px;
   height: 40px;

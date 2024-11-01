@@ -84,11 +84,37 @@ const getGrammar = (entry) => {
         ret.push(reverseAbbreviations.get(gram.textContent));
     return ret.length > 0 ? '(' + ret.join('|') + ')' : '';
 };
+const retransformWord = el => {
+    const clone = el.cloneNode(true);
+    const chars = clone.querySelectorAll('c');
+    for(const c of chars) {
+        const type = c.getAttribute('type');
+        switch (type) {
+            case 'elided':
+                c.replaceWith('*');
+                break;
+            case 'geminated':
+                c.replaceWith('+');
+                break;
+            case 'glide':
+                c.replaceWith('~');
+                break;
+            case 'uncertain':
+                c.replaceWith(`(${c.textContent})`);
+                break;
+            case 'inserted':
+                c.replaceWith(`[${c.textContent}]`);
+                break;
+        }
+    }
+    return getEditionText(clone).trim().replaceAll(/\(u\)/g,'*');
+};
+
 const processEntry = (entry) => {
     const def = entry.querySelector('def');
     const grammar = getGrammar(entry);
     return {
-        tamil: getEditionText(entry.querySelector('form')).trim().replaceAll(/\(u\)/g,'*'),
+        tamil: retransformWord(entry.querySelector('form')),
         english: def ? def.textContent.trim().replaceAll(/\s+/g,'_') + grammar : 
                        grammar || '()',
         note: entry.querySelector('note')
@@ -303,7 +329,7 @@ const showSplits = async () => {
     debugbox.innerHTML = '';
 
     const inputs = popup.querySelectorAll('textarea');
-    const tamval = Sanscript.t(inputs[0].value.replaceAll(/[\d∞\[\]]/g,'').trim(),'tamil','iast').replaceAll(/u\*/g,'*');
+    const tamval = Sanscript.t(inputs[0].value.replaceAll(/[\d∞]/g,'').trim(),'tamil','iast').replaceAll(/u\*/g,'*');
     //const tam = tamval.split(/\s+/).map(s => s.replace(/[,.;?!]$/,''));
     const tamlines = tamval.replaceAll(/[,.;?!](?=\s|$)/g,'').split(/\n+/);
     const tam = tamlines.reduce((acc,cur) => acc.concat(cur.trim().split(/\s+/)),[]);
@@ -552,7 +578,6 @@ const Splitter = {
     addWordSplits: addWordSplits,
     countLines: countLines,
     decodeRLE: decodeRLE,
-    setTransliterator: setTransliterator
 };
 
 export default Splitter;

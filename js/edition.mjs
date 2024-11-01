@@ -7,36 +7,18 @@ import { addVariants } from '../debugging/variants.mjs';
 import { Sanscript } from './sanscript.mjs';
 import WordLookup from './wordlookup.mjs';
 import './tooltip.mjs';
-//import { tamilize, iastToTamil } from './transliterate.mjs';
 
 var Debugging = false;
 
 const cachedContent = new Map();
 
 const lookup = async (e) => {
-//if(e.target.nodeName === 'RT' || e.target.classList?.contains('word')) {
     const apointer = e.target.closest('.alignment-pointer');
     if(apointer) {
         e.preventDefault();
         AlignmentViewer.viewer(apointer.href);
         return;
     }
-    /*
-    const word = e.target.closest('.word');
-    if(word) {
-        //const clean = e.target.dataset.norm.trim();
-        //const clean = word.querySelector('.anno-inline span').textContent;
-        let clean = word.dataset.clean;
-        if(!clean) {
-            const clone = word.cloneNode(true);
-            for(const pc of clone.querySelectorAll('.invisible, .ignored'))
-                pc.remove();
-            clean = Sanscript.t(clone.textContent.replaceAll('\u00AD',''),'tamil','iast');
-        }
-        //window.open(`https://dsal.uchicago.edu/cgi-bin/app/tamil-lex_query.py?qs=${clean}&amp;searchhws=yes&amp;matchtype=exact`,'lexicon',/*'height=500,width=500'`);
-        window.open(`https://uhh-tamilex.github.io/lexicon/#${clean}`);
-    }
-    */
     const word = e.target.closest('.word:not(.nolookup)');
     if(!word) return;
     const blackout = document.getElementById('blackout');
@@ -118,14 +100,18 @@ const wordsplit = (e) => {
         for(const standoff of standoffs) {
             const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''))?.querySelector('.edition');
         
+            target.classList.add('animation');
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.revert(target);
             }
             applymarkup(standoff);
             Transliterate.refreshCache(target);
+            
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.activate(target);
             }
+            //target.classList.remove('animation');
+            setTimeout(() => target.classList.remove('animation'),500);
         }
         document.getElementById('metricalsvg').style.display = 'revert';
         document.getElementById('wordsplitsvg').style.display = 'none';
@@ -157,7 +143,6 @@ const countpos = (str, pos) => {
         if(realn === pos) return n;
     }
 };
-*/
 const nextSibling = (node) => {
     let start = node;
     while(start) {
@@ -182,7 +167,7 @@ const nextTextNode = (start,strand) => {
     }
     return null;
 };
-
+*/
 const realNextSibling = (walker) => {
     let cur = walker.currentNode;
     while(cur) {
@@ -245,11 +230,16 @@ const makeWord = (entry) => {
     const lemma = entry.querySelector('.f[data-name="lemma"]');
     const span = document.createElement('span');
     const clone = lemma.cloneNode(true);
+
     while(clone.firstChild) {
         if(clone.firstChild.nodeType === 1)
             clone.firstChild.lang = 'ta-Latn-t-ta-Taml'; // there's probably a better way
+            // TODO: what's this for again?
         span.append(clone.firstChild);
     }
+    for(const q of span.querySelectorAll('.character q'))
+        q.lang = 'ta'; // TODO: better way?
+
     span.className = 'word split';
     const translation = entry.querySelector('.f[data-name="translation"]');
     const affix = entry.querySelector('.f[data-name="affix"]');
@@ -275,6 +265,7 @@ const makeWord = (entry) => {
             const form = particle.querySelector('[data-name="lemma"]');
             annohtml = annohtml + ` (particle <span lang="ta">${form.textContent}</span>)`;
         }
+
         annoel.innerHTML = annohtml;
         span.prepend(annoel);
     }
@@ -427,22 +418,28 @@ const removemarkup = (standoff) => {
     target.normalize();
 };
 
+const EvaStyleGo = () => {
+    for(const c of document.querySelectorAll('.character')) {
+        if(c.classList.contains('elided'))
+            c.textContent = '*';
+        if(c.classList.contains('glide'))
+            c.textContent = '~';
+        else if(c.classList.contains('geminated'))
+            c.textContent = '+';
+    }
+};
+
 const go = () => {
     const searchparams = new URLSearchParams(window.location.search);
     if(document.getElementById('editionscript').dataset.debugging === 'true')
         Debugging = true;
     else if(searchparams.get('debugging') === 'true')
         Debugging = true;
+    if(searchparams.get('evastyle') !== null)
+       EvaStyleGo(); 
 
     const lineview = document.querySelector('.line-view-icon');
     if(lineview) lineview.style.display = 'none';
-/*
-    const scripttag = document.getElementById('editionscript');
-    if(scripttag.dataset.debugging) {
-        Debugging = true;
-        ApparatusViewer.debug();
-    }
-*/
     const recordcontainer = document.getElementById('recordcontainer');
     Transliterate.init(recordcontainer);
 
@@ -485,6 +482,11 @@ const go = () => {
         if(document.querySelector('div.apparatus-block span.app')) {
             apparatusbutton.style.display = 'block';
             apparatusbutton.addEventListener('click',apparatusswitch);
+            if(Debugging) {
+                const appedit = document.getElementById('apparatuseditbutton');
+                appedit.style.display = 'block';
+                appedit.addEventListener('click',addVariants);
+            }
         }
         else if(Debugging) {
             apparatusbutton.style.display = 'block';
@@ -497,6 +499,14 @@ const go = () => {
     else {
         for(const app of document.querySelectorAll('.apparatus-block'))
             app.style.display = 'block';
+        if(Debugging) {
+            const apparatusbutton = document.getElementById('apparatusbutton');
+            apparatusbutton.style.display = 'block';
+            apparatusbutton.classList.add('disabled');
+            const appedit = document.getElementById('apparatuseditbutton');
+            appedit.style.display = 'block';
+            appedit.addEventListener('click',addVariants);
+        }
     }
     //wordsplit({target: analyzebutton});
     //cleanup(document);
