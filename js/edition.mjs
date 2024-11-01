@@ -23,9 +23,12 @@ const lookup = async (e) => {
     if(!word) return;
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'flex';
+    blackout.innerHTML = '<div class="spinner"></div>';
+
     const lookupwindow = document.createElement('div');
     lookupwindow.id = 'lookupwindow';
     lookupwindow.innerHTML = (await WordLookup(word)) || '<p lang="en">Word not found.</p>';
+    blackout.removeChild(blackout.firstChild);
     blackout.appendChild(lookupwindow);
     Transliterate.refreshCache(lookupwindow);
     if(document.getElementById('transbutton').lang === 'en')
