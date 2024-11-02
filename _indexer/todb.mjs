@@ -468,8 +468,10 @@ const findLines = (doc,id,standOff) => {
 
 const findPos = el => {
     const grams = el.querySelectorAll('gram[type="role"]');
-    for(const gram of grams)
-        if(POS.has(gram)) return gram;
+    for(const gram of grams) {
+        const gramtxt = gram.textContent;
+        if(POS.has(gramtxt)) return gramtxt;
+    }
     return 'undefined';
 };
 
