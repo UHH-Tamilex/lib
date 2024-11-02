@@ -475,9 +475,9 @@ const findPos = el => {
 };
 
 const findGemination = (entry, next) => {
-    console.log(next);
     if(!next) return null;
     const form = entry.querySelector('form');
+    console.log(`${form.textContent.trim()} | ${next.querySelector('form').textContent.trim()}`);
     
     // TODO: deprecated
     const txt = form.textContent.trim();
@@ -493,6 +493,7 @@ const findGemination = (entry, next) => {
     // new syntax!
     const gem = form.querySelector('c[type="geminated"]');
     if(gem) {
+        console.log(form);
         const postsib = gem.nextSibling;
         // TODO: deprecate proclitics
         if(postsib && postsib.textContent.startsWith('-'))
