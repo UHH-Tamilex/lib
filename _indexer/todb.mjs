@@ -447,7 +447,11 @@ const getContext = (entries,from,to,textAlignment) => {
 
 const entryLength = el => {
     const doOne = (entry) => {
-        const firstForm = entry.querySelector('form');
+        const firstForm = entry.querySelector('form').cloneNode(true);
+
+        for(const i of firstForm.querySelectorAll('[type="ignored"]'))
+            i.remove();
+
         const gaplen = [...firstForm.querySelectorAll('gap')].reduce(
            (acc,cur) => acc + cur.getAttribute('quantity') || 1,
         0);
