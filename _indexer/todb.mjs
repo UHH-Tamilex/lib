@@ -446,11 +446,19 @@ const getContext = (entries,from,to,textAlignment) => {
 */
 
 const entryLength = el => {
-    const firstForm = el.querySelector('form');
-    const gaplen = [...firstForm.querySelectorAll('gap')].reduce(
-       (acc,cur) => acc + cur.getAttribute('quantity') || 1,
-    0);
-    return gaplen + firstForm.textContent.trim().length;
+    const doOne = (entry) => {
+        const firstForm = entry.querySelector('form');
+        const gaplen = [...firstForm.querySelectorAll('gap')].reduce(
+           (acc,cur) => acc + cur.getAttribute('quantity') || 1,
+        0);
+        return gaplen + firstForm.textContent.trim().length;
+    };
+    if(el.nodeName === 'entry')
+        return doOne(el);
+    else {
+        const entries = el.querySelector('entry').querySelectorAll('entry');
+        return [...entries].reduce((acc,cur) => acc + doOne(cur),0);
+    }
 };
 
 const findLines = (doc,id,standOff) => {
