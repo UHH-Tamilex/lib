@@ -38,12 +38,9 @@ const addVariants = () => {
     popup.className = 'popup';
     */
     //const selector = document.createElement('select');
-    document.getElementById('variantsswitcher').addEventListener('click',switchType);
     const blackout = document.getElementById('blackout');
     const popup = document.getElementById('variants-popup');
-    popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
     const selector = popup.querySelector('select');
-    //selector.setAttribute('name','edblock');
     for(const lg of document.querySelectorAll('.lg')) {
         if(!lg.id) continue;
         const option = document.createElement('option');
@@ -51,11 +48,39 @@ const addVariants = () => {
         option.append(lg.id);
         selector.append(option);
     }
+    
+    findAlignmentFile();
+
+    document.getElementById('variantsswitcher').addEventListener('click',switchType);
     document.getElementById('addapparatus').addEventListener('click',generateApp);
     document.getElementById('saveapparatus').addEventListener('click',saveAs);
+    popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
+    selector.addEventListener('change',findAlignmentFile);
+
     popup.style.display = 'flex';
     blackout.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
+};
+
+const findAlignmentFile = async () => {
+    const filefinder = document.getElementById('filefinder');
+    const popup = document.getElementById('variants-popup');
+    popup.querySelector('.output-boxen').style.display = 'none';
+    const blockid = popup.querySelector('select[name="edblock"]').value;
+    const srcname = `alignments/${blockid}.xml`;
+    const res = await fetch(srcname);
+    if(!res.ok) {
+        filefinder.style.display = 'none';
+        popup.querySelector('label[for="teifile"]').textContent = 'Select alignment file...';
+        return;
+    }
+    const xmltext = await res.text();
+    document.getElementById('foundfile').textContent = srcname;
+    document.getElementById('usefoundfile').addEventListener('click',() => {
+        getFile({alignment: {text: xmltext, filename: srcname}});     
+    });
+    filefinder.style.display = 'block';
+    popup.querySelector('label[for="teifile"]').textContent = 'Use a different file...';
 };
 
 const saveAs = async () => {
@@ -149,16 +174,22 @@ const parseString = (str,fname) => {
     else
         return newd;
 };
-const getFile = async () => {
+const getFile = async (e) => {
     const popup = document.getElementById('variants-popup');
-    const input = document.getElementById('teifile');
     const blockid = popup.querySelector('select[name="edblock"]').value;
+    const alignment = e.alignment;
 
     if(!curDoc) await loadDoc();
 
-    const file = input.files[0];
-    const text = await readOne(file);
-    const xml = parseString(text,file.name);
+    let xml = alignment ?
+        parseString(alignment.text) :
+        await (async () => {
+            const input = document.getElementById('teifile');
+            const file = input.files[0];
+            const text = await readOne(file);
+            return parseString(text,file.name);
+        })();
+
     const app = await makeApp(xml, {
         base: document.querySelector('.text-siglum').textContent,
         normlem: document.getElementById('normlem').checked, 
@@ -186,8 +217,12 @@ const getFile = async () => {
         curStandOff.setAttribute('corresp',`#${blockid}`);
         curStandOff.setAttribute('type','apparatus');
     }
-    newDoc.documentElement.appendChild(curStandOff);
+
+    if(alignment)
+        curStandOff.setAttribute('source',alignment.filename);
     curStandOff.innerHTML = app;
+
+    newDoc.documentElement.appendChild(curStandOff);
     //const standOff = `<standOff type="apparatus" corresp="#${blockid}">\n<listApp>\n${app}\n</listApp>\n</standOff>`;
     const standOff = curStandOff.outerHTML;
     output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
@@ -233,14 +268,14 @@ const copyToClipboard = (xml,popup) => {
 const mergeGroups = (doc) => {
     const els = doc.querySelectorAll('cl');
     for(const el of els) {
-        const firstw = el.removeChild(el.firstChild);
-        while(el.firstChild) {
+        const firstw = el.removeChild(el.firstElementChild);
+        while(el.firstElementChild) {
             const norm1 = firstw.getAttribute('lemma') || firstw.textContent;
-            const norm2 = el.firstChild.getAttribute('lemma') || el.firstChild.textContent;
+            const norm2 = el.firstElementChild.getAttribute('lemma') || el.firstElementChild.textContent;
             firstw.setAttribute('lemma',norm1 + norm2);
-            while(el.firstChild.firstChild)
-                firstw.appendChild(el.firstChild.firstChild);
-            el.firstChild.remove();
+            while(el.firstElementChild.firstChild)
+                firstw.appendChild(el.firstElementChild.firstChild);
+            el.firstElementChild.remove();
         }
         if(firstw.getAttribute('lemma') === firstw.textContent)
             firstw.removeAttribute('lemma');
