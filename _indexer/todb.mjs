@@ -47,7 +47,6 @@ const dbSchema = {
     person: new Set(['first person','second person','third person','third person']),
     aspect: new Set(['perfective aspect','imperfective aspect','negative','present tense']),
     voice: new Set(['passive','causative']),
-    geminateswith: new Set([...POS,'particle','undefined']),
     syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction']),
     verbfunction: new Set(['auxiliary','denomiative']),
     particlefunction: new Set(['concessive','indefinite','comparative','inclusive']),
@@ -477,7 +476,6 @@ const findPos = el => {
 const findGemination = (entry, next) => {
     if(!next) return null;
     const form = entry.querySelector('form');
-    console.log(`${form.textContent.trim()} | ${next.querySelector('form').textContent.trim()}`);
     
     // TODO: deprecated
     const txt = form.textContent.trim();
@@ -492,7 +490,6 @@ const findGemination = (entry, next) => {
     // new syntax!
     const gem = form.querySelector('c[type="geminated"]');
     if(gem) {
-        console.log(form);
         const postsib = gem.nextSibling;
         // TODO: deprecate proclitics
         if(postsib && postsib.textContent.startsWith('-'))
@@ -557,7 +554,6 @@ const addToDb = (fname,db) => {
             */
 
             const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, geminateswith: geminateswith, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: parseInt(linenum)+1, filename: basename},ins.roles);
-            console.log(dbobj.geminateswith);
             db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @pos, @number, @gender, @nouncase, @person, @aspect, @voice, @geminateswith, @syntax, @verbfunction, @particlefunction, @rootnoun, @misc, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(fromlemma)?.word || ins.form;
             const lemmadef = islemma ? worddef : 
