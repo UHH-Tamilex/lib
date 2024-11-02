@@ -469,7 +469,7 @@ const findLines = (doc,id,standOff) => {
     const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
 
     const realcounts = matchCounts(alignment,linecounts);
-    const entries = [...standOff.querySelectorAll('entry, superEntry')];
+    const entries = [...standOff.querySelectorAll(':scope > entry, :scope > superEntry')];
     let linecount = 0;
     let wordcount = 0;
     for(let n=0; n<entries.length;n++) {
