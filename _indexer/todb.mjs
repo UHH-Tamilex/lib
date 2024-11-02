@@ -129,12 +129,20 @@ const go = () => {
     });
 };
 
-const cleanForm = el => {
+const cleanForm = (el,keep=false) => {
     const clone = el.cloneNode(true);
     for(const gap of clone.querySelectorAll('gap')) {
         const quantity = gap.getAttribute('quantity') || 1;
         gap.replaceWith('‡'.repeat(quantity));
     }
+    for(const c of clone.querySelectorAll('c')) {
+        const type = c.getAttribute('type');
+        if(!keep && type !== 'elided')
+                c.remove();
+        else if(c.getAttribute('type') === 'uncertain')
+            c.replaceWith(`(${c.textContent})`);
+    }
+
     return clone.textContent.trim()
                          .replaceAll(/\([ui]\)/g,'u')
                          .replaceAll(/[+~]/g,'');
@@ -268,9 +276,9 @@ const getPrevEntry = (entries,n,linenum) => {
                 return '';
 
             const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastElementChild : prevEl;
-            return ellipsis + cleanForm(prevEntry.querySelector('form')) + isSameLine(linenum,prevEntry) + ' ';
+            return ellipsis + cleanForm(prevEntry.querySelector('form'),true) + isSameLine(linenum,prevEntry) + ' ';
         }
-        return ellipsis + cleanForm(entries[n-1].querySelector('form')) + isSameLine(linenum,entries[n-1]) + ' ';
+        return ellipsis + cleanForm(entries[n-1].querySelector('form'),true) + isSameLine(linenum,entries[n-1]) + ' ';
     }
     return '';
 };
@@ -313,7 +321,7 @@ const getNextEntry = (entries,n,linenum) => {
     if(!nextEntry) return null;
 
     const ellipsis = n < entries.length-2 ? '…' : '';
-    return ' ' + isSameLine(linenum,nextEntry,true) + cleanForm(nextEntry.querySelector('form')) + ellipsis;
+    return ' ' + isSameLine(linenum,nextEntry,true) + cleanForm(nextEntry.querySelector('form'),true) + ellipsis;
 };
 /*
 const decodeRLE = (s) => {
@@ -541,7 +549,7 @@ const addToDb = (fname,db) => {
             const prev = getPrevEntry(entries,n,linenum);
             const next = getNextEntry(entries,n,linenum);
             const geminateswith = findGemination(entry,realNext(entries,n));
-            const context = prev + cleanForm(entry.querySelector('form')) + next;
+            const context = prev + cleanForm(entry.querySelector('form'),true) + next;
             /*
             const from = n > 0 ? n - 1 : n;
             const to = n < entries.length-1 ? n + 1 : n;
