@@ -10,8 +10,7 @@ import {gramAbbreviations, gramMap} from '../debugging/abbreviations.mjs';
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
-const dbSchema = {
-    pos: new Set(['noun',
+const POS = new Set(['noun',
                    'proper noun',
                    'pronoun',
                    'personal pronoun',
@@ -30,7 +29,9 @@ const dbSchema = {
                    'conditional',
                    'imperative',
                    'optative',
-                   'subjunctive']),
+                   'subjunctive']);
+const dbSchema = {
+    pos: POS,
     number: new Set(['singular','plural']),
     gender: new Set(['masculine','feminine','neuter']),
     nouncase: new Set(['nominative',
@@ -46,6 +47,7 @@ const dbSchema = {
     person: new Set(['first person','second person','third person','third person']),
     aspect: new Set(['perfective aspect','imperfective aspect','negative','present tense']),
     voice: new Set(['passive','causative']),
+    geminateswith: POS, //TODO: and particle and undefined
     syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction']),
     verbfunction: new Set(['auxiliary','denomiative']),
     particlefunction: new Set(['concessive','indefinite','comparative','inclusive']),
@@ -103,6 +105,7 @@ const go = () => {
         'person TEXT, '+
         'aspect TEXT, '+
         'voice TEXT, '+
+        'geminateswith TEXT, '+
         'syntax TEXT, '+
         'verbfunction TEXT, '+
         'particlefunction TEXT, '+
@@ -272,10 +275,26 @@ const getPrevEntry = (entries,n,linenum) => {
     }
     return '';
 };
+
+const realNext = (entries, n) => {
+    if(n === entries.length-1) return null;
+
+    const superEntry = entries[n].closest('superEntry');
+    if(superEntry && entries[n].parentNode.lastElementChild === entries[n]) {
+        const nextEl = superEntry.nextElementSibling;
+        if(!nextEl || (nextEl.nodeName !== 'entry' && nextEl.nodeName !== 'superEntry'))
+            return null;
+
+        const nextEntry = nextEl.nodeName === 'superEntry' ? nextEl.firstElementChild : nextEl;
+        return nextEntry;
+    }
+    return entries[n+1];
+};
+
 const getNextEntry = (entries,n,linenum) => {
+    /*    
     if(n < entries.length-1) {
         const ellipsis = n < entries.length-2 ? '…' : '';
-
         const superEntry = entries[n].closest('superEntry');
         if(superEntry && entries[n].parentNode.lastElementChild === entries[n]) {
             const nextEl = superEntry.nextElementSibling;
@@ -290,6 +309,12 @@ const getNextEntry = (entries,n,linenum) => {
         return ' ' + isSameLine(linenum,entries[n+1],true) + cleanForm(entries[n+1].querySelector('form')) + ellipsis; 
     }
     return '';
+    */
+    const nextEntry = realNext(entries,n);
+    if(!nextEntry) return null;
+
+    const ellipsis = n < entries.length-2 ? '…' : '';
+    return ' ' + isSameLine(linenum,nextEntry,true) + cleanForm(nextEntry.querySelector('form')) + ellipsis;
 };
 /*
 const decodeRLE = (s) => {
@@ -442,6 +467,58 @@ const findLines = (doc,id,standOff) => {
     }
 };
 
+const findPos = el => {
+    const grams = el.querySelectorAll('gram type="role"');
+    for(const gram of grams)
+        if(POS.has(gram)) return gram;
+    return 'undefined';
+};
+
+const findGemination = (entry, next) => {
+    if(!next) return null;
+    const form = entry.querySelector('form');
+    
+    // TODO: deprecated
+    const txt = form.textContent.trim();
+    if(txt.endsWith('+'))
+        return findPos(next);
+    else if(/\+-|-\+/.exec(txt))
+        return 'particle';
+        // Probably won't find proclitics?
+    const nxttxt = next.querySelector('form').textContent.trim();
+    if(nxttxt.startsWith('+'))
+        return findPos(next);
+
+    // new syntax!
+    const gem = form.querySelector('c[type="geminated"]');
+    if(gem) {
+        const postsib = gem.nextSibling;
+        // TODO: deprecate proclitics
+        if(postsib && postsib.textContent.startsWith('-'))
+            return 'particle';
+
+        const presib = gem.nextSibling;
+        if(presib && presib.textContent.endsWith('-'))
+            return 'particle';
+
+        if(gem.parentNode.lastChild === gem)
+            return findPos(next);
+
+        if(gem.parentNode.lastChild.textContent === '' &&
+           gem.parentNode.lastChild.previousSibling === gem)
+            return findPos(next);
+    }
+    const nextgem = next.querySelector('form').querySelector('c[type="geminated"]');
+    if(nextgem) {
+        if(nextgem.parentNode.firstChild === nextgem)
+            return findPos(next);
+        if(nextgem.parentNode.firstChild.textContent === '' &&
+           nextgem.parentNode.firstChild.nextSibling === nextgem)
+            return findPos(next);
+    }
+
+    return null;
+};
 const addToDb = (fname,db) => {
     console.log(fname);
     const basename = Path.basename(fname);
@@ -463,6 +540,7 @@ const addToDb = (fname,db) => {
             if(ins === null) continue;
             const prev = getPrevEntry(entries,n,linenum);
             const next = getNextEntry(entries,n,linenum);
+            const geminateswith = findGemination(entry,realNext(entries,n));
             const context = prev + cleanForm(entry.querySelector('form')) + next;
             /*
             const from = n > 0 ? n - 1 : n;
@@ -477,8 +555,8 @@ const addToDb = (fname,db) => {
             const fromlemma = rows[0]?.fromlemma || null;
             */
 
-            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: parseInt(linenum)+1, filename: basename},ins.roles);
-            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @pos, @number, @gender, @nouncase, @person, @aspect, @voice, @syntax, @verbfunction, @particlefunction, @rootnoun, @misc, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
+            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, geminateswith: geminateswith, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: parseInt(linenum)+1, filename: basename},ins.roles);
+            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @pos, @number, @gender, @nouncase, @person, @aspect, @voice, @geminateswith, @syntax, @verbfunction, @particlefunction, @rootnoun, @misc, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(fromlemma)?.word || ins.form;
             const lemmadef = islemma ? worddef : 
                 fromlemma ? fulldb.prepare('SELECT definition FROM dictionary WHERE islemma = ?').get(fromlemma)?.definition :
