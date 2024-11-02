@@ -489,7 +489,6 @@ const findGemination = (entry, next) => {
     const nxttxt = next.querySelector('form').textContent.trim();
     if(nxttxt.startsWith('+'))
         return findPos(next);
-    console.log('fail');
     // new syntax!
     const gem = form.querySelector('c[type="geminated"]');
     if(gem) {
@@ -543,6 +542,7 @@ const addToDb = (fname,db) => {
             const prev = getPrevEntry(entries,n,linenum);
             const next = getNextEntry(entries,n,linenum);
             const geminateswith = findGemination(entry,realNext(entries,n));
+            console.log(geminateswith);
             const context = prev + cleanForm(entry.querySelector('form')) + next;
             /*
             const from = n > 0 ? n - 1 : n;
