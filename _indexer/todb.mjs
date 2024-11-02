@@ -47,7 +47,7 @@ const dbSchema = {
     person: new Set(['first person','second person','third person','third person']),
     aspect: new Set(['perfective aspect','imperfective aspect','negative','present tense']),
     voice: new Set(['passive','causative']),
-    geminateswith: POS, //TODO: and particle and undefined
+    geminateswith: new Set([...POS,'particle','undefined']),
     syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction']),
     verbfunction: new Set(['auxiliary','denomiative']),
     particlefunction: new Set(['concessive','indefinite','comparative','inclusive']),
@@ -542,7 +542,6 @@ const addToDb = (fname,db) => {
             const prev = getPrevEntry(entries,n,linenum);
             const next = getNextEntry(entries,n,linenum);
             const geminateswith = findGemination(entry,realNext(entries,n));
-            console.log(geminateswith);
             const context = prev + cleanForm(entry.querySelector('form')) + next;
             /*
             const from = n > 0 ? n - 1 : n;
