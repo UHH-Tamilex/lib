@@ -468,13 +468,14 @@ const findLines = (doc,id,standOff) => {
 };
 
 const findPos = el => {
-    const grams = el.querySelectorAll('gram type="role"');
+    const grams = el.querySelectorAll('gram[type="role"]');
     for(const gram of grams)
         if(POS.has(gram)) return gram;
     return 'undefined';
 };
 
 const findGemination = (entry, next) => {
+    console.log(next);
     if(!next) return null;
     const form = entry.querySelector('form');
     
