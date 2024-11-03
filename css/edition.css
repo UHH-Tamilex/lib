@@ -71,6 +71,10 @@ span.choice {
     margin-left: 0.3rem;
     padding-left: 0.2rem;
     margin-right: 0.3rem;
+    padding-right: 0.2rem;
+    border-left: 1px dashed rgb(120,120,120);
+    border-right: 1px dashed rgb(120,120,120);
+    border-radius: 0.4rem;
 }
 
 div.lg div.l.indent {
