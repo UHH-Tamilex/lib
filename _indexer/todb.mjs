@@ -318,7 +318,7 @@ const getNextEntry = (entries,n,linenum) => {
     return '';
     */
     const nextEntry = realNext(entries,n);
-    if(!nextEntry) return null;
+    if(!nextEntry) return '';
 
     const ellipsis = n < entries.length-2 ? '…' : '';
     return ' ' + isSameLine(linenum,nextEntry,true) + cleanForm(nextEntry.querySelector('form'),true) + ellipsis;
