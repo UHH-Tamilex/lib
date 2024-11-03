@@ -67,7 +67,10 @@ div.alternate::before {
 span.choice {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
-    padding-left:inherit;
+    text-indent: 0;
+    margin-left: 0.3rem;
+    padding-left: 0.2rem;
+    margin-right: 0.3rem;
 }
 
 div.lg div.l.indent {
