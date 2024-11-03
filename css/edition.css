@@ -247,7 +247,9 @@ span.invisible {
 .character {
     color: rgba(17,17,17,0.5);
 }
-    
+.character.elided {
+    color: inherit;
+}
 .character.uncertain::before {
     content: '(';
 }

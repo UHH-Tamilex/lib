@@ -684,19 +684,27 @@
 </xsl:template-->
 
 <xsl:template match="x:c">
+    <xsl:variable name="type" select="@type"/>
     <span>
         <xsl:attribute name="class">
             <xsl:text>character </xsl:text>
-            <xsl:value-of select="@type"/>
+            <xsl:value-of select="$type"/>
         </xsl:attribute>
         <xsl:attribute name="data-character"><xsl:value-of select="."/></xsl:attribute>
         <xsl:attribute name="data-anno"/>
         <span class="anno-inline ignored" lang="en">
-            <xsl:value-of select="@type"/>
+            <xsl:value-of select="$type"/>
             <xsl:text> </xsl:text>
             <q><xsl:apply-templates/></q>
         </span>
-        <xsl:apply-templates/>
+        <xsl:choose>
+            <xsl:when test="$type = 'elided'">
+                <xsl:text>'</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates/>
+            </xsl:otherwise>
+        </xsl:choose>
     </span>
 </xsl:template>
 </xsl:stylesheet>
