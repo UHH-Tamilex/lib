@@ -393,8 +393,9 @@ const transliterator = {
                     next.data = '-' + next.data;
                 }
                 else {
+                    console.log(node.nextSibling);
                     if(node.classList.contains('geminated') && 
-                        (!node.nextSibling || node.nextSibling.data.trim() === '')
+                        (!node.nextSibling || node.nextSibling.textContent.trim() === '')
                      )
                             continue;
 
