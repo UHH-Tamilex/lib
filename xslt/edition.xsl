@@ -242,9 +242,13 @@
                                     <input type="checkbox" id="mergerdgs" checked="true"/>
                                     <label>Merge groups</label>
                                 </div>
-                                <div>
+                                <div id="filefinder">
+                                    <span>Found file: </span><span style="font-weight: bold" id="foundfile"></span>
+                                    <button type="button" id="usefoundfile" style="margin-left: 1rem">Align from file</button>
+                                </div>
+                                <div style="margin-top: 1rem">
                                     <label for="teifile">Select alignment file... </label>
-                                    <input type="file" autocomplete="off" id="teifile" name="teifile" accept=".xml"/>
+                                    <input type="file" autocomplete="off" id="teifile" name="teifile" style="margin-left: 1rem" accept=".xml"/>
                                 </div>
                             </div>
                             <div id="variantsinput">
