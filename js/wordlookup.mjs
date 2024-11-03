@@ -10,7 +10,7 @@ const wordLookup = async (word) => {
         for(const pc of clone.querySelectorAll('.invisible, .ignored, .character.inserted, .character.glide, .character.geminated'))
             pc.remove();
         for(const u of clone.querySelectorAll('.character.elided'))
-            u.replace('u');
+            u.replaceWith('u');
         clean = Sanscript.t(clone.textContent.replaceAll('\u00AD',''),'tamil','iast');
     }
     const id = word.closest('[id]').id;
