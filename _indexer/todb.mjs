@@ -48,7 +48,7 @@ const dbSchema = {
     person: new Set(['first person','second person','third person','third person']),
     aspect: new Set(['perfective aspect','imperfective aspect','negative','present tense']),
     voice: new Set(['passive','causative']),
-    syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction']),
+    syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction','relative']),
     verbfunction: new Set(['auxiliary','denomiative']),
     particlefunction: new Set(['concessive','indefinite','comparative','inclusive']),
     misc: new Set(['ideophone','honorific']),
