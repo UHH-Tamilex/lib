@@ -57,6 +57,7 @@ const gramAbbreviations = [
     ['sub.','subjunctive'],
     ['pron.n.','pronominalised noun'],
     ['r.n.','root noun'],
+    ['rel.','relative'],
     ['sg.','singular'],
     ['soc.','sociative'],
     ['sub.','subjuntive'],
