@@ -7,9 +7,14 @@ import { init as cmWrapper } from './cmwrapper.mjs';
 const reverseAbbreviations = new Map(
     gramAbbreviations.map(arr => [arr[1],arr[0]])
 );
-var curDoc = null;
-var newDoc = null;
-var noteCM = null;
+const _state = {
+    curDoc: null,
+    newDoc: null,
+    noteCM: null,
+    tamlines: null,
+    wordsplits: null
+};
+
 const filename = window.location.pathname.split('/').pop();
 
 const addWordSplits = () => {
@@ -28,6 +33,7 @@ const addWordSplits = () => {
     
     document.getElementById('alignbutton').addEventListener('click',showSplits);
     document.getElementById('saveasbutton').addEventListener('click',saveAs);
+    document.getElementById('popup-output').addEventListener('input',refreshFromWordlist);
     blackout.style.display = 'flex';
     popup.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
@@ -67,14 +73,14 @@ const notesView = e => {
         targ.nextElementSibling.classList.remove('selected');
         tbs[0].style.display = 'block';
         //tbs[1].style.display = 'none';
-        noteCM.toTextArea();
+        _state.noteCM.toTextArea();
     }
     else {
         targ.previousSibling.classList.remove('selected');
         tbs[0].style.display = 'none';
         //tbs[1].style.display = 'block';
-        noteCM = cmWrapper(tbs[1]);
-        noteCM.setSize(null,'auto');
+        _state.noteCM = cmWrapper(tbs[1]);
+        _state.noteCM.setSize(null,'auto');
     }
 
 };
@@ -197,14 +203,14 @@ const matchCounts = (alignment,linecounts) => {
 const loadDoc = async () => {
     const res = await fetch(filename);
     const xmltext = await res.text();
-    curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
+    _state.curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
 
 const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
 const fillWordSplits = async (e) => {
     const selected = e.target.options[e.target.options.selectedIndex].value;
-    if(!curDoc) await loadDoc();
-    const standOff = curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
+    if(!_state.curDoc) await loadDoc();
+    const standOff = _state.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
 
     if(!standOff) {
         clearSplits();
@@ -237,7 +243,7 @@ const fillWordSplits = async (e) => {
             if(word.note) allnotes.push(serializer.serializeToString(word.note));
         }
     }
-    const lines = [...curDoc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
+    const lines = [..._state.curDoc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
     const linecounts = countLines(lines);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');
@@ -311,14 +317,16 @@ const getEditionText = el => {
 };
 
 const showSplits = async () => {
-    if(!curDoc) await loadDoc();
-    if(noteCM) noteCM.save();
+    if(!_state.curDoc) await loadDoc();
+    if(_state.noteCM) _state.noteCM.save();
 
     const popup = document.getElementById('splits-popup');
     popup.querySelector('.boxen').style.height = 'unset';
 
     document.getElementById('alignbutton').innerHTML = 'Re-align';
     document.getElementById('saveasbutton').style.display = 'block';
+    document.getElementById('saveasbutton').disabled = false;
+    document.getElementById('saveasbutton').title = '';
 
     popup.querySelector('.output-boxen').style.display = 'flex';
 
@@ -332,6 +340,7 @@ const showSplits = async () => {
     const tamval = Sanscript.t(inputs[0].value.replaceAll(/[\d∞]/g,'').trim(),'tamil','iast').replaceAll(/u\*/g,'*');
     //const tam = tamval.split(/\s+/).map(s => s.replace(/[,.;?!]$/,''));
     const tamlines = tamval.replaceAll(/[,.;?!](?=\s|$)/g,'').split(/\n+/);
+    _state.tamlines = tamlines;
     const tam = tamlines.reduce((acc,cur) => acc.concat(cur.trim().split(/\s+/)),[]);
 
     const engval = inputs[1].value.trim();
@@ -356,7 +365,7 @@ const showSplits = async () => {
     const textblock = document.getElementById(blockid).querySelector('.text-block');
     const text = Transliterate.getCachedText(textblock);
     */
-    const textblock = curDoc.querySelector(`[*|id="${blockid}"]`);
+    const textblock = _state.curDoc.querySelector(`[*|id="${blockid}"]`);
     const edition = textblock.querySelector('[type="edition"]');
     let text = edition ? getEditionText(edition) : getEditionText(textblock);
     text = text.replaceAll(/[\s\n]/g,'');
@@ -367,6 +376,9 @@ const showSplits = async () => {
     const tables = makeAlignmentTable(ret.alignment,tamlines.map(l => l.replaceAll(/\/.+?(?=\s|$)/g,'')),ret.warnings);
     
     debugbox.append(...tables);
+    
+    _state.wordlist = ret.wordlist;
+
     if(lookup) inputs[1].value = refreshTranslation(tamlines,ret.wordlist);
 
     output.style.display = 'block';
@@ -386,13 +398,13 @@ const showSplits = async () => {
 
     output.innerHTML = '';
     output.appendChild(res);
-    newDoc = curDoc.cloneNode(true);
-    let curStandOff = newDoc.querySelector(`standOff[type="wordsplit"][corresp="#${blockid}"]`);
+    _state.newDoc = _state.curDoc.cloneNode(true);
+    let curStandOff = _state.newDoc.querySelector(`standOff[type="wordsplit"][corresp="#${blockid}"]`);
     if(!curStandOff) {
-        curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
+        curStandOff = _state.newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
         curStandOff.setAttribute('corresp',`#${blockid}`);
         curStandOff.setAttribute('type','wordsplit');
-        newDoc.documentElement.appendChild(curStandOff);
+        _state.newDoc.documentElement.appendChild(curStandOff);
     }
     curStandOff.innerHTML = ret.xml;
     const code = document.createElement('div');
@@ -438,7 +450,7 @@ const saveAs = async () => {
             { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
         ],
     });
-    const serialized = (new XMLSerializer()).serializeToString(newDoc);
+    const serialized = (new XMLSerializer()).serializeToString(_state.newDoc);
     const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
     const writer = await fileHandle.createWritable();
     writer.write(file);
@@ -480,6 +492,15 @@ const copyToClipboard = (xml,popup) => {
     );
 };
 
+const refreshFromWordlist = e => {
+    document.getElementById('saveasbutton').disabled = true;
+    document.getElementById('saveasbutton').title = 'Realign first';
+    const row = e.target.closest('tr');
+    const index = [...row.parentNode.children].indexOf(row);
+    _state.wordlist[index].translation = e.target.textContent;
+    document.getElementById('wbwbox').value = refreshTranslation(_state.tamlines,_state.wordlist);
+
+};
 /*
 const addcsvwordsplit = (e) => {
     Papa.parse(e.target.files[0], {
