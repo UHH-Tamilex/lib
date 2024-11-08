@@ -312,9 +312,14 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     //const warnings = await cleanupWordlist(wordlist,notes,lookup);
     const entries = makeEntries(wordlist);
     const rle = formatAlignment(realigned,0);
-    const ret = {xml: rle + '\n' + entries.join('\n'), alignment: aligned, warnings: warnings};
-    if(lookup)
-        ret.wordlist = wordlist;
+    const ret = {
+        xml: rle + '\n' + entries.join('\n'), 
+        alignment: aligned, 
+        wordlist: wordlist,
+        warnings: warnings
+    };
+    //if(lookup)
+    //    ret.wordlist = wordlist;
     return ret;
 };
 /*
