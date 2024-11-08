@@ -425,7 +425,7 @@ const refreshTranslation = (lines,wordlist) => {
     const makeWord = (obj) => {
         let trans = obj.translation;
         if(obj.gram && obj.gram.length > 0)
-            trans = trans + '(' + obj.gram.join('') + ')';
+            trans = trans + '(' + obj.gram.join('|') + ')';
         if(trans === '') trans = '()';
         if(obj.wordnote) trans = trans + '*';
         return trans;
