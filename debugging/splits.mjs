@@ -497,8 +497,8 @@ const refreshFromWordlist = e => {
     document.getElementById('saveasbutton').title = 'Realign first';
     const row = e.target.closest('tr');
     const index = [...row.parentNode.children].indexOf(row);
-    _state.wordlist[index].translation = e.target.textContent;
-    document.getElementById('wbwbox').value = refreshTranslation(_state.tamlines,_state.wordlist);
+    _state.wordlist[index].translation = e.target.textContent.replaceAll(/\s/g,'_');
+    document.querySelector('#wbwbox textarea').value = refreshTranslation(_state.tamlines,_state.wordlist);
 
 };
 /*
