@@ -33,7 +33,7 @@ const addWordSplits = () => {
     
     document.getElementById('alignbutton').addEventListener('click',showSplits);
     document.getElementById('saveasbutton').addEventListener('click',saveAs);
-    document.getElementById('popup-output').addEventListener('input',refreshFromWordlist);
+    document.querySelector('#splits-popup .popup-output').addEventListener('input',refreshFromWordlist);
     blackout.style.display = 'flex';
     popup.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
