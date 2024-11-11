@@ -196,7 +196,6 @@ const getFile = async (e) => {
         mergerdgs: document.getElementById('mergerdgs').checked,
         blockid: blockid
     });
-
     //popup.style.height = '80%';
     //popup.querySelector('.boxen').style.height = 'unset';
 
@@ -209,7 +208,11 @@ const getFile = async (e) => {
     output.style.whiteSpace = 'break-spaces';
     output.style.height = '600px';
     output.style.width = '100%';
-
+    
+    if(app.error) {
+        output.innerHTML = app.error;
+        return;
+    }    
     newDoc = curDoc.cloneNode(true);
     let curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
     if(!curStandOff) {
@@ -231,39 +234,30 @@ const getFile = async (e) => {
     document.getElementById('saveapparatus').style.display = 'block';
 };
 
-const copyToClipboard = (xml,popup) => {
-    navigator.clipboard.writeText(xml).then(
-        () => {
-            const par = popup.querySelector('.popup-output');
-            const tip = document.createElement('div');
-            tip.style.position = 'absolute';
-            tip.style.top = 0;
-            tip.style.right = 0;
-            tip.style.background = 'rgba(0,0,0,0.5)';
-            tip.style.color = 'white';
-            tip.style.padding = '0.5rem';
-            tip.append('Copied to clipboard.');
-            par.appendChild(tip);
-            tip.animate([
-                {opacity: 0},
-                {opacity: 1, easing: 'ease-in'}
-                ],200);
-            setTimeout(() => tip.remove(),1000);
-        },
-        () => {
-            const par = popup.querySelector('.popup-output');
-            const tip = document.createElement('div');
-            tip.style.position = 'absolute';
-            tip.style.top = 0;
-            tip.style.right = 0;
-            tip.style.background = 'rgba(0,0,0,0.5)';
-            tip.style.color = 'red';
-            tip.style.padding = '0.5rem';
-            tip.append('Couldn\'t copy to clipboard.');
-            par.appendChild(tip);
-            setTimeout(() => tip.remove(),1000);
-        }
-    );
+const copyToClipboard = async (xml,popup) => {
+    const par = popup.querySelector('.popup-output');
+    const tip = document.createElement('div');
+    tip.style.position = 'absolute';
+    tip.style.top = 0;
+    tip.style.right = 0;
+    tip.style.background = 'rgba(0,0,0,0.5)';
+    tip.style.color = 'white';
+    tip.style.padding = '0.5rem';
+    try {
+        await navigator.clipboard.writeText(xml);
+        tip.append('Copied to clipboard.');
+        par.appendChild(tip);
+        tip.animate([
+            {opacity: 0},
+            {opacity: 1, easing: 'ease-in'}
+            ],200);
+    } catch {
+        const tip = document.createElement('div');
+        tip.style.color = 'red';
+        tip.append('Couldn\'t copy to clipboard.');
+        par.appendChild(tip);
+    }
+    setTimeout(() => tip.remove(),1000);
 };
 const mergeGroups = (doc) => {
     const els = doc.querySelectorAll('cl');
@@ -433,6 +427,8 @@ const getWitOrder = el => {
 };
 
 const makeApp = async (doc, opts) =>  {
+    const base = doc.querySelector(`TEI[n="${opts.base}"]`);
+    if(!base) return {error: `${opts.base} not found in alignment file.`};
     if(opts.mergerdgs) mergeGroups(doc);
     
     const curListWit = curDoc.querySelector('listWit');
