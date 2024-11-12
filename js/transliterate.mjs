@@ -6,6 +6,8 @@ import { hyphenation_ta_Latn } from './ta-Latn.mjs';
 import { hyphenation_sa } from './sa.mjs';
 import { hyphenation_hi } from './hi.mjs';
 
+const UTF8 = str => String.fromCodePoint(`0x${str}`);
+
 const _state = Object.seal({
     hindic: Object.freeze(['mr','hi','gu','raj','bra']),
     scriptToIso: new Map([
@@ -16,16 +18,21 @@ const _state = Object.seal({
         ['malayalam','Mlym'],
         ['newa','Newa'],
         ['sarada','Shrd'],
+        ['sinhala','Sinh'],
         ['telugu','Telu'],
-        ['nandinagari','Nand']
+        ['nandinagari','Nand'],
+        ['dbumed','Tibt'],
+        ['dbucan','Tibt'],
     ]),
     cachedtext: new Map(),
     parEl: null,
     hyphenator: {
         'ta-Taml': new Hypher(hyphenation_ta),
         'sa-Latn': new Hypher(hyphenation_sa),
+        'pi-Latn': new Hypher(hyphenation_sa),
         'ta-Latn': new Hypher(hyphenation_ta_Latn),
         'te-Latn': new Hypher(hyphenation_sa),
+        'ml-Latn': new Hypher(hyphenation_sa),
         'hi-Deva': new Hypher(hyphenation_hi)
     },
     defaultSanscript: null,
@@ -34,12 +41,10 @@ const _state = Object.seal({
         ['ta-Taml-t-ta-Latn','ta-Latn-t-ta-Taml'],
         ['te-Latn-t-te-Gran','te-Gran-t-te-Latn'],
         ['te-Gran-t-te-Latn','te-Latn-t-te-Gran'],
-        /*
-        ['mr-Latn-t-mr-Deva','mr-Deva-t-mr-Latn'],
-        ['mr-Deva-t-mr-Latn','mr-Latn-t-mr-Deva'],
-        ['hi-Latn-t-hi-Deva','hi-Deva-t-hi-Latn'],
-        ['hi-Deva-t-hi-Latn','hi-Latn-t-hi-Deva']
-        */
+        ['ml-Mlym-t-ml-Latn','ml-Latn-t-ml-Mlym'],
+        ['ml-Latn-t-ml-Mlym','ml-Mlym-t-ml-Latn'],
+        ['pi-Sinh-t-pi-Latn','pi-Latn-t-pi-Sinh'],
+        ['pi-Latn-t-pi-Sinh','pi-Sinh-t-pi-Latn'],
     ]),
     isoToScript: new Map(),
     availlangs: null,
@@ -48,7 +53,7 @@ const _state = Object.seal({
     button: null
 });
 
-_state.availlangs = Object.freeze(['sa','ta','te',..._state.hindic]);
+_state.availlangs = Object.freeze(['sa','ta','ml','pi','te',..._state.hindic]);
 
 _state.hindic.forEach(code => {
     _state.hyphenator[`${code}-Latn`] = _state.hyphenator['sa-Latn'];
@@ -124,7 +129,7 @@ const button = {
             _state.button.textContent = to.tamil('a');
             _state.button.lang = 'ta-Taml';
         }
-        else {
+        else if(_state.defaultSanscript) {
             _state.button.textContent = to[_state.defaultSanscript]('a');
             _state.button.lang = `sa-${_state.scriptToIso.get(_state.defaultSanscript)}`;
         }
@@ -151,14 +156,14 @@ const cache = {
      *  @param  {Node}   txtnode
      *  @return {String}         Hyphenated (and transliterated) text
      */
-    set(txtnode) {
+    set: txtnode => {
         // don't break before daṇḍa, or between daṇḍa and numeral/puṣpikā
         const nbsp = String.fromCodePoint('0x0A0');
         const txt = txtnode.data
             .replace(/\s+([\|।॥])/g,`${nbsp}$1`)
             .replace(/([\|।॥])\s+(?=[\d०१२३४५६७८९❈꣸৽৽])/g,`$1${nbsp}`);
         
-        const getShortLang = (node) => {
+        const getShortLang = node => {
             const s = node.lang.split('-t-');
             if(node.classList.contains('originalscript'))
                 return s[1];
@@ -191,12 +196,12 @@ const cache = {
      *  @param {Node} txtnode
      *  @return       string
      */
-    get: (txtnode) => _state.cachedtext.has(txtnode) ?
-                           _state.cachedtext.get(txtnode) :
-                           txtnode.data,
+    get: txtnode => _state.cachedtext.has(txtnode) ?
+                        _state.cachedtext.get(txtnode) :
+                        txtnode.data,
 };
 
-const getSanscript = (handDescs) => {
+const getSanscript = handDescs => {
     if(handDescs.length === 0) return _state.defaultSanscript;
 
     // just take first script, or Tamil (Grantha) if necessary
@@ -209,21 +214,8 @@ const getSanscript = (handDescs) => {
         }
     }
     return maybetamil ? 'grantha' : false;
-    /*
-    const scripts = [...handDescs].reduce((acc,cur) => {
-        for(const s of cur.dataset.script.split(' '))
-            acc.add(s);
-            return acc;
-    },new Set());
-    
-    let maybetamil = false;
-    for(const s of scripts) {
-        if(s === 'tamil') maybetamil = true;
-        else if(_state.scriptnames.has(s)) return s;
-    }
-    return maybetamil ? 'grantha' : false;
-    */
 };
+
 const prepText = () => {
     // tag codicological units associated with a script first
     const synchs = _state.parEl.querySelectorAll('[data-synch]');
@@ -265,6 +257,14 @@ const prepText = () => {
  */
 const prepTextWalker = (walker,scriptcode) => {
     let curnode = walker.currentNode;
+
+    const getParScript = (curnode) => {
+        const scriptsplit = curnode.parentNode.lang.split('-');
+        if(scriptsplit.length > 1)
+            return scriptsplit.pop();
+        else return null;
+    };
+
     while(curnode) {
         if(curnode.nodeType === Node.ELEMENT_NODE) {
             // what about script features? (e.g. valapalagilaka)
@@ -303,12 +303,8 @@ const prepTextWalker = (walker,scriptcode) => {
                         // no script specified, assume IAST transliteration
                         // case 1: script is specified by parent or parameter
                             // could be a 'hi-Deva' parent, with 'sa' child === 'sa-Deva'
-                        const parscript = (() => {
-                            const scriptsplit = curnode.parentNode.lang.split('-');
-                            if(scriptsplit.length > 1)
-                                return scriptsplit.pop();
-                            else return null;
-                        })();
+                        const parscript = getParScript(curnode);
+
                         let scriptappend = parscript || scriptcode;
 
                         // if language is unqualified 'sa' and script is 'Taml', 
@@ -320,19 +316,6 @@ const prepTextWalker = (walker,scriptcode) => {
                             `${curlang}-Latn-t-${curlang}-${scriptappend}`:
                         // case 2: script not specified at all
                             `${curlang}-Latn`;
-                        /*
-                        const parlength = parlang.length;
-                        if(parlength > 0 && parlang[parlength-1] !== 'Taml') {
-                            curnode.lang = parlangcode + curnode.parentNode.lang;
-                        }
-                        else {
-                            const sascriptcode = scriptcode === 'Taml' ? 
-                                'Gran' : scriptcode; 
-                            curnode.lang = sascriptcode ? 
-                                `${curlang}-Latn-t-${curlang}-${sascriptcode}` : 'sa-Latn';
-                        
-                        }
-                        */
                     }
                     // case 3: no change
                 }
@@ -349,185 +332,177 @@ const prepTextWalker = (walker,scriptcode) => {
     }
 };
 
-const transliterator = {
-    toggle() {
-        /*
-        const subst = _state.parEl.querySelectorAll('span.subst, span.choice, span.expan');
-        const torevert = _state.parEl.querySelectorAll('.torevert');
-        */
-        //const subst = document.querySelectorAll(`span.subst[lang|="${tolang.lang}"],span.choice[lang|="${tolang.lang}"],span.expan[lang|="${tolang.lang}"`);
-        if(_state.button.lang === 'en') {
-            this.revert();
-            button.revert();
-            /*
-            for(const s of [...subst,...torevert])
-                this.unjiggle(s);
-            */
-        }
-        else {
-            this.activate();
-            button.transliterate();
-        }
-    },
+const transliterator = {};
 
-    jiggleChars(par = _state.parEl) {
-        const chars = par.querySelectorAll('.word.split span.character');
-        for(const node of chars) {
-            if(node.classList.contains('elided') ||
-                (node.classList.contains('uncertain') && node.dataset.character === 'a')
-              ) {
-                markToRevert(node);
+transliterator.toggle = () => {
+    if(_state.button.lang === 'en') {
+        transliterator.revert();
+        button.revert();
+    }
+    else {
+        transliterator.activate();
+        button.transliterate();
+    }
+};
 
-                const prev = realPrev(node.previousSibling);
-                prev.data = prev.data + node.dataset.character;
+transliterator.jiggleChars = (par = _state.parEl) => {
+    const chars = par.querySelectorAll('.word.split span.character');
+    for(const node of chars) {
+        if(node.classList.contains('elided') ||
+            (node.classList.contains('uncertain') && node.dataset.character === 'a')
+          ) {
+            markToRevert(node);
+
+            const prev = realPrev(node.previousSibling);
+            prev.data = prev.data + node.dataset.character;
+
+            const temp = node.querySelector('.temporary');
+            if(temp) temp.lastChild.data = '';
+            else node.lastChild.data = '';
+        }
+        else if(node.classList.contains('glide') || node.classList.contains('geminated')) {
+            const prev = realPrev(node.previousSibling);
+            const next = realNext(node.nextSibling);
+            if(next && prev.nodeType === 3 && prev.data.endsWith('-')) {
+                prev.data = prev.data.slice(0,-1);
+                next.data = '-' + next.data;
+            }
+            else {
+                console.log(node.nextSibling);
+                if(node.classList.contains('geminated') && 
+                    (!node.nextSibling || node.nextSibling.textContent.trim() === '')
+                 )
+                        continue;
+
+                const parword = node.closest('.word.split');
+                const prevword = parword.previousElementSibling || parword.closest('.l').previousElementSibling.lastElementChild; 
+                markToRevert(prevword);
+                markToRevert(parword);
+
+                const clone = node.cloneNode(true);
+                prevword.append(clone);
 
                 const temp = node.querySelector('.temporary');
                 if(temp) temp.lastChild.data = '';
                 else node.lastChild.data = '';
             }
-            else if(node.classList.contains('glide') || node.classList.contains('geminated')) {
-                const prev = realPrev(node.previousSibling);
-                const next = realNext(node.nextSibling);
-                if(next && prev.nodeType === 3 && prev.data.endsWith('-')) {
-                    prev.data = prev.data.slice(0,-1);
-                    next.data = '-' + next.data;
-                }
-                else {
-                    console.log(node.nextSibling);
-                    if(node.classList.contains('geminated') && 
-                        (!node.nextSibling || node.nextSibling.textContent.trim() === '')
-                     )
-                            continue;
-
-                    const parword = node.closest('.word.split');
-                    const prevword = parword.previousElementSibling || parword.closest('.l').previousElementSibling.lastElementChild; 
-                    markToRevert(prevword);
-                    markToRevert(parword);
-
-                    const clone = node.cloneNode(true);
-                    prevword.append(clone);
-
-                    const temp = node.querySelector('.temporary');
-                    if(temp) temp.lastChild.data = '';
-                    else node.lastChild.data = '';
-                }
-            }
         }
-    },
-    revert(par = _state.parEl) {
-        const puncs = par.getElementsByClassName('invisible');
-        for(const p of puncs) p.classList.remove('off');
-
-        const walker = document.createTreeWalker(par,NodeFilter.SHOW_ALL);
-        var curnode = walker.currentNode;
-        while(curnode) {
-            if(curnode.nodeType === Node.ELEMENT_NODE) {
-                const rev = _state.reverselangs.get(curnode.lang);
-                if(rev) curnode.lang = rev;
-            }
-            else if(curnode.nodeType === Node.TEXT_NODE) {
-                // lang attribute has already been reversed (hence take index 1)
-                const parlang = curnode.parentNode.lang.split('-');
-                const fromLatn = parlang[1];
-                if(fromLatn === 'Latn') {
-                    const result = (() => {
-                        const cached = cache.get(curnode);
-                        if(curnode.parentNode.classList.contains('originalscript')) {
-                            //TODO: also do for sa-Beng, sa-Deva, etc.
-                            const fromcode = _state.isoToScript.get(parlang[4]);
-                            return to.iast(cached,fromcode);
-                        }
-                        else
-                            return cached;
-                    })();
-                    if(result !== undefined) curnode.data = result;
-                }
-            }
-            curnode = walker.nextNode();
-        }
-
-        //const subst = par.querySelectorAll('span.subst, span.choice, span.expan');
-        const torevert = par.querySelectorAll('.torevert');
-        //for(const s of [...subst,...torevert]) {
-        for(const s of torevert) {
-            unjiggle(s);
-        }
-
-    },
-    
-    activate(par = _state.parEl) {
-        const subst = par.querySelectorAll('span.subst, span.choice, span.expan');
-        for(const s of subst)
-            if(s.lang.startsWith('sa') || s.lang.startsWith('ta')) jiggle(s);
-            //TODO: Also other languages?
-
-        this.jiggleChars(par);
-        convertNums(par);
-        // Go through all <pc>-</pc> tags and make them invisible,
-        // then empty the text node on the left, and add its content
-        // to the text not on the right.
-        // If there are many <pc> tags, the text node on the right
-        // just keeps getting longer.
-        // The original state of each text node was previously cached.
-        const puncs = par.getElementsByClassName('invisible');
-        //const puncs = _state.parEl.querySelectorAll(`.invisible[lang=${langcode}]`);
-        for(const p of puncs) {
-            if(p.lang === 'en') continue; // en nodes aren't cached
-            //if(p.classList.contains('off')) continue;
-            p.classList.add('off');
-            const prev = p.previousSibling;
-            const next = p.nextSibling;
-            if(prev && (prev.nodeType === Node.TEXT_NODE) &&
-               next && (next.nodeType === Node.TEXT_NODE)) {
-                next.data = prev.data + next.data;
-                prev.data = '';
-            }
-            else if(prev && prev.nodeType === 1 && prev.classList.contains('temporary') &&
-                next && next.nodeType === 1 && next.classList.contains('temporary')) {
-                next.firstChild.data = prev.firstChild.data + next.firstChild.data;
-                prev.firstChild.data = '';
-            }
-        }
-         
-        const walker = document.createTreeWalker(par,NodeFilter.SHOW_ALL);
-        var curnode = walker.currentNode;
-        while(curnode) {
-            if(curnode.nodeType === Node.ELEMENT_NODE) {
-                const rev = _state.reverselangs.get(curnode.lang);
-                if(rev) curnode.lang = rev;
-            }
-            else if(curnode.nodeType === Node.TEXT_NODE) {
-                const [lang, script] = (() => {
-                    const s = curnode.parentNode.lang.split('-');
-                    return [s[0],s[1]];
-                })();
-                if(_state.availlangs.includes(lang)) {
-                    const scriptfunc = (() => {
-                        if(to.hasOwnProperty(script))
-                            return to[script];
-                        return null;
-                    })();
-                    const result = (() => {
-                        if(curnode.parentElement.dataset.hasOwnProperty('glyph'))
-                            return curnode.parentElement.dataset.glyph;
-                        if(curnode.parentElement.classList.contains('originalscript'))
-                            return cache.get(curnode);
-                        if(!scriptfunc) return undefined;
-                        return scriptfunc(curnode.data);
-                    })();
-                    if(result !== undefined) curnode.data = result;
-                }
-            }
-            curnode = walker.nextNode();
-        }
-    },
+    }
 };
 
-const jiggle = (node/*,script,lang*/) => {
+transliterator.revert = (par = _state.parEl) => {
+    const getCached = (curnode,parlang) => {
+        const cached = cache.get(curnode);
+        if(curnode.parentNode.classList.contains('originalscript')) {
+            //TODO: also do for sa-Beng, sa-Deva, etc.
+            const fromcode = _state.isoToScript.get(parlang[4]);
+            return to.iast(cached,fromcode);
+        }
+        else
+            return cached;
+    };
+    const puncs = par.getElementsByClassName('invisible');
+    for(const p of puncs) p.classList.remove('off');
+
+    const walker = document.createTreeWalker(par,NodeFilter.SHOW_ALL);
+    var curnode = walker.currentNode;
+    while(curnode) {
+        if(curnode.nodeType === Node.ELEMENT_NODE) {
+            const rev = _state.reverselangs.get(curnode.lang);
+            if(rev) curnode.lang = rev;
+        }
+        else if(curnode.nodeType === Node.TEXT_NODE) {
+            // lang attribute has already been reversed (hence take index 1)
+            const parlang = curnode.parentNode.lang.split('-');
+            const fromLatn = parlang[1];
+            if(fromLatn === 'Latn') {
+                const result = getCached(curnode,parlang);
+                if(result !== undefined) curnode.data = result;
+            }
+        }
+        curnode = walker.nextNode();
+    }
+
+    //const subst = par.querySelectorAll('span.subst, span.choice, span.expan');
+    const torevert = par.querySelectorAll('.torevert');
+    //for(const s of [...subst,...torevert]) {
+    for(const s of torevert) {
+        transliterator.unjiggle(s);
+    }
+
+};
+    
+transliterator.activate = (par = _state.parEl) => {
+    const subst = par.querySelectorAll('span.subst, span.choice, span.expan');
+    for(const s of subst)
+        if(s.lang.startsWith('sa') || s.lang.startsWith('ta')) transliterator.jiggle(s);
+        //TODO: Also other languages?
+
+    transliterator.jiggleChars(par);
+    transliterator.convertNums(par);
+    // Go through all <pc>-</pc> tags and make them invisible,
+    // then empty the text node on the left, and add its content
+    // to the text not on the right.
+    // If there are many <pc> tags, the text node on the right
+    // just keeps getting longer.
+    // The original state of each text node was previously cached.
+    const puncs = par.getElementsByClassName('invisible');
+    //const puncs = _state.parEl.querySelectorAll(`.invisible[lang=${langcode}]`);
+    for(const p of puncs) {
+        if(p.lang === 'en') continue; // en nodes aren't cached
+        //if(p.classList.contains('off')) continue;
+        p.classList.add('off');
+        const prev = p.previousSibling;
+        const next = p.nextSibling;
+        if(prev && (prev.nodeType === Node.TEXT_NODE) &&
+           next && (next.nodeType === Node.TEXT_NODE)) {
+            next.data = prev.data + next.data;
+            prev.data = '';
+        }
+        else if(prev && prev.nodeType === 1 && prev.classList.contains('temporary') &&
+            next && next.nodeType === 1 && next.classList.contains('temporary')) {
+            next.firstChild.data = prev.firstChild.data + next.firstChild.data;
+            prev.firstChild.data = '';
+        }
+    }
+     
+    const walker = document.createTreeWalker(par,NodeFilter.SHOW_ALL);
+    var curnode = walker.currentNode;
+    while(curnode) {
+        if(curnode.nodeType === Node.ELEMENT_NODE) {
+            const rev = _state.reverselangs.get(curnode.lang);
+            if(rev) curnode.lang = rev;
+        }
+        else if(curnode.nodeType === Node.TEXT_NODE) {
+           
+            const [lang, script] = curnode.parentNode.lang.split('-');
+
+            if(_state.availlangs.includes(lang)) {
+                
+                const scriptfunc = to.hasOwnProperty(script) ? to[script] : null;
+                
+
+                let result;
+                // non-HTML tags will have no .dataset (e.g. tagname typos)
+                if(curnode.parentElement.dataset?.hasOwnProperty('glyph'))
+                    result = curnode.parentElement.dataset.glyph;
+                if(curnode.parentElement.classList.contains('originalscript'))
+                    result = cache.get(curnode);
+                if(scriptfunc)
+                    result = scriptfunc(curnode.data);
+
+                if(result !== undefined) curnode.data = result;
+            }
+        }
+        curnode = walker.nextNode();
+    }
+};
+
+transliterator.jiggle = node => {
     if(node.firstChild.nodeType !== 3 && node.lastChild.nodeType !== 3) 
         return;
     
-    unjiggle(node);
+    transliterator.unjiggle(node);
     
     const [lang,script] = (() => {
         const s = node.lang.split('-');
@@ -702,16 +677,16 @@ const jiggle = (node/*,script,lang*/) => {
     */
 };
 
-const unjiggle = (node) => {
+transliterator.unjiggle = node => {
     if(node.hasOwnProperty('origNode'))
         node.replaceWith(node.origNode);
 };
 
-const convertNums = (par = _state.parEl) => {
+transliterator.convertNums = (par = _state.parEl) => {
     const nums = par.querySelectorAll('span.num.trad[lang="ta-Latn-t-ta-Taml"], span.num.trad[lang="sa-Latn-t-sa-Gran"], span.num.trad[lang="sa-Latn-t-sa-Mlym"]');
+    const makeWalker = n => document.createTreeWalker(n,NodeFilter.SHOW_TEXT,{acceptNode() {return NodeFilter.FILTER_ACCEPT;}});
     for(const num of nums) {
-        const walker = document.createTreeWalker(num,NodeFilter.SHOW_TEXT,
-            {acceptNode() {return NodeFilter.FILTER_ACCEPT;} });
+        const walker = makeWalker(num);
         var curnode = walker.currentNode;
         while(walker.nextNode()) {
             const curnode = walker.currentNode;
@@ -719,6 +694,7 @@ const convertNums = (par = _state.parEl) => {
         }
     }
 };
+
 const to = {
 
     smush: function(text,d_conv = false) {
@@ -747,7 +723,7 @@ const to = {
         return text;
     },
     
-    nums: function(text) {
+    nums: text => {
         const newarr = [];
         const rev = text.split('').reverse();
         let offset = 0;
@@ -782,25 +758,25 @@ const to = {
         else return literated;
     },
     
-    tamil: function(text) {
+    tamil: text => {
         const txt = to.smush(text);
         const grv = new Map([
-            ['\u0B82','\u{11300}'],
-            ['\u0BBE','\u{1133E}'],
-            ['\u0BBF','\u{1133F}'],
-            ['\u0BC0','\u{11340}'],
-            ['\u0BC1','\u{11341}'],
-            ['\u0BC2','\u{11342}'],
-            ['\u0BC6','\u{11347}'],
-            ['\u0BC7','\u{11347}'],
-            ['\u0BC8','\u{11348}'],
-            ['\u0BCA','\u{1134B}'],
-            ['\u0BCB','\u{1134B}'],
-            ['\u0BCC','\u{1134C}'],
-            ['\u0BCD','\u{1134D}'],
-            ['\u0BD7','\u{11357}']
+            ['\u0B82',UTF8('11300')],
+            ['\u0BBE',UTF8('1133E')],
+            ['\u0BBF',UTF8('1133F')],
+            ['\u0BC0',UTF8('11340')],
+            ['\u0BC1',UTF8('11341')],
+            ['\u0BC2',UTF8('11342')],
+            ['\u0BC6',UTF8('11347')],
+            ['\u0BC7',UTF8('11347')],
+            ['\u0BC8',UTF8('11348')],
+            ['\u0BCA',UTF8('1134B')],
+            ['\u0BCB',UTF8('1134B')],
+            ['\u0BCC',UTF8('1134C')],
+            ['\u0BCD',UTF8('1134D')],
+            ['\u0BD7',UTF8('11357')]
         ]);
-        const grc = ['\u{11316}','\u{11317}','\u{11318}','\u{1131B}','\u{1131D}','\u{11320}','\u{11321}','\u{11322}','\u{11325}','\u{11326}','\u{11327}','\u{1132B}','\u{1132C}','\u{1132D}'];
+        const grc = [UTF8('11316'),UTF8('11317'),UTF8('11318'),UTF8('1131B'),UTF8('1131D'),UTF8('11320'),UTF8('11321'),UTF8('11322'),UTF8('11325'),UTF8('11326'),UTF8('11327'),UTF8('1132B'),UTF8('1132C'),UTF8('1132D')];
 
         const smushed = text
             .replace(/([kṅcñṭṇtnpmyrlvḻḷṟṉ])\s+([aāiīuūeēoō])/g, '$1$2')
@@ -817,18 +793,18 @@ const to = {
     },
     grantha: function(txt) {
         const grv = new Map([
-            ['\u{11300}','\u0B82'],
-            ['\u{1133E}','\u0BBE'],
-            ['\u{1133F}','\u0BBF'],
-            ['\u{11340}','\u0BC0'],
-            ['\u{11341}','\u0BC1'],
-            ['\u{11342}','\u0BC2'],
-            ['\u{11347}','\u0BC6'],
-            ['\u{11348}','\u0BC8'],
-            ['\u{1134B}','\u0BCA'],
-            ['\u{1134C}','\u0BCC'],
-            ['\u{1134D}','\u0BCD'],
-            ['\u{11357}','\u0BD7']
+            [UTF8('11300'),'\u0B82'],
+            [UTF8('1133E'),'\u0BBE'],
+            [UTF8('1133F'),'\u0BBF'],
+            [UTF8('11340'),'\u0BC0'],
+            [UTF8('11341'),'\u0BC1'],
+            [UTF8('11342'),'\u0BC2'],
+            [UTF8('11347'),'\u0BC6'],
+            [UTF8('11348'),'\u0BC8'],
+            [UTF8('1134B'),'\u0BCA'],
+            [UTF8('1134C'),'\u0BCC'],
+            [UTF8('1134D'),'\u0BCD'],
+            [UTF8('11357'),'\u0BD7']
         ]);
         const tmc = ['\u0BA9','\u0BB1','\u0BB3','\u0BB4'];
         const rgex = new RegExp(`([${tmc.join('')}])([${[...grv.keys()].join('')}])`,'gu');
@@ -849,21 +825,25 @@ const to = {
     malayalam: function(txt) {
         const chillu = {
             'ക':'ൿ',
+            'ണ':'ൺ',
             'ത':'ൽ',
             'ന':'ൻ',
             'മ':'ൔ',
             'ര':'ർ',
+            'ല':'ൽ',
+            'ള':'ൾ'
         };
 
         const smushed = to.smush(txt,true)
             .replace(/(^|\s)_ā/,'$1\u0D3D\u200D\u0D3E')
             //.replace(/(^|\s)_r/,"$1\u0D3D\u200D\u0D30\u0D4D");
             //FIXME (replaced by chillu r right now)
+            .replace(/ŭ/g,'u\u0D4D')
             .replace(/(\S)·/g,'$1\u200C');
         
         const newtxt = Sanscript.t(smushed,'iast','malayalam')
             // use chillu final consonants	
-            .replace(/([കതനമര])്(?![^\s\u200C,—’―])/g, function(match,p1) {
+            .replaceAll(/([കണതനമരലള])്(?![^\s\u200C,—’―])/g, function(match,p1) {
                 return chillu[p1];
             });
 
@@ -925,7 +905,7 @@ const to = {
 
         const posttext = replacedtext//.replace(/ê/g,'e') // no pṛṣṭhamātrās
             //.replace(/ô/g,'o') // same with o
-            .replace(/ṙ/g,'r\u200D') // valapalagilaka
+            .replace(/ṙ/g,'r\u200D'); // valapalagilaka
             //.replace(/ṁ/g,'ṃ') // no telugu oṃkāra sign
             //.replace(/ḿ/g,'ṃ')
             //.replace(/î/g,'i') // no pṛṣṭhamātrās
@@ -956,8 +936,15 @@ const to = {
         const smushed = to.smush(pretext);
 
         const text = Sanscript.t(smushed,'iast','sarada')
-            .replace(/¯/g, '\u{111DC}');
+            .replace(/¯/g, UTF8('111DC'));
         return text;
+    },
+    
+    sinhala: function(txt) {
+
+        const smushed = to.smush(txt);
+
+        return Sanscript.t(smushed,'iast','sinhala');
     },
 
     nandinagari: function(txt) {
@@ -969,7 +956,7 @@ const to = {
         const smushed = to.smush(pretext);
 
         const text = Sanscript.t(smushed,'iast','nandinagari')
-            .replace(/¯/g, '\u{119E3}');
+            .replace(/¯/g, UTF8('119E3'));
         return text;
     },
 };
@@ -1034,12 +1021,11 @@ const markToRevert = el => {
 const Transliterate = Object.freeze({
     init: init,
     to: to,
-    scripts: function() { return _state.scriptnames;},
+    scripts: () => _state.scriptnames,
     refreshCache: refreshCache,
     activate: transliterator.activate,
     revert: transliterator.revert,
-    jiggleChars: transliterator.jiggleChars,
-    getCached: (el) => _state.cachedtext.get(el),
+    getCached: el => _state.cachedtext.get(el),
     getCachedText: getCachedText
 
 });
