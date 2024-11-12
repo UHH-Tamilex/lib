@@ -671,7 +671,7 @@ transliterator.jiggle = node => {
         node.insertBefore(el,node.firstChild);
     }
     
-    const virama = Sanscript.schemes[isoToScript(script)].virama;
+    const virama = Sanscript.schemes[_state.isoToScript(script)].virama;
     for (const arr of add_virama) {
         const newel = document.createElement(arr[1]);
         for(const att of arr[0].attributes)
