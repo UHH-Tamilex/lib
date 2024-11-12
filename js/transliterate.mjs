@@ -368,7 +368,6 @@ transliterator.jiggleChars = (par = _state.parEl) => {
                 next.data = '-' + next.data;
             }
             else {
-                console.log(node.nextSibling);
                 if(node.classList.contains('geminated') && 
                     (!node.nextSibling || node.nextSibling.textContent.trim() === '')
                  )
@@ -532,12 +531,8 @@ transliterator.jiggle = node => {
         const txt = kid.textContent.trim();
         if(txt === '') continue;
         if(txt === 'a') { 
-            if(kid.nodeType === 1) {
-                if(kid.nodeName === 'del')
-                    add_virama.push([kid,'ins']);
-                else if(kid.nodeName === 'ins')
-                    add_virama.push([kid,'del']);
-            }
+            if(kid.nodeType === 1)
+                add_virama.push(kid);
             kid.textContent = '';
             continue;
         }
@@ -672,12 +667,17 @@ transliterator.jiggle = node => {
     }
     
     const virama = Sanscript.schemes[_state.isoToScript.get(script)].virama;
-    for (const arr of add_virama) {
-        const newel = document.createElement(arr[1]);
-        for(const att of arr[0].attributes)
+    for (const el of add_virama) {
+        const newel = el.nodeName === 'DEL' ? 
+            document.createElement('ins') :
+            document.createElement('del');
+        if(newel.nodeName === 'INS')
+            newel.className = 'add';
+
+        for(const att of el.attributes)
             newel.setAttribute(att.name,att.value);
-        newel.textContent = virama;
-        arr[0].replace(newel);
+        newel.append(virama);
+        el.replaceWith(newel);
     }
 
     if(telugu_del_headstroke) {
