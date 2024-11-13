@@ -30,7 +30,8 @@ const POS = new Set(['noun',
                    'conditional',
                    'imperative',
                    'optative',
-                   'subjunctive']);
+                   'subjunctive',
+                   'interjection']);
 const dbSchema = {
     pos: POS,
     number: new Set(['singular','plural']),

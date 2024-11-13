@@ -31,6 +31,7 @@ const gramAbbreviations = [
     ['inf.','infinitive'],
     ['inst.','instrumental'],
     ['inter.pron.','interrogative pronoun'],
+    ['interj.','interjection'],
     ['ipt.','imperative'],
     ['loc.','locative'],
     ['m.','masculine'],
