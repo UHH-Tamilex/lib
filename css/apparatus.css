@@ -2,7 +2,7 @@ section div.wide {
     max-width: 100%;
     display: flex;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: space-between;
 }
 .text-block {
     top: 0;
