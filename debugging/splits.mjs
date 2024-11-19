@@ -207,7 +207,7 @@ const showSplits = async () => {
     const tam = tamlines.reduce((acc,cur) => acc.concat(cur.trim().split(/\s+/)),[]);
 
     const engval = inputs[1].value.trim();
-    const eng = engval ? engval.split(/\s+/).map(s => s.replace(/[,.;?!]$/,'')) :
+    const eng = engval ? engval.split(/\s+/) : //.map(s => s.replace(/[,.;?!]$/,'')) :
                          Array(tam.length).fill('');
 
     if(engval) {

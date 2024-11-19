@@ -522,13 +522,15 @@ const findAffix = (word,translation) => {
 };
 
 const findGrammar = (translation) => {
-    const gram = translation.search(/\(.+\)-?$/);
-    if(gram == -1) return null;
+    //const gram = translation.search(/\(.+?\)-?$/);
+    //if(gram == -1) return null;
+    const gram = translation.lastIndexOf('(');
+    if(gram === -1) return null;
 
-    const hyphen = translation.endsWith('-') ? '-' : '';
-    const trimmed = translation.slice(0,gram) + hyphen;
+    //const hyphen = translation.endsWith('-') ? '-' : '';
+    const trimmed = translation.slice(0,gram);// + hyphen;
 
-    let hay = translation.slice(gram).replaceAll(/[\(\)\-]/g,'');
+    let hay = translation.slice(gram).replaceAll(/[\(\)]/g,'');
     
     const ret = [];
     let hayswarning = false;
