@@ -292,8 +292,8 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
                 const slice0 = jiggleSlice(alignment[0],start,end);
                 const slice1 = jiggleSlice(alignment[1],start,end);
                 const {words: strand, warnings: morewarnings} = await getWordlist(
-                        wordsplit[n].split('|'),
-                        transsplit[n].split('|'),
+                        wordsplit[n].split(/(?<!\.)\|/),
+                        transsplit[n].split(/(?<!\.)\|/),
                         [slice0,slice1],
                         notes,
                         lookup
