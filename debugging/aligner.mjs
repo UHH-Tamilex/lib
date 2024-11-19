@@ -251,7 +251,14 @@ const getSandhiform = (sandhisequence,start,end) => {
 const getWordlist = async (tam,eng,alignment,notes,lookup) => {
     const warnings = [];
     const ret = [];
-
+    const jiggleSlice = (a,s,e) => {
+        const ret = a.slice(s,e);
+        if(ret[0] === CONCATLEFT)
+            ret[0] = a[s-1];
+        if(ret[ret.length-1] === CONCATRIGHT)
+            ret[ret.length-1] = a[e];
+        return ret;
+    };
     let start = 0;
     for(let n=0;n<tam.length;n++) {
         // TODO: should we remove hyphens or not?
@@ -282,10 +289,12 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
             const transsplit = entry.translation.split('/');
             entry.superEntry = [];
             for(let n=0;n<wordsplit.length;n++) {
+                const slice0 = jiggleSlice(alignment[0],start,end);
+                const slice1 = jiggleSlice(alignment[1],start,end);
                 const {words: strand, warnings: morewarnings} = await getWordlist(
                         wordsplit[n].split('|'),
                         transsplit[n].split('|'),
-                        [alignment[0].slice(start,end),alignment[1].slice(start,end)],
+                        [slice0,slice1],
                         notes,
                         lookup
                     );
