@@ -55,6 +55,8 @@ const makeWordsplits = (standOff, serializer = new XMLSerializer()) => {
     return {eng: engout, tam: tamout, notes: allnotes};
 };
 
+const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
+
 const processEntry = (entry) => {
     const def = entry.querySelector('def');
     const grammar = getGrammar(entry);
@@ -134,4 +136,4 @@ const countLines = lines => {
     },[]);
 };
 */
-export {makeWordsplits, getEditionText, countLines};
+export {makeWordsplits, getEditionText};

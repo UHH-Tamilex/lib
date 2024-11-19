@@ -122,8 +122,6 @@ const loadDoc = async () => {
     _state.curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
 
-const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
-
 const fillWordSplits = async (e) => {
     if(!_state.curDoc) await loadDoc();
     const selected = e.target.options[e.target.options.selectedIndex].value;
