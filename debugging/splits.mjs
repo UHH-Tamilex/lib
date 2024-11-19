@@ -207,16 +207,8 @@ const loadDoc = async () => {
 };
 
 const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
-const fillWordSplits = async (e) => {
-    const selected = e.target.options[e.target.options.selectedIndex].value;
-    if(!_state.curDoc) await loadDoc();
-    const standOff = _state.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
 
-    if(!standOff) {
-        clearSplits();
-        return;
-    }
-
+const makeWordsplits = (doc,standOff) => {
     const words = [];
     for(const child of standOff.children) {
         if(child.nodeName === 'entry')
@@ -243,7 +235,7 @@ const fillWordSplits = async (e) => {
             if(word.note) allnotes.push(serializer.serializeToString(word.note));
         }
     }
-    const lines = [..._state.curDoc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
+    const lines = [...doc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
     const linecounts = countLines(lines);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');
@@ -265,10 +257,25 @@ const fillWordSplits = async (e) => {
             engout = engout + engsplits[n] + ' ';
         }
     }
+
+    return {eng: engout, tam: tamout, notes: allnotes};
+};
+const fillWordSplits = async (e) => {
+    const selected = e.target.options[e.target.options.selectedIndex].value;
+    if(!_state.curDoc) await loadDoc();
+    const standOff = _state.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
+
+    if(!standOff) {
+        clearSplits();
+        return;
+    }
+    
+    const ret = makeWordsplits(_state.curDoc,standOff);
+
     const textareas = document.querySelectorAll('#splits-popup textarea');
-    textareas[0].value = tamout;
-    textareas[1].value = engout;
-    textareas[2].value = allnotes.join('\n\n');
+    textareas[0].value = ret.tam;
+    textareas[1].value = ret.eng;
+    textareas[2].value = ret.allnotes.join('\n\n');
 
     document.getElementById('saveasbutton').disabled = true;
     document.getElementById('saveasbutton').title = 'Realign first';
@@ -605,6 +612,7 @@ const Splitter = {
     addWordSplits: addWordSplits,
     countLines: countLines,
     decodeRLE: decodeRLE,
+    makeWordsplits: makeWordsplits
 };
 
 export default Splitter;
