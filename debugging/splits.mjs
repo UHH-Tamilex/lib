@@ -3,7 +3,7 @@ import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 import { init as cmWrapper } from './cmwrapper.mjs';
-import { serializeWordsplits, getEditionText } from './pure.mjs';
+import { serializeWordsplits, getEditionText } from './serializeStandOff.mjs';
 
 const _state = {
     curDoc: null,
