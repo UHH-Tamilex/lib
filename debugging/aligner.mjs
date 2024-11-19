@@ -776,7 +776,9 @@ const jiggleAlignment = (aligned, tokenizedwords) => {
     //aligned = [...aligned];
     const wordlist = [...tokenizedwords];
     const words = [];
-    const nextWord = l => l.shift().map(c => c.replaceAll(/[\[\]]/g,'')); // AGGHHH
+    const nextWord = l => l.length > 0 ?
+        l.shift().map(c => c.replaceAll(/[\[\]]/g,'')) : // AGGHHH
+        undefined; // huh?
     let wordstart = 0;
     let curword = nextWord(wordlist);
     let curcount = 0;
