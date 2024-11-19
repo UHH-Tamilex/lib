@@ -137,7 +137,7 @@ const fillWordSplits = async (e) => {
     const textareas = document.querySelectorAll('#splits-popup textarea');
     textareas[0].value = ret.tam;
     textareas[1].value = ret.eng;
-    textareas[2].value = ret.allnotes.join('\n\n');
+    textareas[2].value = ret.notes.join('\n\n');
 
     document.getElementById('saveasbutton').disabled = true;
     document.getElementById('saveasbutton').title = 'Realign first';

@@ -1,7 +1,7 @@
 import {gramAbbreviations} from './aligner.mjs';
 import {countLines, decodeRLE, matchCounts} from './utils.mjs';
 
-const serializeWordsplits = (standOff, serializer = new XMLSerializer()) => {
+const serializeWordsplits = (standOff, serializer) => {
     const words = [];
     const doc = standOff.ownerDocument;
     const selected = standOff.getAttribute('corresp').slice(1);
@@ -15,7 +15,12 @@ const serializeWordsplits = (standOff, serializer = new XMLSerializer()) => {
     const tamsplits = [];
     const engsplits = [];
     const allnotes = [];
-    const cleanNote = n => serializer(n).replaceAll('<note xmlns="http://www.tei-c.org/ns/1.0">','<note>');
+    const cleanNote = n => {
+        if(serializer)
+            return serializer(n).replaceAll('<note xmlns="http://www.tei-c.org/ns/1.0">','<note>');
+        const xs = new XMLSerializer();
+        return xs.serializeToString(n).replaceAll('<note xmlns="http://www.tei-c.org/ns/1.0">','<note>');
+    };
 
     for(const word of words) {
         if(word.hasOwnProperty('strands')) {

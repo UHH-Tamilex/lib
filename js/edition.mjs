@@ -265,7 +265,7 @@ const makeWord = (entry) => {
             annohtml = annohtml + ` (${affixrole} <span lang="ta">${form.textContent}</span>)`;
         }
         for(const particle of particles) {
-            const form = particle.querySelector('[data-name="lemma"]');
+            const form = particle.querySelector('.f');
             annohtml = annohtml + ` (particle <span lang="ta">${form.textContent}</span>)`;
         }
 
