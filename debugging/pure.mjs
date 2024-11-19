@@ -53,4 +53,70 @@ const makeWordsplits = standOff => {
     return {eng: engout, tam: tamout, notes: allnotes};
 };
 
-export {makeWordsplits};
+const processEntry = (entry) => {
+    const def = entry.querySelector('def');
+    const grammar = getGrammar(entry);
+    return {
+        tamil: retransformWord(entry.querySelector('form')),
+        english: def ? def.textContent.trim().replaceAll(/\s+/g,'_') + grammar : 
+                       grammar || '()',
+        note: entry.querySelector('note')
+   };
+};
+const processSuperEntry = (superEntry) => {
+    const ret = {
+            type: superEntry.getAttribute('type'),
+            strands: []
+        };
+    for(const strand of superEntry.querySelectorAll(':scope > entry')) {
+        const strandentries = [];
+        for(const entry of strand.querySelectorAll(':scope > entry')) {
+            strandentries.push(processEntry(entry));
+        }
+        ret.strands.push(strandentries);
+    }
+    return ret;
+};
+
+const getGrammar = (entry) => {
+    const ret = [];
+    for(const gram of entry.querySelectorAll('gram[type="role"]'))
+        ret.push(reverseAbbreviations.get(gram.textContent));
+    return ret.length > 0 ? '(' + ret.join('|') + ')' : '';
+};
+const retransformWord = el => {
+    const clone = el.cloneNode(true);
+    const chars = clone.querySelectorAll('c');
+    for(const c of chars) {
+        const type = c.getAttribute('type');
+        switch (type) {
+            case 'elided':
+                c.replaceWith('*');
+                break;
+            case 'geminated':
+                c.replaceWith('+');
+                break;
+            case 'glide':
+                c.replaceWith('~');
+                break;
+            case 'uncertain':
+                c.replaceWith(`(${c.textContent})`);
+                break;
+            case 'inserted':
+                c.replaceWith(`[${c.textContent}]`);
+                break;
+        }
+    }
+    return getEditionText(clone).trim().replaceAll(/\(u\)/g,'*');
+};
+
+const getEditionText = el => {
+    const clone = el.cloneNode(true);
+    for(const gap of clone.querySelectorAll('gap')) {
+        const quantity = gap.getAttribute('quantity') || 1;
+        gap.replaceWith('‡'.repeat(quantity));
+    }
+    return clone.textContent;
+};
+
+export {makeWordsplits, getEditionText};

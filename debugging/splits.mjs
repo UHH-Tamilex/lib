@@ -3,7 +3,7 @@ import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 import { init as cmWrapper } from './cmwrapper.mjs';
-import { makeWordsplits } from './pure.mjs';
+import { makeWordsplits, getEditionText } from './pure.mjs';
 
 const reverseAbbreviations = new Map(
     gramAbbreviations.map(arr => [arr[1],arr[0]])
@@ -84,62 +84,6 @@ const notesView = e => {
         _state.noteCM.setSize(null,'auto');
     }
 
-};
-const getGrammar = (entry) => {
-    const ret = [];
-    for(const gram of entry.querySelectorAll('gram[type="role"]'))
-        ret.push(reverseAbbreviations.get(gram.textContent));
-    return ret.length > 0 ? '(' + ret.join('|') + ')' : '';
-};
-const retransformWord = el => {
-    const clone = el.cloneNode(true);
-    const chars = clone.querySelectorAll('c');
-    for(const c of chars) {
-        const type = c.getAttribute('type');
-        switch (type) {
-            case 'elided':
-                c.replaceWith('*');
-                break;
-            case 'geminated':
-                c.replaceWith('+');
-                break;
-            case 'glide':
-                c.replaceWith('~');
-                break;
-            case 'uncertain':
-                c.replaceWith(`(${c.textContent})`);
-                break;
-            case 'inserted':
-                c.replaceWith(`[${c.textContent}]`);
-                break;
-        }
-    }
-    return getEditionText(clone).trim().replaceAll(/\(u\)/g,'*');
-};
-
-const processEntry = (entry) => {
-    const def = entry.querySelector('def');
-    const grammar = getGrammar(entry);
-    return {
-        tamil: retransformWord(entry.querySelector('form')),
-        english: def ? def.textContent.trim().replaceAll(/\s+/g,'_') + grammar : 
-                       grammar || '()',
-        note: entry.querySelector('note')
-   };
-};
-const processSuperEntry = (superEntry) => {
-    const ret = {
-            type: superEntry.getAttribute('type'),
-            strands: []
-        };
-    for(const strand of superEntry.querySelectorAll(':scope > entry')) {
-        const strandentries = [];
-        for(const entry of strand.querySelectorAll(':scope > entry')) {
-            strandentries.push(processEntry(entry));
-        }
-        ret.strands.push(strandentries);
-    }
-    return ret;
 };
 
 const decodeRLE = s => s.replaceAll(/(\d+)([MLRG])/g, (_, count, chr) => chr.repeat(count));
@@ -265,15 +209,6 @@ const getNotes = str => {
     const tempdoc = (new DOMParser()).parseFromString(`<TEI xmlns="http://www.tei-c.org/ns/1.0">${str}</TEI>`, 'text/xml');
     const serializer = new XMLSerializer();
     return [...tempdoc.documentElement.children].map(c => serializer.serializeToString(c));
-};
-
-const getEditionText = el => {
-    const clone = el.cloneNode(true);
-    for(const gap of clone.querySelectorAll('gap')) {
-        const quantity = gap.getAttribute('quantity') || 1;
-        gap.replaceWith('‡'.repeat(quantity));
-    }
-    return clone.textContent;
 };
 
 const showSplits = async () => {
