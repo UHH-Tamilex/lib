@@ -208,10 +208,7 @@ const loadDoc = async () => {
 
 const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
 
-const makeWordsplits = (doc,selected) => {
-    const standOff = doc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
-    if(!standOff) return;
-
+const makeWordsplits = standOff => {
     const words = [];
     for(const child of standOff.children) {
         if(child.nodeName === 'entry')
@@ -238,6 +235,8 @@ const makeWordsplits = (doc,selected) => {
             if(word.note) allnotes.push(serializer.serializeToString(word.note));
         }
     }
+    const doc = standOff.ownerDocument;
+    const selected = standOff.getAttribute('corresp').slice(1);
     const lines = [...doc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
     const linecounts = countLines(lines);
     
@@ -267,13 +266,15 @@ const makeWordsplits = (doc,selected) => {
 const fillWordSplits = async (e) => {
     if(!_state.curDoc) await loadDoc();
     const selected = e.target.options[e.target.options.selectedIndex].value;
+    const standOff = _state.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
 
-    const ret = makeWordsplits(_state.curDoc,selected);
-
-    if(!ret) {
+    if(!standOff) {
         clearSplits();
         return;
     }
+
+    const ret = makeWordsplits(standOff);
+
     
     const textareas = document.querySelectorAll('#splits-popup textarea');
     textareas[0].value = ret.tam;
