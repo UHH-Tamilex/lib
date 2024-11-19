@@ -119,4 +119,7 @@ const getEditionText = el => {
     return clone.textContent;
 };
 
+const reverseAbbreviations = new Map(
+    gramAbbreviations.map(arr => [arr[1],arr[0]])
+);
 export {makeWordsplits, getEditionText};
