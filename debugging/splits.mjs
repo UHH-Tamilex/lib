@@ -383,13 +383,15 @@ const showSplits = async () => {
 
     output.style.display = 'block';
     output.style.border = '1px solid black';
-    const standOff =`<standOff type="wordsplit" corresp="#${blockid}">\n${ret.xml}\n</standOff>`;
+
+    const standOff =`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit" corresp="#${blockid}">\n${ret.xml}\n</standOff>`;
     const xproc = new XSLTProcessor();
     const resp = await fetch('lib/debugging/wordlist.xsl');
     const parser = new DOMParser();
     const xslsheet = parser.parseFromString(await resp.text(), 'text/xml');
     xproc.importStylesheet(xslsheet);
-    const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
+    //const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
+    const res = xproc.transformToDocument(parser.parseFromString(standOff,'text/xml')).querySelector('table');
     if(document.getElementById('transbutton').lang === 'en')
         for(const th of res.querySelectorAll('[lang="ta-Latn"]')) {
             th.textContent = Sanscript.t(th.textContent,'iast','tamil');
@@ -406,7 +408,8 @@ const showSplits = async () => {
         curStandOff.setAttribute('type','wordsplit');
         _state.newDoc.documentElement.appendChild(curStandOff);
     }
-    curStandOff.innerHTML = ret.xml;
+    curStandOff.innerHTML = `\n${ret.xml}\n`;
+
     const code = document.createElement('div');
     code.classList.add('code');
     code.style.display = 'none';

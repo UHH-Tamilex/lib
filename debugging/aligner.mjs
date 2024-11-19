@@ -175,6 +175,7 @@ const updateParticles = (obj) => {
         //console.log(`Found particle: ${particle.particle} in ${obj.word}, "${obj.translation}".`);
         obj.translation = particle.translation;
         obj.particle = particle.particle;
+        obj.particletype = particle.particletype;
         obj.bare = particle.bare;
     }
     // TODO: findAffix will be deprecated
@@ -194,10 +195,11 @@ const updateMarks = obj => {
         switch (nosandhi[n]) {
             case '~':
                nosandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
+               sandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
                break;
             case '+':
                 nosandhi[n] = `<c type="geminated">${sandhi[n]}</c>`;
-                sandhi[n] = '';
+                sandhi[n] = `<c type="geminated">${sandhi[n]}</c>`;
                 break;
             case '*':
             case '\'':
@@ -211,9 +213,11 @@ const updateMarks = obj => {
                 break;
             case '[i]':
                 nosandhi[n] = '<c type="inserted">i</c>';
+                sandhi[n] = '<c type="inserted">i</c>';
                 break;
             case '[m]':
                 nosandhi[n] = '<c type="inserted">m</c>';
+                sandhi[n] = '<c type="inserted">m</c>';
         }
     }
 };
@@ -301,17 +305,18 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
 const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     //const wl = restoreSandhi(removeOptions(tam).join(''));
     const wl = removeOptions(tam);
-    const wordjoin = tamilSplit(wl.join(''));
+    const wordtokens = wl.map(w => tamilSplit(w));
+    const wordjoin = wordtokens.flat();
     const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
-    const realigned = jiggleAlignment(aligned,wl);
+    const realigned = jiggleAlignment(aligned,wordtokens);
 
     if(lookup && !_state.worker)
         _state.worker = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
 
-    const {words: wordlist, warnings: warnings}  = await getWordlist(tam,eng,realigned,[...notes],lookup);
+    const {words: wordlist, warnings: warnings}  = await getWordlist(tam,eng,aligned,[...notes],lookup);
     //const warnings = await cleanupWordlist(wordlist,notes,lookup);
     const entries = makeEntries(wordlist);
-    const rle = formatAlignment(realigned,0);
+    const rle = formatAlignment(aligned,0);
     const ret = {
         xml: rle + '\n' + entries.join('\n'), 
         alignment: aligned, 
@@ -370,29 +375,51 @@ const formatAlignment = (arr) => {
 const makeGaps = str => str.replaceAll(/‡+/g,m => `<gap quantity="${m.length}" unit="character" reason="lost"/>`);
 
 const makeEntries = (arr) => {
-    const formatWord = (w) => {
-        /*
-        const clean = w.replace(/([~+()])/g,'<pc>$1</pc>')
-                     //.replace(/['’*]$/,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
-                       .replaceAll(/['’*]/g,'<pc type="ignored">(</pc>u<pc type="ignored">)</pc>')
-                       .replaceAll(/\[(.+?)\]/g,'<supplied>$1</supplied>');
-                     //.replaceAll(/\[(.+?)\]/g,'$1');
-        */
+    const formatWord = w => {
         const clean = w.join('');
         return makeGaps(clean);
     };
+    const formatSandhi = w => {
+        let slice;
+        if(w.particle) {
+            if(w.particletype === 'enclitic')
+                slice = w.sandhi.slice(0,w.tokenized.lastIndexOf('-'));
+            else
+                slice = w.sandhi.slice(w.tokenized.indexOf('-')+1);
+        }
+        return formatWord(slice || w.sandhi);
+    };
     const formatEntry = (e) => {
-        const bare = e.bare ? `<form type="simple">${makeGaps(e.bare)}</form>\n` : '';
-        const affixrole = e.affixrole ? `<gramGrp><gram type="role">${e.affixrole}</gram></gramGrp>` : '';
-        const affix = e.affix ? `<gramGrp type="affix"><m>${e.affix}</m>${affixrole}</gramGrp>\n` : '';
-        const gram = e.gram ? '<gramGrp>' + 
-                    e.gram.map(g => `<gram type="role">${gramMap.get(g)}</gram>\n`).join('') +
-                    '</gramGrp>'
-                : '';
-        const particle = e.particle ? `<gramGrp type="particle"><m>${e.particle}</m></gramGrp>\n` : '';
-        const def = e.translation ? `\n<def>${e.translation.replaceAll(/_/g,' ')}</def>` : '';
-        //return `<entry>\n<form>${formatWord(e.word)}</form>\n<def>${e.translation.replaceAll(/_/g,' ')}</def>\n${bare}${affix}${gram}${particle}${e.wordnote ? formatNote(e.wordnote) : ''}${e.transnote ? formatNote(e.transnote) : ''}</entry>`;
-        return `<entry>\n<form>${formatWord(e.tokenized)}</form>${def}\n${bare}${affix}${gram}${particle}${e.wordnote ? '\n' + e.wordnote : ''}</entry>`;
+        const form = formatWord(e.tokenized);
+        const bareformatted = e.bare ? makeGaps(e.bare) : undefined;
+        const bare = bareformatted ? `<form type="simple">${bareformatted}</form>\n` : '';
+        const sandhijoin = formatSandhi(e);
+        const sandhi = sandhijoin !== (bareformatted || form) ?
+            `<form type="sandhi">${sandhijoin}</form>\n` : ''; 
+        const affixrole = e.affixrole ? 
+            `<gramGrp><gram type="role">${e.affixrole}</gram></gramGrp>` : '';
+        const affix = e.affix ?
+            `<gramGrp type="affix"><m>${e.affix}</m>${affixrole}</gramGrp>\n` : '';
+        const gram = e.gram ? 
+            '<gramGrp>\n' + 
+                e.gram.map(g => `  <gram type="role">${gramMap.get(g)}</gram>\n`).join('') +
+                '</gramGrp>\n'
+            : '';
+        const particle = e.particle ? 
+            `<gramGrp type="particle"><m type="${e.particletype}">${e.particle}</m></gramGrp>\n` : '';
+        const def = e.translation ? 
+            `<def>${e.translation.replaceAll(/_/g,' ')}</def>\n` : '';
+
+        return `<entry>\n` +
+               `<form>${form}</form>\n` +
+               def +
+               bare +
+               sandhi +
+               affix + 
+               gram + 
+               particle +
+               (e.wordnote ? e.wordnote + '\n' : '') +
+               '</entry>';
     };
 
     return arr.map(obj => {
@@ -459,6 +486,7 @@ const findParticle = (word,translation) => {
                     //translation: translation.slice(0,translation.length-transmatch[0].length),
                     translation: translation.replace(regex,''),
                     particle: cleanBare(particle),
+                    particletype: particle.endsWith('-') ? 'proclitic' : 'enclitic',
                     //bare: cleanBare(word.slice(0,word.length-wordmatch[0].length))
                     bare: cleanBare(word.replace(regex,''))
                 };
@@ -468,6 +496,7 @@ const findParticle = (word,translation) => {
                     return {
                         translation: translation,
                         particle: cleanBare(particle),
+                        particletype: particle.endsWith('-') ? 'proclitic' : 'enclitic',
                         bare: cleanBare(word.replace(regex,''))
                     };
             }
@@ -743,25 +772,26 @@ const jiggleWord = (word, text, start, end) => {
     return text;
 };
 
-const jiggleAlignment = (aligned, wordlist) => {
-    aligned = [...aligned];
-    wordlist = [...wordlist];
+const jiggleAlignment = (aligned, tokenizedwords) => {
+    //aligned = [...aligned];
+    const wordlist = [...tokenizedwords];
     const words = [];
+    const nextWord = l => l.shift().map(c => c.replaceAll(/[\[\]]/g,'')); // AGGHHH
     let wordstart = 0;
-    let curword = wordlist.shift().replaceAll(/[\[\]]/g,''); // AGGHHH
+    let curword = nextWord(wordlist);
     let curcount = 0;
     for(let n=0; n<aligned[1].length; n++) {
         if(!curword) break; // huh?
-        if(curcount === tamilSplit(curword).length) {
-            aligned[0] = jiggleWord(tamilSplit(curword), aligned[0], wordstart, n);
+        if(curcount === curword.length) {
+            aligned[0] = jiggleWord(curword, aligned[0], wordstart, n);
             wordstart = n+1;
             curcount = 0;
-            curword = wordlist.shift()?.replaceAll(/[\[\]]/g,''); // UGGHHHH
+            curword = nextWord(wordlist);
         }
         if(aligned[1][n] !== '')
             curcount = curcount + 1;
     }
-    return aligned;
+    //return aligned;
 };
 
 export { alignWordsplits, tamilSplit, gramAbbreviations };
