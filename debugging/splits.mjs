@@ -3,7 +3,7 @@ import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 import { init as cmWrapper } from './cmwrapper.mjs';
-import { makeWordsplits, getEditionText } from './pure.mjs';
+import { serializeWordsplits, getEditionText } from './pure.mjs';
 
 const _state = {
     curDoc: null,
@@ -132,8 +132,7 @@ const fillWordSplits = async (e) => {
         return;
     }
 
-    const ret = makeWordsplits(standOff);
-
+    const ret = serializeWordsplits(standOff);
     
     const textareas = document.querySelectorAll('#splits-popup textarea');
     textareas[0].value = ret.tam;

@@ -1,7 +1,7 @@
 import {gramAbbreviations} from './aligner.mjs';
 import {countLines, decodeRLE, matchCounts} from './utils.mjs';
 
-const makeWordsplits = (standOff, serializer = new XMLSerializer()) => {
+const serializeWordsplits = (standOff, serializer = new XMLSerializer()) => {
     const words = [];
     const doc = standOff.ownerDocument;
     const selected = standOff.getAttribute('corresp').slice(1);
@@ -138,4 +138,4 @@ const countLines = lines => {
     },[]);
 };
 */
-export {makeWordsplits, getEditionText};
+export {serializeWordsplits, getEditionText};
