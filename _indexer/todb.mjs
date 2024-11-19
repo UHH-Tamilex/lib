@@ -96,6 +96,7 @@ const go = () => {
     db.prepare('CREATE TABLE [citations] ('+
         'form TEXT, '+
         'formsort TEXT, '+
+        'sandhi TEXT, '+
         'islemma TEXT, '+
         'fromlemma TEXT, '+
         'def TEXT, '+
@@ -206,6 +207,7 @@ const prepWordEntry = entry => {
     if(!defel) return null;
     const def = defel.innerHTML.trim();
     const form = entry.querySelector('form');
+    const sandhi = entry.querySelector('sandhi');
     const clean = cleanForm(form);
     const simple = entry.querySelector('form[type="simple"]')?.innerHTML.trim();
     const particle = entry.querySelector('gramGrp[type="particle"]');
@@ -216,6 +218,8 @@ const prepWordEntry = entry => {
         def: def,
         roles: roles ? getRoles(roles) : {},
     };
+    if(sandhi)
+        ret.sandhi = cleanForm(sandhi);
     if(particle) {
         const [ptype,pform] = cleanParticle(particle,clean);
         ret[ptype] = pform;
@@ -577,8 +581,8 @@ const addToDb = (fname,db) => {
             const fromlemma = rows[0]?.fromlemma || null;
             */
 
-            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), islemma: islemma, fromlemma: fromlemma, def: ins.def, geminateswith: geminateswith, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: parseInt(linenum)+1, filename: basename},ins.roles);
-            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @islemma, @fromlemma, @def, @pos, @number, @gender, @nouncase, @person, @aspect, @voice, @geminateswith, @syntax, @verbfunction, @particlefunction, @rootnoun, @misc, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
+            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), sandhi: ins.sandhi, islemma: islemma, fromlemma: fromlemma, def: ins.def, geminateswith: geminateswith, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: parseInt(linenum)+1, filename: basename},ins.roles);
+            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @sandhi, @islemma, @fromlemma, @def, @pos, @number, @gender, @nouncase, @person, @aspect, @voice, @geminateswith, @syntax, @verbfunction, @particlefunction, @rootnoun, @misc, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(fromlemma)?.word || ins.form;
             const lemmadef = islemma ? worddef : 
                 fromlemma ? fulldb.prepare('SELECT definition FROM dictionary WHERE islemma = ?').get(fromlemma)?.definition :
