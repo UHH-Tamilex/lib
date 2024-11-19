@@ -132,7 +132,7 @@ const go = () => {
     });
 };
 
-const cleanForm = (el,remove=['elided']) => {
+const cleanForm = (el,remove=['elided','geminated','glide']) => {
     const clone = el.cloneNode(true);
     for(const gap of clone.querySelectorAll('gap')) {
         const quantity = gap.getAttribute('quantity') || 1;
