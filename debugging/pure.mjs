@@ -1,3 +1,5 @@
+import {gramAbbreviations} from './aligner.mjs';
+
 const makeWordsplits = standOff => {
     const words = [];
     for(const child of standOff.children) {

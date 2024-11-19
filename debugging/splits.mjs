@@ -1,4 +1,4 @@
-import { alignWordsplits, gramAbbreviations } from './aligner.mjs';
+import { alignWordsplits} from './aligner.mjs';
 import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
