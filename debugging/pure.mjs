@@ -1,7 +1,9 @@
 import {gramAbbreviations} from './aligner.mjs';
 
-const makeWordsplits = standOff => {
+const makeWordsplits = (standOff, serializer = new XMLSerializer()) => {
     const words = [];
+    const doc = standOff.ownerDocument;
+    const selected = standOff.getAttribute('corresp').slice(1);
     for(const child of standOff.children) {
         if(child.nodeName === 'entry')
             words.push(processEntry(child));
@@ -12,23 +14,20 @@ const makeWordsplits = standOff => {
     const tamsplits = [];
     const engsplits = [];
     const allnotes = [];
-    const serializer = new XMLSerializer();
     for(const word of words) {
         if(word.hasOwnProperty('strands')) {
             tamsplits.push(word.strands.map(arr => arr.map(w => w.tamil).join('|')).join('/'));
             engsplits.push(word.strands.map(arr => arr.map(w => w.note ? w.english + '*' : w.english).join('|')).join('/'));
             for(const strand of word.strands)
                 for(const w of strand) 
-                    if(w.note) allnotes.push(serializer.serializeToString(w.note));
+                    if(w.note) allnotes.push(serializer(w.note));
         }
         else {
             tamsplits.push(word.tamil);
             engsplits.push(word.note ? word.english + '*' : word.english);
-            if(word.note) allnotes.push(serializer.serializeToString(word.note));
+            if(word.note) allnotes.push(serializer(word.note));
         }
     }
-    const doc = standOff.ownerDocument;
-    const selected = standOff.getAttribute('corresp').slice(1);
     const lines = [...doc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
     const linecounts = countLines(lines);
     
