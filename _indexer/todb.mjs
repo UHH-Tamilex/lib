@@ -207,7 +207,7 @@ const prepWordEntry = entry => {
     if(!defel) return null;
     const def = defel.innerHTML.trim();
     const form = entry.querySelector('form');
-    const sandhi = entry.querySelector('sandhi');
+    const sandhi = entry.querySelector('form[type="sandhi"]');
     const clean = cleanForm(form);
     const simple = entry.querySelector('form[type="simple"]')?.innerHTML.trim();
     const particle = entry.querySelector('gramGrp[type="particle"]');
