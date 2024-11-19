@@ -208,7 +208,10 @@ const loadDoc = async () => {
 
 const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
 
-const makeWordsplits = (doc,standOff) => {
+const makeWordsplits = (doc,selected) => {
+    const standOff = doc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
+    if(!standOff) return;
+
     const words = [];
     for(const child of standOff.children) {
         if(child.nodeName === 'entry')
@@ -260,18 +263,18 @@ const makeWordsplits = (doc,standOff) => {
 
     return {eng: engout, tam: tamout, notes: allnotes};
 };
-const fillWordSplits = async (e) => {
-    const selected = e.target.options[e.target.options.selectedIndex].value;
-    if(!_state.curDoc) await loadDoc();
-    const standOff = _state.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
 
-    if(!standOff) {
+const fillWordSplits = async (e) => {
+    if(!_state.curDoc) await loadDoc();
+    const selected = e.target.options[e.target.options.selectedIndex].value;
+
+    const ret = makeWordsplits(_state.curDoc,selected);
+
+    if(!ret) {
         clearSplits();
         return;
     }
     
-    const ret = makeWordsplits(_state.curDoc,standOff);
-
     const textareas = document.querySelectorAll('#splits-popup textarea');
     textareas[0].value = ret.tam;
     textareas[1].value = ret.eng;
