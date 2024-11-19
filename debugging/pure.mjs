@@ -15,18 +15,20 @@ const makeWordsplits = (standOff, serializer = new XMLSerializer()) => {
     const tamsplits = [];
     const engsplits = [];
     const allnotes = [];
+    const cleanNote = n => serializer(n).replaceAll('<note xmlns="http://www.tei-c.org/ns/1.0">','<note>');
+
     for(const word of words) {
         if(word.hasOwnProperty('strands')) {
             tamsplits.push(word.strands.map(arr => arr.map(w => w.tamil).join('|')).join('/'));
             engsplits.push(word.strands.map(arr => arr.map(w => w.note ? w.english + '*' : w.english).join('|')).join('/'));
             for(const strand of word.strands)
                 for(const w of strand) 
-                    if(w.note) allnotes.push(serializer(w.note));
+                    if(w.note) allnotes.push(cleanNote(w.note));
         }
         else {
             tamsplits.push(word.tamil);
             engsplits.push(word.note ? word.english + '*' : word.english);
-            if(word.note) allnotes.push(serializer(word.note));
+            if(word.note) allnotes.push(cleanNote(word.note));
         }
     }
     const lines = [...doc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
