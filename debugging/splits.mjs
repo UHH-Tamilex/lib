@@ -117,14 +117,6 @@ const countWalker = el => {
     }
     return count;
 };
-const countLines = lines => {
-    return lines.reduce((acc,cur) => {
-        const count = countWalker(cur);
-        const add = acc.length > 0 ? acc.at(-1) : 0;
-        acc.push(count + add);
-        return acc;
-    },[]);
-};
 
 const matchCounts = (alignment,linecounts) => {
     linecounts = [...linecounts];
@@ -492,7 +484,6 @@ const makeEntries = (list) => {
 
 const Splitter = {
     addWordSplits: addWordSplits,
-    countLines: countLines,
     decodeRLE: decodeRLE,
     makeWordsplits: makeWordsplits
 };

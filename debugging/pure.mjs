@@ -1,4 +1,5 @@
 import {gramAbbreviations} from './aligner.mjs';
+import {countLines} from './utils.mjs';
 
 const makeWordsplits = (standOff, serializer = new XMLSerializer()) => {
     const words = [];
@@ -123,4 +124,14 @@ const getEditionText = el => {
 const reverseAbbreviations = new Map(
     gramAbbreviations.map(arr => [arr[1],arr[0]])
 );
-export {makeWordsplits, getEditionText};
+/*
+const countLines = lines => {
+    return lines.reduce((acc,cur) => {
+        const count = countWalker(cur);
+        const add = acc.length > 0 ? acc.at(-1) : 0;
+        acc.push(count + add);
+        return acc;
+    },[]);
+};
+*/
+export {makeWordsplits, getEditionText, countLines};
