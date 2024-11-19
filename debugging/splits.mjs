@@ -269,6 +269,9 @@ const fillWordSplits = async (e) => {
     textareas[0].value = tamout;
     textareas[1].value = engout;
     textareas[2].value = allnotes.join('\n\n');
+
+    document.getElementById('saveasbutton').disabled = true;
+    document.getElementById('saveasbutton').title = 'Realign first';
 };
 
 const clearSplits = () => {
