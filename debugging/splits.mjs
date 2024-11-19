@@ -83,8 +83,6 @@ const notesView = e => {
 
 };
 
-const decodeRLE = s => s.replaceAll(/(\d+)([MLRG])/g, (_, count, chr) => chr.repeat(count));
-
 const realNextSibling = (walker) => {
     let cur = walker.currentNode;
     while(cur) {
@@ -116,22 +114,6 @@ const countWalker = el => {
         cur = walker.nextNode();
     }
     return count;
-};
-
-const matchCounts = (alignment,linecounts) => {
-    linecounts = [...linecounts];
-    const realcounts = [];
-    let matchcount = 0;
-    for(let n=0;n<alignment[0].length;n++) {
-        if(matchcount === linecounts[0]) {
-            linecounts.shift();
-            const line2 = alignment[1].slice(0,n);
-            const matches = [...line2].reduce((acc, cur) => cur === 'M' ?  acc + 1 : acc,0);
-            realcounts.push(matches);
-        }
-        if(alignment[0][n] === 'M') matchcount = matchcount + 1;
-    }
-    return realcounts;
 };
 
 const loadDoc = async () => {
@@ -483,9 +465,7 @@ const makeEntries = (list) => {
 */
 
 const Splitter = {
-    addWordSplits: addWordSplits,
-    decodeRLE: decodeRLE,
-    makeWordsplits: makeWordsplits
+    addWordSplits: addWordSplits
 };
 
 export default Splitter;

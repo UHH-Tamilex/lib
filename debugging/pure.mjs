@@ -1,5 +1,5 @@
 import {gramAbbreviations} from './aligner.mjs';
-import {countLines} from './utils.mjs';
+import {countLines, decodeRLE, matchCounts} from './utils.mjs';
 
 const makeWordsplits = (standOff, serializer = new XMLSerializer()) => {
     const words = [];
