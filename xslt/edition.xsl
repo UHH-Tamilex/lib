@@ -198,7 +198,7 @@
                             <div>
                                 <label>Word-by-word translation</label>
                                 <div id="wbwbox">
-                                    <textarea></textarea>
+                                    <textarea id="engsplit"></textarea>
                                     <textarea class="notes"></textarea>
                                     <div class="switcher" id="notesswitcher">
                                         <div class="selected">Splits</div>

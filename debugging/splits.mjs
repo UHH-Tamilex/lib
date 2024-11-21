@@ -398,7 +398,7 @@ listEdit.blur = e => {
         listEdit.updateWord(e);
     document.getElementById('saveasbutton').disabled = true;
     document.getElementById('saveasbutton').title = 'Realign first';
-    document.querySelector('#wbwbox textarea').value = refreshTranslation(_state.tamlines,_state.wordlist);
+    document.getElementById('engsplit').value = refreshTranslation(_state.tamlines,_state.wordlist);
     e.target.blur();
 };
 
@@ -554,7 +554,8 @@ const makeEntries = (list) => {
 
 const Splitter = {
     addWordSplits: addWordSplits,
-    listEdit: listEdit
+    listEdit: listEdit,
+    refreshTranslation
 };
 
 export default Splitter;
