@@ -53,6 +53,7 @@
         </xsl:if>
         </xsl:element>
         <xsl:element name="td">
+            <xsl:attribute name="class">gramGrp</xsl:attribute>
             <xsl:apply-templates select="x:gramGrp[not(@type)]"/>
         </xsl:element>
         <xsl:element name="td">

@@ -316,7 +316,9 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     const wl = removeOptions(tam);
     const wordtokens = wl.map(w => tamilSplit(w));
     const wordjoin = wordtokens.flat();
-    const aligned = needlemanWunsch(tamilSplit(text),wordjoin,wordsplitscore);
+    // split cīrs first, in case of "a u", "a i", etc.
+    const toktext = text.split(/\s+/).map(c => tamilSplit(c)).flat();
+    const aligned = needlemanWunsch(toktext,wordjoin,wordsplitscore);
     const realigned = jiggleAlignment(aligned,wordtokens);
 
     if(lookup && !_state.worker)
@@ -807,4 +809,4 @@ const jiggleAlignment = (aligned, tokenizedwords) => {
     //return aligned;
 };
 
-export { alignWordsplits, tamilSplit, gramAbbreviations };
+export { alignWordsplits, tamilSplit, gramAbbreviations, findGrammar, gramMap };

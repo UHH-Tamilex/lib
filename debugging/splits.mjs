@@ -1,4 +1,4 @@
-import { alignWordsplits} from './aligner.mjs';
+import { alignWordsplits, findGrammar, gramMap } from './aligner.mjs';
 import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
@@ -10,7 +10,8 @@ const _state = {
     newDoc: null,
     noteCM: null,
     tamlines: null,
-    wordsplits: null
+    wordsplits: null,
+    changed: false
 };
 
 const filename = window.location.pathname.split('/').pop();
@@ -27,18 +28,22 @@ const addWordSplits = () => {
         selector.append(option);
     }
     fillWordSplits({target: selector});
-    selector.addEventListener('change',fillWordSplits);
+    selector.addEventListener('change',maybeFillWordSplits);
     
     document.getElementById('alignbutton').addEventListener('click',showSplits);
     document.getElementById('saveasbutton').addEventListener('click',saveAs);
-    document.querySelector('#splits-popup .popup-output').addEventListener('input',refreshFromWordlist);
+    document.querySelector('#splits-popup .popup-output').addEventListener('click',listEdit.click);
+    document.querySelector('#splits-popup .popup-output').addEventListener('keydown',listEdit.keydown);
+    document.querySelector('#splits-popup .popup-output').addEventListener('focusin',listEdit.focusin);
+    for(const ta of document.querySelectorAll('#splits-popup textarea'))
+        ta.addEventListener('change',() => {_state.changed = true;});
+
     blackout.style.display = 'flex';
     popup.style.display = 'flex';
     blackout.addEventListener('click',cancelPopup);
     document.getElementById('previewswitcher').addEventListener('click',codePreview);
     document.getElementById('notesswitcher').addEventListener('click',notesView);
 };
-
 const codePreview = e => {
     const targ = e.target.closest('.switcher > div');
     if(!targ || targ.classList.contains('selected')) return;
@@ -122,6 +127,15 @@ const loadDoc = async () => {
     _state.curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
 
+const maybeFillWordSplits = (e) => {
+    if(!_state.changed)
+        fillWordSplits(e);
+    else if(window.confirm('Are you sure? Changes will be lost.')) {
+        fillWordSplits(e);
+        _state.changed = false;
+    }
+};
+
 const fillWordSplits = async (e) => {
     if(!_state.curDoc) await loadDoc();
     const selected = e.target.options[e.target.options.selectedIndex].value;
@@ -139,8 +153,16 @@ const fillWordSplits = async (e) => {
     textareas[1].value = ret.eng;
     textareas[2].value = ret.notes.join('\n\n');
 
-    document.getElementById('saveasbutton').disabled = true;
-    document.getElementById('saveasbutton').title = 'Realign first';
+    resetOutput();
+};
+
+const resetOutput = () => {
+    document.getElementById('alignbutton').innerHTML = 'Align';
+    document.getElementById('saveasbutton').style.display = 'none';
+    const popup = document.getElementById('splits-popup');
+    popup.querySelector('.output-boxen').style.display = 'none';
+    popup.querySelector('.popup-output').innerHTML = '';
+    popup.querySelector('.popup-warnings').innerHTML = '';
 };
 
 const clearSplits = () => {
@@ -155,22 +177,10 @@ const cancelPopup = (e) => {
 
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
-    document.getElementById('alignbutton').innerHTML = 'Align';
-    document.getElementById('saveasbutton').style.display = 'none';
     blackout.querySelector('select').innerHTML = '';
     for(const textarea of blackout.querySelectorAll('textarea'))
         textarea.value = '';
-
-    const popup = document.getElementById('splits-popup');
-    popup.style.display = 'none';
-    popup.querySelector('.output-boxen').style.display = 'none';
-    popup.querySelector('.popup-output').innerHTML = '';
-    popup.querySelector('.popup-warnings').innerHTML = '';
-    
-    /*
-    popup.style.height = '50%';
-    popup.querySelector('.boxen').style.height = '100%';
-    */
+    resetOutput();
 };
 
 const getNotes = str => {
@@ -231,7 +241,6 @@ const showSplits = async () => {
     const textblock = _state.curDoc.querySelector(`[*|id="${blockid}"]`);
     const edition = textblock.querySelector('[type="edition"]');
     let text = edition ? getEditionText(edition) : getEditionText(textblock);
-    text = text.replaceAll(/[\s\n]/g,'');
 
     const notes = getNotes(inputs[2].value);
     const lookup = popup.querySelector('input[name="lookup"]').checked;
@@ -358,13 +367,95 @@ const copyToClipboard = (xml,popup) => {
     );
 };
 
-const refreshFromWordlist = e => {
+const listEdit = {};
+
+listEdit.keydown = e => {
+    if(e.key === 'Enter') {
+        e.preventDefault();
+        e.target.blur();
+    }
+    else if(e.key === 'Tab' && e.target.classList.contains('gramGrp')) {
+        e.preventDefault();
+        const next = !e.shiftKey ?  
+            e.target.closest('tr').nextElementSibling :
+            e.target.closest('tr').previousElementSibling;
+        e.target.blur();
+        if(next)
+            next.querySelector('.gramGrp').click();
+    }
+};
+
+listEdit.blur = e => {
+    if(_state.editState !== e.target.textContent)
+        _state.changed = true;
+    _state.editState = null;
+
+    if(e.target.classList.contains('gramGrp')) {
+        e.target.contentEditable = false;
+        listEdit.updateGrams(e);
+    }
+    else
+        listEdit.updateWord(e);
     document.getElementById('saveasbutton').disabled = true;
     document.getElementById('saveasbutton').title = 'Realign first';
+    document.querySelector('#wbwbox textarea').value = refreshTranslation(_state.tamlines,_state.wordlist);
+    e.target.blur();
+};
+
+listEdit.focusin = e => {
+    if(e.target.spellcheck === true) {
+        _state.editState = e.target.textContent;
+        e.target.addEventListener('blur',listEdit.blur,{once: true});
+    }
+};
+
+listEdit.click = e => {
+    if(e.target.classList.contains('gramGrp')) {
+        const row = e.target.closest('tr');
+        const index = [...row.parentNode.children].indexOf(row);
+        const grams = _state.wordlist[index].gram;
+        if(grams && grams.length > 0)
+                e.target.innerHTML = '(' + grams.join('|') + ')';
+        else
+            e.target.innerHTML = '()';
+        _state.editState = e.target.innerHTML;
+        e.target.contentEditable = true;
+        e.target.focus();
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.setStart(e.target.firstChild,e.target.firstChild.data.length -1);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        
+        e.target.addEventListener('blur',listEdit.blur,{once: true});
+    }
+};
+
+listEdit.updateGrams = e => {
+    const row = e.target.closest('tr');
+    const index = [...row.parentNode.children].indexOf(row);
+    const transgram = _state.wordlist[index].translation + e.target.innerHTML;
+    const ret = findGrammar(transgram);
+    const def = row.querySelector('[spellcheck="true"]');
+    if(ret) {
+        _state.wordlist[index].gram = ret.gram;
+        _state.wordlist[index].translation = ret.translation;
+        def.innerHTML = ret.translation;
+        e.target.innerHTML = ret.gram.map(g => gramMap.get(g)).join('<br>');
+    }
+    else {
+        _state.wordlist[index].gram = [];
+        _state.wordlist[index].translation = transgram;
+        def.innerHTML = transgram;
+        e.target.innerHTML = '';
+    }
+};
+
+listEdit.updateWord = e => {
     const row = e.target.closest('tr');
     const index = [...row.parentNode.children].indexOf(row);
     _state.wordlist[index].translation = e.target.textContent.replaceAll(/\s/g,'_');
-    document.querySelector('#wbwbox textarea').value = refreshTranslation(_state.tamlines,_state.wordlist);
 
 };
 /*
