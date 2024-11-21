@@ -432,6 +432,8 @@ listEdit.click = e => {
         
         e.target.addEventListener('blur',listEdit.blur,{once: true});
     }
+    else if(e.target.firstElementChild.spellcheck === true)
+        e.target.firstElementChild.focus();
 };
 
 listEdit.updateGrams = e => {
