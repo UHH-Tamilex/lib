@@ -553,7 +553,8 @@ const makeEntries = (list) => {
 */
 
 const Splitter = {
-    addWordSplits: addWordSplits
+    addWordSplits: addWordSplits,
+    listEdit: listEdit
 };
 
 export default Splitter;
