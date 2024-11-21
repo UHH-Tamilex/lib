@@ -437,7 +437,7 @@ listEdit.click = e => {
 listEdit.updateGrams = e => {
     const row = e.target.closest('tr');
     const index = [...row.parentNode.children].indexOf(row);
-    const transgram = listEdit.state.wordlist[index].translation + e.target.innerHTML;
+    const transgram = listEdit.state.wordlist[index].translation + e.target.textContent.trim();
     const ret = findGrammar(transgram);
     const def = row.querySelector('[spellcheck="true"]');
     if(ret) {
