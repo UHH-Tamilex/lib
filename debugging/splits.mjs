@@ -369,6 +369,8 @@ const copyToClipboard = (xml,popup) => {
 
 const listEdit = {};
 
+listEdit.state = _state;
+
 listEdit.keydown = e => {
     if(e.key === 'Enter') {
         e.preventDefault();
@@ -386,9 +388,9 @@ listEdit.keydown = e => {
 };
 
 listEdit.blur = e => {
-    if(_state.editState !== e.target.textContent)
-        _state.changed = true;
-    _state.editState = null;
+    if(listEdit.state.editState !== e.target.textContent)
+        listEdit.state.changed = true;
+    listEdit.state.editState = null;
 
     if(e.target.classList.contains('gramGrp')) {
         e.target.contentEditable = false;
@@ -398,13 +400,13 @@ listEdit.blur = e => {
         listEdit.updateWord(e);
     document.getElementById('saveasbutton').disabled = true;
     document.getElementById('saveasbutton').title = 'Realign first';
-    document.getElementById('engsplit').value = refreshTranslation(_state.tamlines,_state.wordlist);
+    document.getElementById('engsplit').value = refreshTranslation(listEdit.state.tamlines,listEdit.state.wordlist);
     e.target.blur();
 };
 
 listEdit.focusin = e => {
     if(e.target.spellcheck === true) {
-        _state.editState = e.target.textContent;
+        listEdit.state.editState = e.target.textContent;
         e.target.addEventListener('blur',listEdit.blur,{once: true});
     }
 };
@@ -413,12 +415,12 @@ listEdit.click = e => {
     if(e.target.classList.contains('gramGrp')) {
         const row = e.target.closest('tr');
         const index = [...row.parentNode.children].indexOf(row);
-        const grams = _state.wordlist[index].gram;
+        const grams = listEdit.state.wordlist[index].gram;
         if(grams && grams.length > 0)
                 e.target.innerHTML = '(' + grams.join('|') + ')';
         else
             e.target.innerHTML = '()';
-        _state.editState = e.target.innerHTML;
+        listEdit.state.editState = e.target.innerHTML;
         e.target.contentEditable = true;
         e.target.focus();
         const range = document.createRange();
@@ -435,18 +437,18 @@ listEdit.click = e => {
 listEdit.updateGrams = e => {
     const row = e.target.closest('tr');
     const index = [...row.parentNode.children].indexOf(row);
-    const transgram = _state.wordlist[index].translation + e.target.innerHTML;
+    const transgram = listEdit.state.wordlist[index].translation + e.target.innerHTML;
     const ret = findGrammar(transgram);
     const def = row.querySelector('[spellcheck="true"]');
     if(ret) {
-        _state.wordlist[index].gram = ret.gram;
-        _state.wordlist[index].translation = ret.translation;
+        listEdit.state.wordlist[index].gram = ret.gram;
+        listEdit.state.wordlist[index].translation = ret.translation;
         def.innerHTML = ret.translation;
         e.target.innerHTML = ret.gram.map(g => gramMap.get(g)).join('<br>');
     }
     else {
-        _state.wordlist[index].gram = [];
-        _state.wordlist[index].translation = transgram;
+        listEdit.state.wordlist[index].gram = [];
+        listEdit.state.wordlist[index].translation = transgram;
         def.innerHTML = transgram;
         e.target.innerHTML = '';
     }
@@ -455,7 +457,7 @@ listEdit.updateGrams = e => {
 listEdit.updateWord = e => {
     const row = e.target.closest('tr');
     const index = [...row.parentNode.children].indexOf(row);
-    _state.wordlist[index].translation = e.target.textContent.replaceAll(/\s/g,'_');
+    listEdit.state.wordlist[index].translation = e.target.textContent.replaceAll(/\s/g,'_');
 
 };
 /*
