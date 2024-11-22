@@ -40,6 +40,11 @@ const serializeWordsplits = (standOff, serializer) => {
     const linecounts = countLines(lines);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');
+
+    if(!alignmentel) {
+        return {eng: engsplits.join(' '), tam: tamsplits.join(' '), notes: allnotes};
+    }
+
     const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
 
     const realcounts = matchCounts(alignment,linecounts);
@@ -58,7 +63,6 @@ const serializeWordsplits = (standOff, serializer) => {
             engout = engout + engsplits[n] + ' ';
         }
     }
-
     return {eng: engout, tam: tamout, notes: allnotes};
 };
 

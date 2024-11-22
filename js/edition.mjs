@@ -435,9 +435,10 @@ const EvaStyleGo = () => {
 const findCorrespLine = e => {
     const line = e.target.closest('.l[data-corresp]');
     if(!line) return;
-    const corresps = line.dataset.corresp.split('-').map(n => parseInt(n,10));
-    const corrarr = corresps.length === 1 ? corresps :
-                    Array(corresps[1] - corresps[0] + 1).fill().map((_,i) => corresps[0] + i);
+    const corresps = line.dataset.corresp.split('-');
+    const corrints = corresps.map(c => parseInt(c,10));
+    const corrarr = corrints.length === 1 ? corrints :
+                    Array(corrints[1] - corrints[0] + 1).fill().map((_,i) => corrints[0] + i);
     
     const ed = line.closest('.text-block').parentNode.querySelector('.edition');
     if(!ed) return;
@@ -445,19 +446,37 @@ const findCorrespLine = e => {
     const lines = ed.querySelectorAll('.l');
     if(!lines) return;
 
-    const torem = [];
+    const tounlight = [];
     for(const corresp of corrarr) {
         const sel = `.l:nth-of-type(${corresp})`;
         const found = ed.querySelector(sel);
         if(found) {
-            found.classList.add('lightlit');
-            torem.push(found);
+            /*
+            const abcd = /[a-d]+$/.exec(corresp);
+            if(abcd) {
+            // do ab/cd here
+            // export highlight function from apparatus.mjs
+            // if(document.getElementById('transbutton').lang === 'en') {
+            // Transliterate.revert
+            // }
+            // get cachedContent from edition.mjs
+            // highlightcoords(..,..)
+            // if(document.getElementById('transbutton').lang === 'en') {
+            // Transliterate.refreshCache
+            // Transliterate.activate
+            // }
+            }
+            else {
+                */
+                found.classList.add('lightlit');
+                tounlight.push(found);
+            //}
         }
     }
     line.classList.add('corresplit');
     line.addEventListener('mouseout',() => {
         line.classList.remove('corresplit');
-        for(const el of torem)
+        for(const el of tounlight)
             el.classList.remove('lightlit');
     },{once: true});
 };
