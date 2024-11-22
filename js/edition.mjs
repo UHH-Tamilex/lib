@@ -432,6 +432,36 @@ const EvaStyleGo = () => {
     }
 };
 
+const findCorrespLine = e => {
+    const line = e.target.closest('.l[data-corresp]');
+    if(!line) return;
+    const corresps = line.dataset.corresp.split('-').map(n => parseInt(n,10));
+    const corrarr = corresps.length === 1 ? corresps :
+                    Array(corresps[1] - corresps[0] + 1).fill().map((_,i) => corresps[0] + i);
+    
+    const ed = line.closest('.text-block').parentNode.querySelector('.edition');
+    if(!ed) return;
+    
+    const lines = ed.querySelectorAll('.l');
+    if(!lines) return;
+
+    const torem = [];
+    for(const corresp of corrarr) {
+        const sel = `.l:nth-of-type(${corresp})`;
+        const found = ed.querySelector(sel);
+        if(found) {
+            found.classList.add('lightlit');
+            torem.push(found);
+        }
+    }
+    line.classList.add('corresplit');
+    line.addEventListener('mouseout',() => {
+        line.classList.remove('corresplit');
+        for(const el of torem)
+            el.classList.remove('lightlit');
+    },{once: true});
+};
+
 const go = () => {
     const searchparams = new URLSearchParams(window.location.search);
     if(document.getElementById('editionscript').dataset.debugging === 'true')
@@ -454,6 +484,8 @@ const go = () => {
         }
     }
     recordcontainer.querySelector('.teitext').addEventListener('click',lookup);
+    for(const transblock of recordcontainer.querySelectorAll('.translation'))
+        transblock.addEventListener('mouseover',findCorrespLine);
     
     const wordsplitbutton = document.getElementById('wordsplitbutton');
     if(document.querySelector('.standOff[data-type="wordsplit"]')) {

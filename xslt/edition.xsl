@@ -362,6 +362,9 @@
                 <xsl:value-of select="@rend"/>
             </xsl:if>
         </xsl:attribute>
+        <xsl:if test="@corresp">
+            <xsl:attribute name="data-corresp"><xsl:value-of select="@corresp"/></xsl:attribute>
+        </xsl:if>
         <xsl:call-template name="lang"/>
         <xsl:apply-templates/>
         <xsl:text>

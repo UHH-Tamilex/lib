@@ -45,6 +45,16 @@ div.lg div.l {
     padding-left: 1rem;
     text-indent: -1rem;
 }
+
+div.l[data-corresp]::after {
+    content: attr(data-corresp);
+    font-variant-position: super;
+    color: rgb(168,81,16); 
+}
+
+div.l.corresplit[data-corresp]::after {
+    background: rgba(255,255,128,0.5);
+}
 div.lg div.l.space {
     margin-top: 2rem;
 }
