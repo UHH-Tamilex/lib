@@ -437,7 +437,7 @@ const findCorrespLine = e => {
     if(!line) return;
     const corresps = line.dataset.corresp.split('-');
     const corrints = corresps.map(c => parseInt(c,10));
-    const corrarr = corrints.length === 1 ? corrints :
+    const corrarr = corrints.length === 1 || isNaN(corrints[1]) ? [corrints[0]] :
                     Array(corrints[1] - corrints[0] + 1).fill().map((_,i) => corrints[0] + i);
     
     const ed = line.closest('.text-block').parentNode.querySelector('.edition');
