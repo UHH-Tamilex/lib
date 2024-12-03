@@ -109,8 +109,8 @@ const go = () => {
         'aspect TEXT, '+
         'voice TEXT, '+
         'precededby TEXT, '+
-        'pregeminate TEXT, '+
-        'postgeminate TEXT, '+
+        'pregeminate INTEGER, '+
+        'postgeminate INTEGER, '+
         'followedby TEXT, '+
         'syntax TEXT, '+
         'verbfunction TEXT, '+
