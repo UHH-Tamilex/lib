@@ -535,7 +535,7 @@ const findPos = el => {
 };
 
 const findPost = (entry, next) => {
-    if(!next) return {pos: null, geminates: false};
+    if(!next) return {pos: null, geminates: 'FALSE'};
 
     const form = entry.querySelector('form');
     const gems = form.querySelectorAll('c[type="geminated"]');
@@ -553,33 +553,33 @@ const findPost = (entry, next) => {
         // TODO: deal with compounds
         const postsib = gem.nextSibling;
         if(postsib && postsib.textContent.startsWith('-') && entry.querySelector('m[type="enclitic"]'))
-            return {pos: 'particle', geminates: true};
+            return {pos: 'particle', geminates: 'TRUE'};
 
         // geminate with following word
         if(gem.parentNode.lastChild === gem)
-            return {pos: findPos(next), geminates: true};
+            return {pos: findPos(next), geminates: 'TRUE'};
 
         // if someone autoformatted and added newlines everywhere
         if(gem.parentNode.lastChild.nodeType === 3 &&
            gem.parentNode.lastChild.textContent === '' &&
            gem.parentNode.lastChild.previousSibling === gem)
-            return {pos: findPos(next), geminates: true};
+            return {pos: findPos(next), geminates: 'TRUE'};
     }
     const nextgem = next.querySelector('form').querySelector('c[type="geminated"]');
     if(nextgem) {
         if(nextgem.parentNode.firstChild === nextgem)
-            return {pos: findPos(next), geminates: true};
+            return {pos: findPos(next), geminates: 'TRUE'};
 
         // if someone autoformatted and added newlines everywhere
         if(nextgem.parentNode.firstChild.textContent === '' &&
            nextgem.parentNode.firstChild.nextSibling === nextgem)
-            return {pos: findPos(next), geminates: true};
+            return {pos: findPos(next), geminates: 'TRUE'};
     }
 
-    return {pos: findPos(next), geminates: false};
+    return {pos: findPos(next), geminates: 'FALSE'};
 };
 const findPre = (entry, pre) => {
-    if(!pre) return {pos: null, geminates: false};
+    if(!pre) return {pos: null, geminates: 'FALSE'};
 
     const form = entry.querySelector('form');
     const gems = [...form.querySelectorAll('c[type="geminated"]')].toReversed();
@@ -597,30 +597,30 @@ const findPre = (entry, pre) => {
         // TODO: deal with compounds
         const presib = gem.previousSibling;
         if(presib && presib.textContent.startsWith('-') && entry.querySelector('m[type="proclitic"]'))
-            return {pos: 'particle', geminates: true};
+            return {pos: 'particle', geminates: 'TRUE'};
 
         // geminate with previous word
         if(gem.parentNode.firstChild === gem)
-            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: 'TRUE'};
 
         // if someone autoformatted and added newlines everywhere
         if(gem.parentNode.lastChild.nodeType === 3 &&
            gem.parentNode.lastChild.textContent === '' &&
            gem.parentNode.lastChild.previousSibling === gem)
-            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: 'TRUE'};
     }
     const prevgem = [...prev.querySelector('form').querySelectorAll('c[type="geminated"]')].pop();
     if(prevgem) {
         if(prevgem.parentNode.lastChild === prevgem)
-            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: 'TRUE'};
 
         // if someone autoformatted and added newlines everywhere
         if(prevgem.parentNode.lastChild.textContent === '' &&
            prevgem.parentNode.lastChild.previousSibling === prevgem)
-            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: 'TRUE'};
     }
 
-    return {pos: findPos(prev), geminates: false};
+    return {pos: findPos(prev), geminates: 'FALSE'};
 };
 
 const addToDb = (fname,db) => {
