@@ -578,7 +578,7 @@ const findPost = (entry, next) => {
 
     return {pos: findPos(next), geminates: 'FALSE'};
 };
-const findPre = (entry, pre) => {
+const findPre = (entry, prev) => {
     if(!pre) return {pos: null, geminates: 'FALSE'};
 
     const form = entry.querySelector('form');
