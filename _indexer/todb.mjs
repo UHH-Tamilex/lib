@@ -579,7 +579,7 @@ const findPost = (entry, next) => {
     return {pos: findPos(next), geminates: 'FALSE'};
 };
 const findPre = (entry, prev) => {
-    if(!pre) return {pos: null, geminates: 'FALSE'};
+    if(!prev) return {pos: null, geminates: 'FALSE'};
 
     const form = entry.querySelector('form');
     const gems = [...form.querySelectorAll('c[type="geminated"]')].toReversed();
