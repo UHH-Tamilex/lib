@@ -11,11 +11,12 @@ const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
 const POS = new Set(['noun',
-                   'proper noun',
                    'pronoun',
+                   /*
                    'demonstrative pronoun',
                    'personal pronoun',
                    'interrogative pronoun',
+                   */
                    'adjective',
                    'verbal noun',
                    'pronominalised noun',
@@ -46,13 +47,13 @@ const dbSchema = {
                      'genitive',
                      'locative',
                      'vocative']),
-    person: new Set(['first person','second person','third person','third person']),
+    person: new Set(['first person','second person','third person']),
     aspect: new Set(['perfective aspect','imperfective aspect','negative','present tense']),
     voice: new Set(['passive','causative']),
     syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction','relative']),
     verbfunction: new Set(['auxiliary','denomiative']),
     particlefunction: new Set(['concessive','indefinite','comparative','inclusive']),
-    misc: new Set(['ideophone','honorific']),
+    misc: new Set(['ideophone','honorific','proper name']),
     rootnoun: new Set(['verbal root as adjective',
                        'verbal root as gerundive',
                        'verbal root as imperative',
@@ -107,7 +108,10 @@ const go = () => {
         'person TEXT, '+
         'aspect TEXT, '+
         'voice TEXT, '+
-        'geminateswith TEXT, '+
+        'precededby TEXT, '+
+        'pregeminate TEXT, '+
+        'postgeminate TEXT, '+
+        'followedby TEXT, '+
         'syntax TEXT, '+
         'verbfunction TEXT, '+
         'particlefunction TEXT, '+
@@ -280,6 +284,12 @@ const isSameLine = (linenum, el,postspace) => {
 };
 
 const getPrevEntry = (entries,n,linenum) => {
+    const prevEntry = realPrev(entries,n);
+    if(!prevEntry) return '';
+
+    const ellipsis = n > 1 ? '…' : '';
+    return ellipsis + cleanForm(prevEntry.querySelector('form'),[]) + isSameLine(linenum,prevEntry) + ' ';
+    /*
     if(n > 0) {
         const ellipsis = n > 1 ? '…' : '';
 
@@ -295,6 +305,21 @@ const getPrevEntry = (entries,n,linenum) => {
         return ellipsis + cleanForm(entries[n-1].querySelector('form'),[]) + isSameLine(linenum,entries[n-1]) + ' ';
     }
     return '';
+    */
+};
+const realPrev = (entries, n) => {
+    if(n === 0) return null;
+
+    const superEntry = entries[n].closest('superEntry');
+    if(superEntry && entries[n].parentNode.firstElementChild === entries[n]) {
+        const prevEl = superEntry.prevElementSibling;
+        if(!prevEl || (prevEl.nodeName !== 'entry' && prevEl.nodeName !== 'superEntry'))
+            return null;
+
+        const prevEntry = prevEl.nodeName === 'superEntry' ? prevEl.lastElementChild : prevEl;
+        return prevEntry;
+    }
+    return entries[n-1];
 };
 
 const realNext = (entries, n) => {
@@ -509,50 +534,95 @@ const findPos = el => {
     return 'undefined';
 };
 
-const findGemination = (entry, next) => {
-    if(!next) return null;
+const findPost = (entry, next) => {
+    if(!next) return {pos: null, geminates: false};
+
     const form = entry.querySelector('form');
-    
-    // TODO: deprecated
-    const txt = form.textContent.trim();
-    if(txt.endsWith('+'))
-        return findPos(next);
-    else if(/\+-|-\+/.exec(txt))
-        return 'particle';
-        // Probably won't find proclitics?
-    const nxttxt = next.querySelector('form').textContent.trim();
-    if(nxttxt.startsWith('+'))
-        return findPos(next);
-    // new syntax!
-    const gem = form.querySelector('c[type="geminated"]');
-    if(gem) {
+    const gems = form.querySelectorAll('c[type="geminated"]');
+    for(const gem of gems) {
+        // geminate at beginning of form
+        if(gem.parentNode.firstSibling === gem)
+            continue;
+        if(gem.previousSibling && 
+           gem.previousSibling === gem.parentNode.firstChild &&
+           gem.previousSibling.nodeType === 3 && 
+           gem.previousSibling.data.trim() == '')
+            continue;
+
+        // geminate with enclitic particle
+        // TODO: deal with compounds
         const postsib = gem.nextSibling;
-        // TODO: deprecate proclitics
-        if(postsib && postsib.textContent.startsWith('-'))
-            return 'particle';
+        if(postsib && postsib.textContent.startsWith('-') && entry.querySelector('m[type="enclitic"]'))
+            return {pos: 'particle', geminates: true};
 
-        const presib = gem.nextSibling;
-        if(presib && presib.textContent.endsWith('-'))
-            return 'particle';
-
+        // geminate with following word
         if(gem.parentNode.lastChild === gem)
-            return findPos(next);
+            return {pos: findPos(next), geminates: true};
 
-        if(gem.parentNode.lastChild.textContent === '' &&
+        // if someone autoformatted and added newlines everywhere
+        if(gem.parentNode.lastChild.nodeType === 3 &&
+           gem.parentNode.lastChild.textContent === '' &&
            gem.parentNode.lastChild.previousSibling === gem)
-            return findPos(next);
+            return {pos: findPos(next), geminates: true};
     }
     const nextgem = next.querySelector('form').querySelector('c[type="geminated"]');
     if(nextgem) {
         if(nextgem.parentNode.firstChild === nextgem)
-            return findPos(next);
+            return {pos: findPos(next), geminates: true};
+
+        // if someone autoformatted and added newlines everywhere
         if(nextgem.parentNode.firstChild.textContent === '' &&
            nextgem.parentNode.firstChild.nextSibling === nextgem)
-            return findPos(next);
+            return {pos: findPos(next), geminates: true};
     }
 
-    return null;
+    return {pos: findPos(next), geminates: false};
 };
+const findPre = (entry, pre) => {
+    if(!pre) return {pos: null, geminates: false};
+
+    const form = entry.querySelector('form');
+    const gems = [...form.querySelectorAll('c[type="geminated"]')].toReversed();
+    for(const gem of gems) {
+        // geminate at end of form
+        if(gem === gem.parentNode.lastSibling)
+            continue;
+        if(gem.nextSibling &&
+           gem.parentNode.lastChild === gem.nextSibling &&
+           gem.nextSibling.nodeType === 3 && 
+           gem.nextSibling.data.trim() == '')
+            continue;
+
+        // geminate with proclitic particle
+        // TODO: deal with compounds
+        const presib = gem.previousSibling;
+        if(presib && presib.textContent.startsWith('-') && entry.querySelector('m[type="proclitic"]'))
+            return {pos: 'particle', geminates: true};
+
+        // geminate with previous word
+        if(gem.parentNode.firstChild === gem)
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+
+        // if someone autoformatted and added newlines everywhere
+        if(gem.parentNode.lastChild.nodeType === 3 &&
+           gem.parentNode.lastChild.textContent === '' &&
+           gem.parentNode.lastChild.previousSibling === gem)
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+    }
+    const prevgem = [...prev.querySelector('form').querySelectorAll('c[type="geminated"]')].pop();
+    if(prevgem) {
+        if(prevgem.parentNode.lastChild === prevgem)
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+
+        // if someone autoformatted and added newlines everywhere
+        if(prevgem.parentNode.lastChild.textContent === '' &&
+           prevgem.parentNode.lastChild.previousSibling === prevgem)
+            return {pos: prev.querySelector('m[type="enclitic"]') ? 'particle' : findPos(prev), geminates: true};
+    }
+
+    return {pos: findPos(prev), geminates: false};
+};
+
 const addToDb = (fname,db) => {
     console.log(fname);
     const basename = Path.basename(fname);
@@ -574,7 +644,8 @@ const addToDb = (fname,db) => {
             if(ins === null) continue;
             const prev = getPrevEntry(entries,n,linenum);
             const next = getNextEntry(entries,n,linenum);
-            const geminateswith = findGemination(entry,realNext(entries,n));
+            const {pos: precededby, geminates: pregeminate} = findPre(entry,realPrev(entries,n));
+            const {pos: followedby, geminates: postgeminate} = findPost(entry,realNext(entries,n));
             const context = prev + cleanForm(entry.querySelector('form'),[]) + next;
             /*
             const from = n > 0 ? n - 1 : n;
@@ -589,8 +660,8 @@ const addToDb = (fname,db) => {
             const fromlemma = rows[0]?.fromlemma || null;
             */
 
-            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), sandhi: ins.sandhi, islemma: islemma, fromlemma: fromlemma, def: ins.def, geminateswith: geminateswith, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: parseInt(linenum)+1, filename: basename},ins.roles);
-            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @sandhi, @islemma, @fromlemma, @def, @pos, @number, @gender, @nouncase, @person, @aspect, @voice, @geminateswith, @syntax, @verbfunction, @particlefunction, @rootnoun, @misc, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
+            const dbobj = Object.assign({form: ins.form, formsort: Sanscript.t(ins.form,'iast','tamil'), sandhi: ins.sandhi, islemma: islemma, fromlemma: fromlemma, def: ins.def, precededby: precededby, pregeminate: pregeminate, postgeminate: postgeminate, followedby: followedby, proclitic: ins.proclitic, enclitic: ins.enclitic, context: context, citation: citation, line: parseInt(linenum)+1, filename: basename},ins.roles);
+            db.prepare('INSERT INTO citations VALUES (@form, @formsort, @sandhi, @islemma, @fromlemma, @def, @pos, @number, @gender, @nouncase, @person, @aspect, @voice, @precededby, @pregeminate, @postgeminate, @followedby, @syntax, @verbfunction, @particlefunction, @rootnoun, @misc, @proclitic, @enclitic, @context, @citation, @line, @filename)').run(dbobj);
             const lemmaform = islemma ? ins.form : fulldb.prepare('SELECT word FROM dictionary WHERE islemma = ?').get(fromlemma)?.word || ins.form;
             const lemmadef = islemma ? worddef : 
                 fromlemma ? fulldb.prepare('SELECT definition FROM dictionary WHERE islemma = ?').get(fromlemma)?.definition :
