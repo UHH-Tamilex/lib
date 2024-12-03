@@ -247,7 +247,8 @@ const showSplits = async () => {
     const ret = await alignWordsplits(text,tam,eng,notes,lookup);
     const tables = makeAlignmentTable(ret.alignment,tamlines.map(l => l.replaceAll(/\/.+?(?=\s|$)/g,'')),ret.warnings);
     
-    debugbox.append(...tables);
+    for(const table of tables)
+        debugbox.appendChild(table);
     
     _state.wordlist = ret.wordlist;
 
