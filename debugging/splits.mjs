@@ -456,8 +456,8 @@ listEdit.updateGrams = e => {
     const def = row.querySelector('[spellcheck="true"]');
     if(ret) {
         listEdit.state.wordlist[index].gram = ret.gram;
-        listEdit.state.wordlist[index].translation = ret.translation;
-        def.innerHTML = ret.translation;
+        //listEdit.state.wordlist[index].translation = ret.translation;
+        //def.innerHTML = ret.translation;
         e.target.innerHTML = ret.gram.map(g => gramMap.get(g)).join('<br>');
     }
     else {
