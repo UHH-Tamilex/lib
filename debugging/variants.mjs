@@ -39,6 +39,7 @@ const addVariants = () => {
     */
     //const selector = document.createElement('select');
     const blackout = document.getElementById('blackout');
+    document.getElementById('splits-popup').style.display = 'none';
     const popup = document.getElementById('variants-popup');
     const selector = popup.querySelector('select');
     for(const lg of document.querySelectorAll('.lg')) {

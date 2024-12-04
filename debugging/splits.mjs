@@ -18,6 +18,7 @@ const filename = window.location.pathname.split('/').pop();
 
 const addWordSplits = () => {
     const blackout = document.getElementById('blackout');
+    document.getElementById('variants-popup').style.display = 'none';
     const popup = document.getElementById('splits-popup');
     const selector = popup.querySelector('select');
     for(const lg of document.querySelectorAll('.lg')) {
