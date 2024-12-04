@@ -298,7 +298,18 @@ const showSplits = async () => {
 
 const refreshTranslation = (lines,wordlist) => {
     let ret = '';
+    const makeSuperword = obj => {
+        const arr = [];
+        for(const strand of obj) {
+            const strandarr = [];
+            for(const w of strand)
+                strandarr.push(makeWord(w));
+            arr.push(strandarr.join('|'));
+        }
+        return arr.join('/');
+    };
     const makeWord = (obj) => {
+        if(obj.hasOwnProperty('superEntry')) return makeSuperword(obj);
         let trans = obj.translation;
         if(obj.gram && obj.gram.length > 0)
             trans = trans + '(' + obj.gram.join('|') + ')';
