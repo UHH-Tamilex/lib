@@ -302,7 +302,7 @@ span.invisible {
     height: 75px;
     background: #989895;
 }
-.popup-output .spinner::after {
+#blackout .popup-output .spinner::after {
   background: rgb(250,250,248);
 }
 
