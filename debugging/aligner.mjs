@@ -10,11 +10,12 @@ const _state = {
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
 
-const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ēmaṉṟa','ō','ōo','ōteyya','kol','kolō','kollō','kollē','koṉ','koṉmaṟṟu','koṉ-','til','tilla','tillamma','teyya','maṟṟu','maṟṟu-','maṟṟē','ēmaṟṟē','ōmaṟṟu','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟil','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṉāl','maṉṟa','maṉṟamma','maṟkollō','mātu','mātō','māḷa','yāḻa','yāḻa-'];
+const particlebare = ['amma','amma-','attai','arō','ā','ār','āl','ālamma','āṟṟilla','ikā','um','umār','ē','ēku','ēkamma','ēmaṉṟa','ō','ōo','ōteyya','kol','kolō','kollō','kollē',/*'koṉ','koṉmaṟṟu','koṉ-',*/'til','tilla','tillamma','teyya',/*'maṟṟu','maṟṟu-',*/'maṟṟē','ēmaṟṟē','ōmaṟṟu','ōmaṟṟē','maṟṟilla','maṉ','maṉṟa','maṉṟil','maṉṟilla','maṉṉō','maṉṉē','maṉṉum','maṉṉāl','maṉṟa','maṉṟamma','maṟkollō','mātu','mātō','māḷa',/*'yāḻa','yāḻa-'*/];
 
 particlebare.sort((a,b) => b.length - a.length);
 
 const particles = particlebare.map(a => {
+    /*
     if(a.endsWith('-')) {
         const aa = a.slice(0,-1);
         if(/u$/.test(aa)) {
@@ -24,6 +25,7 @@ const particles = particlebare.map(a => {
         else
             return [a,new RegExp(`^\\+?~?${aa}\\+?-`)];
     }
+    */
     if(/u$/.test(a)) {
         const regex = a.replace(/u$/,'(?:[*\'’u]|\\(i\\))');
         return [a,new RegExp(`\\+?~?${regex}\\+?$`)];
@@ -497,6 +499,7 @@ const findParticle = (word,translation) => {
                     //translation: translation.slice(0,translation.length-transmatch[0].length),
                     translation: translation.replace(regex,''),
                     particle: cleanBare(particle),
+                    // TODO: proclitics are deprecated
                     particletype: particle.endsWith('-') ? 'proclitic' : 'enclitic',
                     //bare: cleanBare(word.slice(0,word.length-wordmatch[0].length))
                     bare: cleanBare(word.replace(regex,''))
@@ -507,6 +510,7 @@ const findParticle = (word,translation) => {
                     return {
                         translation: translation,
                         particle: cleanBare(particle),
+                        // TODO: proclitics are deprecated
                         particletype: particle.endsWith('-') ? 'proclitic' : 'enclitic',
                         bare: cleanBare(word.replace(regex,''))
                     };
@@ -646,6 +650,9 @@ const cleanupWord = async (obj,lookup,notes,warnings) => {
 
     if(obj.translation === '()') // after removing note marker
             obj.translation = '';
+    
+    if(/^\+[kṅcñtnpmyrlv]/.test(obj.word))
+        warnings.push(`In "${obj.word}", the "+" is probably wrong.`);
 
     updateParticles(obj);
 
