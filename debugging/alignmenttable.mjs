@@ -169,7 +169,7 @@ const makeAlignmentTable = (alignment,lines,warnings) => {
     if(warnings.length > 0)
         for(const warning of warnings) {
             const ws = document.createElement('div');
-            ws.innerHTML = `<b>${warning}</b> not recognized.`;
+            ws.innerHTML = `Please check <b>${warning}</b>.`;
             ws.className = 'warningbox';
             ret.unshift(ws);
         }

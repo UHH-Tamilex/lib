@@ -652,7 +652,7 @@ const cleanupWord = async (obj,lookup,notes,warnings) => {
             obj.translation = '';
     
     if(/^\+[kṅcñtnpmyrlv]/.test(obj.word))
-        warnings.push(`In "${obj.word}", the "+" is probably wrong.`);
+        warnings.push(obj.word);
 
     updateParticles(obj);
 
