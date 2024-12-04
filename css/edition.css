@@ -274,13 +274,14 @@ span.invisible {
   display: inline-block;
   margin: 1rem;
   position: relative;
-  background: linear-gradient(0deg, rgb(240,202,121) 0%, rgba(50,50,50,0.3) 60%);
+  background: linear-gradient(0deg, rgb(240,202,121) 0%, white 60%);
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
 }
 #blackout .spinner {
   width: 80px;
   height: 80px;
+  background: linear-gradient(0deg, rgb(240,202,121) 0%, rgba(50,50,50,0.3) 60%);
 }
 .spinner::after {
   content: '';  
