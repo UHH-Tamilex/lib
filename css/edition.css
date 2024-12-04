@@ -274,10 +274,15 @@ span.invisible {
   display: inline-block;
   margin: 1rem;
   position: relative;
-  background: linear-gradient(0deg, rgb(240,202,121) 0%, white 60%);
+  background: linear-gradient(0deg, rgb(240,202,121) 0%, rgb(255,255,248) 60%);
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
 }
+
+.popup-output .spinner {
+  background: linear-gradient(0deg, rgb(240,202,121) 0%, white 60%);
+}
+
 #blackout .spinner {
   width: 80px;
   height: 80px;
