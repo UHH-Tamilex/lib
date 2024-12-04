@@ -253,7 +253,7 @@
                             </div>
                             <div id="variantsinput">
                                 <label>Apparatus from text</label>
-                                <textarea></textarea>
+                                <textarea rows="15"></textarea>
                                 <button type="button" id="addapparatus">Generate apparatus</button>
                             </div>
                             <div class="output-boxen">
