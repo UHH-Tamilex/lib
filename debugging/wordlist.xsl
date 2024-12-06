@@ -48,9 +48,12 @@
             <xsl:apply-templates select="x:note"/>
         </xsl:element>
         <xsl:element name="td">
-        <xsl:if test="x:def">
-            <xsl:apply-templates select="x:def"/>
-        </xsl:if>
+            <xsl:element name="span">
+            <xsl:attribute name="contenteditable">true</xsl:attribute>
+            <xsl:attribute name="spellcheck">true</xsl:attribute>
+                <xsl:apply-templates select="x:def"/>
+            </xsl:element>
+            <xsl:text> </xsl:text>
         </xsl:element>
         <xsl:element name="td">
             <xsl:attribute name="class">gramGrp</xsl:attribute>
@@ -165,15 +168,6 @@
             <xsl:apply-templates/>
         </xsl:element>
     </xsl:element>
-</xsl:template>
-
-<xsl:template match="x:def">
-    <xsl:element name="span">
-    <xsl:attribute name="contenteditable">true</xsl:attribute>
-    <xsl:attribute name="spellcheck">true</xsl:attribute>
-        <xsl:apply-templates/>
-    </xsl:element>
-    <xsl:text> </xsl:text>
 </xsl:template>
 
 <xsl:template match="x:gramGrp[not(@type)]">
