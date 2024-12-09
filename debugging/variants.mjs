@@ -120,6 +120,7 @@ const generateApp = async e => {
     if(listApp.hasOwnProperty('errors'))
         output.innerHTML = listApp.errors.join('<br>');
     else {
+        console.log(listApp.output);
         newDoc = curDoc.cloneNode(true);
         let curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
         if(!curStandOff) {
