@@ -345,11 +345,11 @@ transliterator.toggle = () => {
     }
 };
 
-transliterator.jiggleChars = (par = _state.parEl) => {
+transliterator.jiggleWordsplits = (par = _state.parEl) => {
     const chars = par.querySelectorAll('.word.split span.character');
     for(const node of chars) {
         if(node.classList.contains('elided') ||
-            (node.classList.contains('uncertain') && node.dataset.character === 'a')
+            (node.classList.contains('uncertain') && ['i','a'].includes(node.dataset.character))
           ) {
             markToRevert(node);
 
@@ -361,6 +361,18 @@ transliterator.jiggleChars = (par = _state.parEl) => {
             else node.lastChild.data = '';
         }
         else if(node.classList.contains('glide') || node.classList.contains('geminated')) {
+            const next = node.nextSibling;
+            if(!next || next.nodeType !== 3)
+                continue;
+            
+            const vowelstart = next.data.match(/ai|au|[aāiīuūeēoō]/);
+            if(!vowelstart) continue;
+            
+            markToRevert(node);
+            node.textContent = node.textContent + vowelstart[0];
+            next.data = next.data.substring(vowelstart[0].length);
+
+            /*
             const prev = realPrev(node.previousSibling);
             const next = realNext(node.nextSibling);
             if(next && prev.nodeType === 3 && prev.data.endsWith('-')) {
@@ -385,6 +397,7 @@ transliterator.jiggleChars = (par = _state.parEl) => {
                 if(temp) temp.lastChild.data = '';
                 else node.lastChild.data = '';
             }
+            */
         }
     }
 };
@@ -437,7 +450,7 @@ transliterator.activate = (par = _state.parEl) => {
         if(s.lang.startsWith('sa') || s.lang.startsWith('ta')) transliterator.jiggle(s);
         //TODO: Also other languages?
 
-    transliterator.jiggleChars(par);
+    transliterator.jiggleWordsplits(par);
     transliterator.convertNums(par);
     // Go through all <pc>-</pc> tags and make them invisible,
     // then empty the text node on the left, and add its content
