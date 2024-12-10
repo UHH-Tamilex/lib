@@ -369,7 +369,8 @@ transliterator.jiggleWordsplits = (par = _state.parEl) => {
             if(!vowelstart) continue;
             
             markToRevert(node);
-            node.textContent = node.textContent + vowelstart[0];
+            // use lastChild because firstChild is an annotation div
+            node.lastChild.textContent = node.lastChild.textContent + vowelstart[0];
             next.data = next.data.substring(vowelstart[0].length);
 
             /*
