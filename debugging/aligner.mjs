@@ -1,11 +1,13 @@
 import needlemanWunsch from './needlemanwunsch.mjs';
-import dbQuery from './dbquery.mjs';
 import createSqlWorker from '../js/sqlWorker.mjs';
 import {gramAbbreviations} from './abbreviations.mjs';
+import lookupFeatures from './lookupFeatures.mjs';
 
+/*
 const _state = {
     worker: null
 };
+*/
 
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
@@ -87,6 +89,7 @@ caseAffixes.sort((a,b) => b[0].length - a[0].length);
 const gramKeys = gramAbbreviations.map(a => a[0]);
 
 const gramMap = new Map(gramAbbreviations);
+const revGramMap = new Map(gramAbbreviations.map(a => [a[1],a[0]]));
 
 const wordsplitscore = (a,b) => {
     const vowels = 'aāiīuūoōeē'.split('');
@@ -322,10 +325,10 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     const toktext = text.split(/\s+/).map(c => tamilSplit(c)).flat();
     const aligned = needlemanWunsch(toktext,wordjoin,wordsplitscore);
     const realigned = jiggleAlignment(aligned,wordtokens);
-
+    /*
     if(lookup && !_state.worker)
         _state.worker = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
-
+    */
     const {words: wordlist, warnings: warnings}  = await getWordlist(tam,eng,aligned,[...notes],lookup);
     //const warnings = await cleanupWordlist(wordlist,notes,lookup);
     const entries = makeEntries(wordlist);
@@ -623,23 +626,27 @@ const mostPopular = (arr) => {
     return ret.el;
 };
 
-const lookupFeatures = async (str) => {
-    const res = await dbQuery(str);
-    if(!res) return null;
-    
-    const arr = res.length === 1 ? JSON.parse(res[0][0]) : JSON.parse(mostPopular(res)[0]);
-    if(arr.length === 0) return null;
-
-    const ret = [];
-    for(const abbr of arr) {
-        if(gramMap.has(abbr)) ret.push(abbr);
-    }
-    return ret;
-};
-
 const cleanForm = str => {
     return str.replaceAll(/([~+()])/g,'')
               .replaceAll(/['’*]/g,'u');
+};
+
+const reverseGramLookup = arr => {
+    const ret = [];
+    const neuter = arr.indexOf('neuter');
+    if(neuter > -1) { // AAGGH
+        const number = arr.indexOf('singular') || arr.indexOf('plural');
+        if(number > -1) {
+            arr[neuter] = 'neuter ' + arr[number];
+            arr[number] = '';
+        }
+        //TODO: this fails if something is just neuter...
+    }
+    for(const term of arr) {
+        const abbr = revGramMap.get(term);
+        if(abbr) ret.push(abbr);
+    }
+    return ret;
 };
 
 const cleanupWord = async (obj,lookup,notes,warnings) => {
@@ -663,17 +670,19 @@ const cleanupWord = async (obj,lookup,notes,warnings) => {
         obj.gram = grammar.gram;
         if(grammar.warning) warnings.push(grammar.warning);
     }
-    if(lookup) {
+    if(lookup && (!grammar || obj.translation === '')) {
         const bare = cleanForm(obj.bare || obj.word);
-        if(!grammar || obj.translation === '') {
-            const features = await lookupFeatures(bare);
-            if(features) obj.gram = features;
+        const features = await lookupFeatures(bare,obj.gram);
+        if(features) {
+            if(!obj.gram) obj.gram = reverseGramLookup(features.grammar);
+            if(!obj.translation) obj.translation = features.translation;
         }
-
+        /*
         if(obj.translation === '') {
             const res = (await _state.worker.db.query('SELECT def FROM citations WHERE form = ? LIMIT 1',[bare]))[0];
             if(res && res.def) obj.translation = res.def.replaceAll(/\s+/g,'_');
         }
+        */
     }
     /*
     if(!particle && !affix && !grammar) {
