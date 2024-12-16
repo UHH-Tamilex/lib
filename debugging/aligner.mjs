@@ -1,7 +1,6 @@
 import needlemanWunsch from './needlemanwunsch.mjs';
-import createSqlWorker from '../js/sqlWorker.mjs';
 import {gramAbbreviations} from './abbreviations.mjs';
-import lookupFeatures from './lookupFeatures.mjs';
+import lookupFeatures from './lookupfeatures.mjs';
 
 /*
 const _state = {

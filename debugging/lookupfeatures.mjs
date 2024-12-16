@@ -100,3 +100,5 @@ const mostPopular2 = (arr) => {
         },[])
     };
 };
+
+export default lookupFeatures;
