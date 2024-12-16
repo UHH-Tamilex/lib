@@ -671,7 +671,7 @@ const cleanupWord = async (obj,lookup,notes,warnings) => {
     }
     if(lookup && (!grammar || obj.translation === '')) {
         const bare = cleanForm(obj.bare || obj.word);
-        const features = await lookupFeatures(bare,obj.gram);
+        const features = await lookupFeatures(bare,obj.translation,obj.gram);
         if(features) {
             if(!obj.gram) obj.gram = reverseGramLookup(features.grammar);
             if(!obj.translation) obj.translation = features.translation;

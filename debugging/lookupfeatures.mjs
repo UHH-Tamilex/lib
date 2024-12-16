@@ -7,14 +7,14 @@ const _state = {
 
 const importantKeys = ['pos','number','gender','nouncase','person','aspect','voice'];
 
-const lookupFeatures = async (translation, grammar) => {
+const lookupFeatures = async (str, translation, grammar) => {
     const ret = {
         translation: null,
         grammar: null
     };
     
     if(!translation && !grammar) {
-        if(!state.fullindex)
+        if(!_state.fullindex)
             _state.fullindex = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
 
         const res = (await _state.fullindex.db.query(`SELECT def, ${importantKeys.join(', ')} FROM [citations] WHERE form = ?`,[str]));
@@ -27,9 +27,9 @@ const lookupFeatures = async (translation, grammar) => {
         if(!_state.lemmaindex) 
             _state.lemmaindex = await createSqlWorker('../debugging/index.db');
 
-        const res = (await _state.lemmaindex.db.query(`SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = ?`,[translation]));
+        const res = (await _state.lemmaindex.db.query(`SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = ?`,[str]));
 
-        if(res) {
+        if(res.length > 0) {
             const obj = res.length === 1 ? 
                 res[0] :
                 mostPopular(res);
@@ -38,13 +38,11 @@ const lookupFeatures = async (translation, grammar) => {
                 grammar: [],
             };
             
-            ret.translation = obj.def;
-
             for(const key of importantKeys)
                 if(obj.hasOwnProperty(key))
                     ret.grammar.push(obj[key]);
 
-            if(ret.translation) return ret;
+            return ret;
         }
     }
     /*
@@ -81,7 +79,15 @@ const mostPopular = (arr) => {
 };
 
 const mostPopular2 = (arr) => {
-    if(arr.length === 1) return arr[0];
+    if(arr.length === 1)
+        return {
+            translation: arr[0].def,
+            grammar: importantKeys.reduce((acc,cur) => {
+                if(arr[0].hasOwnProperty(cur))
+                    acc.push(arr[0][cur]);
+                return acc;
+            },[])
+        };
 
     const counts = new Map();
     for(const obj of arr) {
@@ -90,12 +96,12 @@ const mostPopular2 = (arr) => {
         if(curcount) curcount.count = curcount.count + 1;
         else counts.set(str,{obj: obj,count: 1});
     }
-    const sorted = [...counts.values()].toSorted((a,b) => b.count - a.count);
+    const best = [...counts.values()].toSorted((a,b) => a.count - b.count).pop().obj;
     return {
-        translation: sorted[0][0].def,
+        translation: best.def,
         grammar: importantKeys.reduce((acc,cur) => {
-            if(sorted[0][0].hasOwnProperty(cur))
-                acc.push(cur);
+            if(best.hasOwnProperty(cur))
+                acc.push(best[cur]);
             return acc;
         },[])
     };
