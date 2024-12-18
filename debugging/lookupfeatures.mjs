@@ -1,5 +1,5 @@
 import createSqlWorker from '../js/sqlWorker.mjs';
-import dbSchema from './abbreviations.mjs';
+import {dbSchema} from './abbreviations.mjs';
 
 const _state = {
     lemmaindex: null,
@@ -9,16 +9,14 @@ const _state = {
 
 const importantKeys = ['pos','number','gender','nouncase','person','aspect','voice'];
 
-const lookupCitations = async (str,grammar) => {
+const lookupCitations = async (str) => {
     if(!_state.fullindex)
         _state.fullindex = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
     
     const cached = _state.cache.get(str);
     if(cached) return cached;
     
-    const res = grammar ?
-        (await _state.fullindex.db.query(`SELECT def FROM [citations] WHERE form = ? AND ${grammar.search}`,[str,...grammar.values])) :
-        (await _state.fullindex.db.query(`SELECT def, ${importantKeys.join(', ')} FROM [citations] WHERE form = ?`,[str]));
+    const res = (await _state.fullindex.db.query(`SELECT def, ${importantKeys.join(', ')} FROM [citations] WHERE form = ?`,[str]));
 
     if(res.length === 0) return null;
 
@@ -30,6 +28,19 @@ const lookupCitations = async (str,grammar) => {
     };
     _state.cache.set(str,ret);
     return ret;
+};
+
+const lookupCitationDefs = async (str,grammar) => {
+    if(!_state.fullindex)
+        _state.fullindex = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
+    
+    const cached = _state.cache.get(str);
+    if(cached) return cached;
+    
+    const res = (await _state.fullindex.db.query(`SELECT def FROM [citations] WHERE form = ? AND ${grammar.search}`,[str,...grammar.values]));
+
+    if(res.length === 0) return null;
+    return mostPopular3(res.map(r => r.def));
 };
 
 const lookupLemmata = async str => {
@@ -65,10 +76,10 @@ const lookupLemmata = async str => {
 const lookupFeatures = async (str, translation, grammar) => {
     
     if(!translation && !grammar) {
-        return lookupCitations(str);
+        return await lookupCitations(str);
     }
     else if(!grammar) { // translation given, grammar empty
-        return lookupLemmata(str);
+        return await lookupLemmata(str);
     }
     else if(!translation) { // grammar given, translation empty
         const gramarr = [];
@@ -82,7 +93,12 @@ const lookupFeatures = async (str, translation, grammar) => {
                 }
             }
         }
-        return lookupCitations(str,{search: search.join(' AND '), values: grammarr});
+        const def = await lookupCitationDefs(str,{search: search.join(' AND '), values: gramarr});
+        if(def) 
+            return {
+                translation: def,
+                grammar: grammar
+            };
     }
     /*
     else if(!translation) {
@@ -144,6 +160,19 @@ const mostPopular2 = (arr) => {
             return acc;
         },[])
     };
+};
+
+const mostPopular3 = (arr) => {
+    if(arr.length === 1) return arr[0];
+
+    const freqs = new Map();
+    for(const a of arr) {
+        const exist = freqs.get(a);
+        if(exist) freqs.set(a,exist + 1);
+        else freqs.set(a,0);
+    }
+    const best = [...freqs].toSorted((a,b) => a[1] - b[1]).pop()[0];
+    return best;
 };
 
 export default lookupFeatures;
