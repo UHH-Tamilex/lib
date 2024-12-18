@@ -78,4 +78,56 @@ const gramAbbreviations = [
 gramAbbreviations.sort((a,b) => b[0].length - a[0].length);
 const gramMap = new Map(gramAbbreviations.map(arr => [arr[1],arr[0]]));
 
-export {gramAbbreviations, gramMap};
+const POS = new Set(['noun',
+                   'pronoun',
+                   /*
+                   'demonstrative pronoun',
+                   'personal pronoun',
+                   'interrogative pronoun',
+                   */
+                   'adjective',
+                   'verbal noun',
+                   'pronominalised noun',
+                   'participial noun',
+                   'verbal root',
+                   'root noun',
+                   'finite verb',
+                   'peyareccam',
+                   'infinitive',
+                   'absolutive',
+                   'habitual future',
+                   'conditional',
+                   'imperative',
+                   'optative',
+                   'subjunctive',
+                   'interjection']);
+const dbSchema = {
+    pos: POS,
+    number: new Set(['singular','plural']),
+    gender: new Set(['masculine','feminine','neuter']),
+    nouncase: new Set(['nominative',
+                     'oblique',
+                     'accusative',
+                     'sociative',
+                     'instrumental',
+                     'dative',
+                     'ablative',
+                     'genitive',
+                     'locative',
+                     'vocative']),
+    person: new Set(['first person','second person','third person']),
+    aspect: new Set(['perfective aspect','imperfective aspect','negative','present tense']),
+    voice: new Set(['passive','causative']),
+    syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction','relative']),
+    verbfunction: new Set(['auxiliary','denomiative']),
+    particlefunction: new Set(['concessive','indefinite','comparative','inclusive']),
+    misc: new Set(['ideophone','honorific','proper name']),
+    rootnoun: new Set(['verbal root as adjective',
+                       'verbal root as gerundive',
+                       'verbal root as imperative',
+                       'verbal root as infinitive',
+                       'verbal root as peyareccam',
+                       'verbal root as peyareccam imperfective aspect',
+                       'verbal root as peyareccam perfective aspect'])
+};
+export {gramAbbreviations, gramMap, dbSchema};

@@ -1,49 +1,88 @@
 import createSqlWorker from '../js/sqlWorker.mjs';
+import dbSchema from './abbreviations.mjs';
 
 const _state = {
     lemmaindex: null,
-    fullindex: null
+    fullindex: null,
+    cache: new Map()
 };
 
 const importantKeys = ['pos','number','gender','nouncase','person','aspect','voice'];
 
-const lookupFeatures = async (str, translation, grammar) => {
+const lookupCitations = async (str,grammar) => {
+    if(!_state.fullindex)
+        _state.fullindex = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
+    
+    const cached = _state.cache.get(str);
+    if(cached) return cached;
+    
+    const res = grammar ?
+        (await _state.fullindex.db.query(`SELECT def FROM [citations] WHERE form = ? AND ${grammar.search}`,[str,...grammar.values])) :
+        (await _state.fullindex.db.query(`SELECT def, ${importantKeys.join(', ')} FROM [citations] WHERE form = ?`,[str]));
+
+    if(res.length === 0) return null;
+
+    const candidate = mostPopular2(res);
+
+    const ret = {
+        translation: candidate.translation.replaceAll(/\s+/g,'_'),
+        grammar: candidate.grammar
+    };
+    _state.cache.set(str,ret);
+    return ret;
+};
+
+const lookupLemmata = async str => {
+    if(!_state.lemmaindex) 
+        _state.lemmaindex = await createSqlWorker('../debugging/index.db');
+
+    const cached = _state.cache.get(str);
+    if(cached) return cached;
+
+    const res = (await _state.lemmaindex.db.query(`SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = ?`,[str]));
+
+    if(res.length === 0) return null;
+
+    const obj = res.length === 1 ? 
+        res[0] :
+        mostPopular(res);
+
     const ret = {
         translation: null,
-        grammar: null
+        grammar: [],
     };
     
+    for(const key of importantKeys)
+        if(obj.hasOwnProperty(key))
+            ret.grammar.push(obj[key]);
+
+    _state.cache.set(str,ret);
+
+    return ret;
+};
+
+// returns {translation: String, grammar: Array}
+const lookupFeatures = async (str, translation, grammar) => {
+    
     if(!translation && !grammar) {
-        if(!_state.fullindex)
-            _state.fullindex = await createSqlWorker('https://uhh-tamilex.github.io/lexicon/wordindex.db');
-
-        const res = (await _state.fullindex.db.query(`SELECT def, ${importantKeys.join(', ')} FROM [citations] WHERE form = ?`,[str]));
-        const candidate = mostPopular2(res);
-        ret.translation = candidate.translation.replaceAll(/\s+/g,'_');
-        ret.grammar = candidate.grammar;
-        return ret;
+        return lookupCitations(str);
     }
-    else if(!grammar) {
-        if(!_state.lemmaindex) 
-            _state.lemmaindex = await createSqlWorker('../debugging/index.db');
-
-        const res = (await _state.lemmaindex.db.query(`SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = ?`,[str]));
-
-        if(res.length > 0) {
-            const obj = res.length === 1 ? 
-                res[0] :
-                mostPopular(res);
-            const ret = {
-                translation: null,
-                grammar: [],
-            };
-            
-            for(const key of importantKeys)
-                if(obj.hasOwnProperty(key))
-                    ret.grammar.push(obj[key]);
-
-            return ret;
+    else if(!grammar) { // translation given, grammar empty
+        return lookupLemmata(str);
+    }
+    else if(!translation) { // grammar given, translation empty
+        const gramarr = [];
+        const search = [];
+        const keys = Object.keys(dbSchema);
+        for(const key of keys) {
+            for(const gram of grammar) {
+                if(dbSchema[key].has(gram)) {
+                    search.push(`${key} = ?`);
+                    gramarr.push(gram);
+                }
+            }
         }
+        return lookupCitations(str,{search: search.join(' AND '), values: grammarr});
     }
     /*
     else if(!translation) {

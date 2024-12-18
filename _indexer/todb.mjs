@@ -5,63 +5,10 @@ import Jsdom from 'jsdom';
 import sqlite3 from 'better-sqlite3';
 import {Sanscript} from '../js/sanscript.mjs';
 import {decodeRLE,matchCounts,countLines} from '../debugging/utils.mjs';
-import {gramAbbreviations, gramMap} from '../debugging/abbreviations.mjs';
+import {gramAbbreviations, gramMap, dbSchema} from '../debugging/abbreviations.mjs';
 
 const CONCATRIGHT = Symbol.for('concatright');
 const CONCATLEFT = Symbol.for('concatleft');
-
-const POS = new Set(['noun',
-                   'pronoun',
-                   /*
-                   'demonstrative pronoun',
-                   'personal pronoun',
-                   'interrogative pronoun',
-                   */
-                   'adjective',
-                   'verbal noun',
-                   'pronominalised noun',
-                   'participial noun',
-                   'verbal root',
-                   'root noun',
-                   'finite verb',
-                   'peyareccam',
-                   'infinitive',
-                   'absolutive',
-                   'habitual future',
-                   'conditional',
-                   'imperative',
-                   'optative',
-                   'subjunctive',
-                   'interjection']);
-const dbSchema = {
-    pos: POS,
-    number: new Set(['singular','plural']),
-    gender: new Set(['masculine','feminine','neuter']),
-    nouncase: new Set(['nominative',
-                     'oblique',
-                     'accusative',
-                     'sociative',
-                     'instrumental',
-                     'dative',
-                     'ablative',
-                     'genitive',
-                     'locative',
-                     'vocative']),
-    person: new Set(['first person','second person','third person']),
-    aspect: new Set(['perfective aspect','imperfective aspect','negative','present tense']),
-    voice: new Set(['passive','causative']),
-    syntax: new Set(['muṟṟeccam','postposition','adverb','conjunction','relative']),
-    verbfunction: new Set(['auxiliary','denomiative']),
-    particlefunction: new Set(['concessive','indefinite','comparative','inclusive']),
-    misc: new Set(['ideophone','honorific','proper name']),
-    rootnoun: new Set(['verbal root as adjective',
-                       'verbal root as gerundive',
-                       'verbal root as imperative',
-                       'verbal root as infinitive',
-                       'verbal root as peyareccam',
-                       'verbal root as peyareccam imperfective aspect',
-                       'verbal root as peyareccam perfective aspect'])
-};
 
 const dbValues = Object.values(dbSchema).reduce((acc,cur) => {
         for(const c of cur) acc.push(c);
@@ -529,7 +476,7 @@ const findPos = el => {
     const grams = el.querySelectorAll('gram[type="role"]');
     for(const gram of grams) {
         const gramtxt = gram.textContent;
-        if(POS.has(gramtxt)) return gramtxt;
+        if(dbSchema.pos.has(gramtxt)) return gramtxt;
     }
     return 'undefined';
 };
