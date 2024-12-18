@@ -659,6 +659,8 @@ const cleanupWord = async (obj,lookup,notes,warnings) => {
     
     if(/^\+[kṅcñtnpmyrlv]/.test(obj.word))
         warnings.push(obj.word);
+    if(/~$|~-/.test(obj.word))
+        warnings.push(obj.word);
 
     updateParticles(obj);
 
