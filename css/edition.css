@@ -134,8 +134,11 @@ h6.trailer {
     text-align: right;
 }
 
-.text-block:first-child { line-height: 3.5rem; margin-right: 0.25rem;}
-.text-block:last-child {line-height: 3.5rem; margin-left: 0.25rem;}
+.text-block.lg:first-child { line-height: 3.5rem; margin-right: 0.25rem;}
+.text-block.lg:last-child {line-height: 3.5rem; margin-left: 0.25rem;}
+.text-block.p:first-child { line-height: 2rem; margin-right: 0.25rem;}
+.text-block.p:last-child {line-height: 2rem; margin-left: 0.25rem;}
+
 rt { padding-bottom: 0.5rem;}
 rt:hover, span.word:not(.nolookup):hover { background-color: yellow; cursor: pointer; }
 #tooltip { font-size: 1.1rem; }

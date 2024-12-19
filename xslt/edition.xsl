@@ -307,7 +307,7 @@
 <xsl:template match="x:div/x:p">
     <xsl:element name="div">
         <xsl:attribute name="class">
-            <xsl:text>text-block </xsl:text>
+            <xsl:text>text-block p</xsl:text>
             <xsl:choose>
                 <xsl:when test="@type='edition'"><xsl:text>edition</xsl:text></xsl:when>
                 <xsl:when test="@type='translation'"><xsl:text>translation</xsl:text></xsl:when>
@@ -322,7 +322,7 @@
     <xsl:element name="div">
         <xsl:call-template name="lang"/>
         <xsl:attribute name="class">
-            <xsl:text>text-block </xsl:text>
+            <xsl:text>text-block lg</xsl:text>
             <xsl:choose>
                 <xsl:when test="@type='edition'"><xsl:text>edition</xsl:text></xsl:when>
                 <xsl:when test="@type='translation'"><xsl:text>translation</xsl:text></xsl:when>
