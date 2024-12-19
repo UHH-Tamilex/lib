@@ -50,7 +50,7 @@ div.l[data-corresp]::after {
     content: attr(data-corresp);
     /*font-variant-position: super;*/
     vertical-align: super;
-    font-size: 45%;
+    font-size: 55%;
     color: rgb(168,81,16); 
 }
 
@@ -64,8 +64,9 @@ div.edition {
     counter-reset: line-numb;
 }
 div.edition div.l::before {
+    content: counter(line-numb);
     counter-increment: line-numb +1;
-    content: counter(line-numb, none);
+    display: none;
     position: absolute;
     left: -5px;
     text-align: right;
@@ -73,12 +74,12 @@ div.edition div.l::before {
 }
 
 div.edition div.l:nth-child(5n)::before {
-    content: counter(line-numb);
+    display: inline-block;
 }
 
 div.edition div.l.linenumbered::before {
     color: rgb(168,81,16);
-    content: counter(line-numb);
+    display: inline-block;
 }
 
 div.alternate {
