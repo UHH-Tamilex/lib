@@ -451,33 +451,15 @@ const findCorrespLine = e => {
         const sel = `.l:nth-of-type(${corresp})`;
         const found = ed.querySelector(sel);
         if(found) {
-            /*
-            const abcd = /[a-d]+$/.exec(corresp);
-            if(abcd) {
-            // do ab/cd here
-            // export highlight function from apparatus.mjs
-            // if(document.getElementById('transbutton').lang === 'en') {
-            // Transliterate.revert
-            // }
-            // get cachedContent from edition.mjs
-            // highlightcoords(..,..)
-            // if(document.getElementById('transbutton').lang === 'en') {
-            // Transliterate.refreshCache
-            // Transliterate.activate
-            // }
-            }
-            else {
-                */
-                found.classList.add('lightlit');
-                tounlight.push(found);
-            //}
+            found.classList.add('linenumbered');
+            tounlight.push(found);
         }
     }
     line.classList.add('corresplit');
     line.addEventListener('mouseout',() => {
         line.classList.remove('corresplit');
         for(const el of tounlight)
-            el.classList.remove('lightlit');
+            el.classList.remove('linenumbered');
     },{once: true});
 };
 
