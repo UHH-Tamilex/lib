@@ -65,6 +65,7 @@ div.edition {
 }
 div.edition div.l::before {
     counter-increment: line-numb +1;
+    content: counter(line-numb, none);
     position: absolute;
     left: -5px;
     text-align: right;
