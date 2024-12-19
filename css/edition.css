@@ -126,6 +126,14 @@ div.lg div.l.indent8 {
 div.lg div.l.indent9 {
     padding-left: 90%;
 }
+
+h6.trailer {
+    font-size: inherit;
+    width: 100%;
+    display: inline-block;
+    text-align: right;
+}
+
 .text-block:first-child { line-height: 3.5rem; margin-right: 0.25rem;}
 .text-block:last-child {line-height: 3.5rem; margin-left: 0.25rem;}
 rt { padding-bottom: 0.5rem;}

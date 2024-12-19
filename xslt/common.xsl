@@ -37,6 +37,13 @@
     </xsl:element>
 </xsl:template>
 
+<xsl:template match="x:trailer">
+    <xsl:element name="h6">
+        <xsl:attribute name="class">trailer</xsl:attribute>
+        <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template>
+
 <xsl:template name="p">
     <xsl:element name="p">
         <xsl:if test="@corresp or @xml:id">
