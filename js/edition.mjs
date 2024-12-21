@@ -472,8 +472,9 @@ const go = () => {
     if(searchparams.get('evastyle') !== null)
        EvaStyleGo(); 
 
-    const lineview = document.querySelector('.line-view-icon');
-    if(lineview) lineview.style.display = 'none';
+    const lineview = document.querySelectorAll('.line-view-icon');
+    if(lineview) for(const l of lineview) l.style.display = 'none';
+
     const recordcontainer = document.getElementById('recordcontainer');
     Transliterate.init(recordcontainer);
 
@@ -484,7 +485,8 @@ const go = () => {
             b.parentElement.after(b);
         }
     }
-    recordcontainer.querySelector('.teitext').addEventListener('click',lookup);
+    for(const teitext of recordcontainer.querySelectorAll('.teitext'))
+        teitext.addEventListener('click',lookup);
     for(const transblock of recordcontainer.querySelectorAll('.translation'))
         transblock.addEventListener('mouseover',findCorrespLine);
     
