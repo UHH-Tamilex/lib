@@ -38,7 +38,7 @@
 </xsl:template>
 
 <xsl:template match="x:trailer">
-    <xsl:element name="h6">
+    <xsl:element name="div">
         <xsl:attribute name="class">trailer</xsl:attribute>
         <xsl:apply-templates/>
     </xsl:element>

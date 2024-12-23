@@ -1,6 +1,6 @@
 .text-block.edition[lang^='ta-Taml'] {
     word-spacing: 1rem;
-    font-size: 1.2rem;
+    /*font-size: 1.2rem;*/`
 }
 :lang('en') {
     word-spacing: normal;
@@ -127,11 +127,17 @@ div.lg div.l.indent9 {
     padding-left: 90%;
 }
 
-h6.trailer {
+.trailer {
     font-size: inherit;
     width: 60%;
     display: inline-block;
     text-align: right;
+    line-height: 2rem; 
+    font-size: 1.2rem; 
+}
+.trailer[lang^='ta-Taml'] {
+    line-height: 2.3rem;
+    font-size: 1.15rem;
 }
 
 .text-block.lg {
@@ -144,7 +150,7 @@ h6.trailer {
     font-size: 1.2rem; 
     margin-right: 0.25rem;
 }
-.text-block.p:lang(ta-Taml) {
+.text-block.p[lang^='ta-Taml'] {
     line-height: 2.3rem;
     font-size: 1.15rem;
 }

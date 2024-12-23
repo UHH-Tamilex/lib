@@ -92,10 +92,12 @@ const revGramMap = new Map(gramAbbreviations.map(a => [a[1],a[0]]));
 
 const wordsplitscore = (a,b) => {
     const vowels = 'aāiīuūoōeē'.split('');
+    const punctuation = ['-','‘','’','“','”',',','.',';'];
     if(a === ' ' || b === ' ') return -2;
     if(a === b) return 1;
     if(a === 'i' && b === '[i]') return 1;
     if(['m','ṅ','n','ñ'].includes(a) && b === '[m]') return 1;
+    if(punctuation.includes(a)) return -3;
     if(['-','*','\'','’','(',')','(a)','(m)'].includes(b)) return -2;
     if(['y','v'].includes(a) && b === '~') return 1; // is this needed?
     if(vowels.includes(a) && vowels.includes(b)) return -0.5;
