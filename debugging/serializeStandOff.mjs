@@ -131,7 +131,7 @@ const getEditionText = el => {
         const quantity = gap.getAttribute('quantity') || 1;
         gap.replaceWith('‡'.repeat(quantity));
     }
-    for(const toremove of clone.querySelectorAll('rdg, note'))
+    for(const toremove of clone.querySelectorAll('rdg, note, trailer'))
         toremove.remove();
     return clone.textContent;
 };
