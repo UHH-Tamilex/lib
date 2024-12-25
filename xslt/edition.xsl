@@ -70,7 +70,7 @@
             <xsl:attribute name="rel">stylesheet</xsl:attribute>
             <xsl:attribute name="href"><xsl:value-of select="$root"/>css/edition.css</xsl:attribute>
         </xsl:element>
-        <xsl:if test="$debugging = 'true'">
+        <!--xsl:if test="$debugging = 'true'"-->
             <xsl:element name="link">
                 <xsl:attribute name="rel">stylesheet</xsl:attribute>
                 <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/debugging.css</xsl:attribute>
@@ -90,7 +90,7 @@
                 <xsl:attribute name="src"><xsl:value-of select="$root"/>debugging/prism.js</xsl:attribute>
                 <xsl:attribute name="data-manual"/>
             </xsl:element>
-        </xsl:if>
+        <!--/xsl:if-->
         <xsl:element name="script">
             <xsl:attribute name="type">module</xsl:attribute>
             <xsl:attribute name="src"><xsl:value-of select="$root"/>js/edition.mjs</xsl:attribute>
@@ -175,7 +175,7 @@
                     </xsl:attribute>
                 </xsl:element>
             </xsl:if>
-            <xsl:if test="$debugging = 'true'">
+            <!--xsl:if test="$debugging = 'true'"-->
                 <div id="blackout">
                     <div class="popup" id="splits-popup">
                         <div class="popup-header">
@@ -268,7 +268,7 @@
                     </div>
                    </div>
                 </div>
-            </xsl:if>
+            <!--/xsl:if-->
         </xsl:element>
     </xsl:element>
 </xsl:template>
