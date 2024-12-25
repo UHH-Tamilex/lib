@@ -552,7 +552,10 @@ const go = () => {
     const highlight = searchparams.get('highlight');
     if(highlight) {
         const found = document.querySelector(highlight);
-        if(found) found.classList.add('lightlit');
+        if(found) {
+            found.scrollIntoView({behaviour: 'smooth', block: 'center'});
+            found.classList.add('lightlit');
+        }
         document.addEventListener('click',() => {
             found.classList.remove('lightlit');
         },{once: true});
