@@ -44,7 +44,7 @@ section div.wide {
     font-variant: super;
 }
 
-.lem-inline:hover, .lem-inline:hover *, .lem:hover, .highlit, .highlit *, .permalit {
+.lem-inline:hover, .lem-inline:hover *, .lem:hover, .highlit, .highlit * {
     text-decoration: none;
     background: rgba(255,255,128,1);
 }
