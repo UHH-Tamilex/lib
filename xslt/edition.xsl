@@ -565,9 +565,9 @@
                     <span class="lem lem-anchor">*</span>
                 </xsl:otherwise>
             </xsl:choose>
-            <xsl:if test="x:rdg">
+            <xsl:if test="x:rdg | x:rdgGrp">
                 <span>
-                    <xsl:for-each select="x:rdg">
+                    <xsl:for-each select="./x:rdg | ./x:rdgGrp">
                         <xsl:call-template name="reading"/>
                     </xsl:for-each>
                 </span>
