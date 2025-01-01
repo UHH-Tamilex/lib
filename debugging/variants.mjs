@@ -284,7 +284,7 @@ const makeSorter = order => {
     return (a,b) => {
         const aindex = order.indexOf(a);
         const bindex = order.indexOf(b);
-        return aindex > bindex;
+        return aindex < bindex ? -1 : 1;
     };
 };
 
