@@ -814,7 +814,7 @@ const jiggleAlignment = (aligned, tokenizedwords) => {
     let wordstart = 0;
     let curword = nextWord(wordlist);
     let curcount = 0;
-    for(let n=0; n<aligned[1].length; n++) {
+    for(let n=0; n<=aligned[1].length; n++) {
         if(!curword) break; // huh?
         if(curcount === curword.length) {
             aligned[0] = jiggleWord(curword, aligned[0], wordstart, n);
