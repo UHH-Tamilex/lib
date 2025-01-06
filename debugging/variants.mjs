@@ -12,6 +12,13 @@ const loadDoc = async () => {
     curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
 
+const loadOtherDoc = async (fn) => {
+    const res = await fetch(fn);
+    if(!res.ok) return null;
+    const xmltext = await res.text();
+    return (new DOMParser()).parseFromString(xmltext, 'text/xml');
+};
+
 const switchType = e => {
     const targ = e.target.closest('.switcher > div');
     if(!targ || targ.classList.contains('selected')) return;
@@ -192,12 +199,33 @@ const getFile = async (e) => {
             return parseString(text,file.name);
         })();
 
-    const app = await makeApp(xml, {
+    newDoc = curDoc.cloneNode(true);
+    
+    const cachedwitnesses = new Map();
+    const cachedfiles = new Map();
+    for(const wit of getWits(newDoc,xml)) {
+        if(!cachedwitnesses.get(wit.name)) {
+            let file = cachedfiles.get(wit.name);
+            if(!file) {
+                file = await loadOtherDoc(wit.filename);
+                cachedfiles.set(wit.filename,file);
+            }
+            if(file) { // file could be null from loadOtherDoc
+                cachedwitnesses.set(wit.name, {
+                    type: wit.type,
+                    xml: file
+                });
+            }
+        }
+    }
+    const app = await makeApp(xml, newDoc, {
         base: document.querySelector('.text-siglum').textContent,
         normlem: document.getElementById('normlem').checked, 
         mergerdgs: document.getElementById('mergerdgs').checked,
-        blockid: blockid
+        blockid: blockid,
+        witnesses: cachedwitnesses
     });
+
     //popup.style.height = '80%';
     //popup.querySelector('.boxen').style.height = 'unset';
 
@@ -215,8 +243,11 @@ const getFile = async (e) => {
         output.innerHTML = app.error;
         return;
     }    
-    newDoc = curDoc.cloneNode(true);
-    let curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
+    
+    addWitnesses(newDoc, app.listwit);
+    addApparatus(newDoc, app.listapp, xml, blockid, alignment.filename);
+    const curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
+    /*
     if(!curStandOff) {
         curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
         curStandOff.setAttribute('corresp',`#${blockid}`);
@@ -228,6 +259,7 @@ const getFile = async (e) => {
     curStandOff.innerHTML = app;
 
     newDoc.documentElement.appendChild(curStandOff);
+    */
     //const standOff = `<standOff type="apparatus" corresp="#${blockid}">\n<listApp>\n${app}\n</listApp>\n</standOff>`;
     const standOff = curStandOff.outerHTML;
     output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
@@ -261,6 +293,7 @@ const copyToClipboard = async (xml,popup) => {
     }
     setTimeout(() => tip.remove(),1000);
 };
+/*
 const mergeGroups = (doc) => {
     const els = doc.querySelectorAll('cl');
     for(const el of els) {
@@ -330,7 +363,6 @@ const curry = f => {
     };
 };
 
-/*
 const fetchFile = async fn => {
     const response = await fetch(fn);
     const str = await response.text();

@@ -96,6 +96,7 @@ section div.wide {
     font-size: 0.9rem;
     margin-right: 0.2rem;
     word-break: normal;
+    white-space: nowrap;
 }
 
 .msid a:link, .msid a:active,
@@ -199,6 +200,26 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 
 .anchor.highlit::after {
     background: rgba(255,255,128,1);
+}
+
+.parallel {
+    display: flex;
+}
+
+.parallel > div {
+    flex-basis: 100%;
+}
+
+.parallel > .wide {
+    justify-content: flex-start;
+}
+
+.parallel .text-block {
+    width: unset;
+}
+
+.ignoredtags {
+    display: none;
 }
 
 @media (max-width: 600px) {

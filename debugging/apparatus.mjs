@@ -38,21 +38,20 @@ const getWitList = (doc, opts, arr) => {
     const newwits = new Set();
     for(const wit of wits) {
         const witel = listWit.querySelector(`witness[${idsel}="${wit}"]`);
-        const type = witel.getAttribute('n');
+        const type = witel.getAttribute('n') || witel.getAttribute('type'); // deprecated
         const par = witel.parentNode.closest('witness');
         const parid = par?.getAttribute('xml:id');
-        const ac = parid && par.querySelector('witness[n="ac"]')?.getAttribute('xml:id');
-        const pc = parid && par.querySelector('witness[n="pc"]')?.getAttribute('xml:id');
+        const other = parid && type === 'ac' ? 
+                par.querySelector('witness[n="pc"], witness[type="pc"]')?.getAttribute('xml:id') :
+                      parid && type == 'pc' ?
+                par.querySelector('witness[n="ac"], witness[type="ac"]')?.getAttribute('xml:id') : null;
 
         if(!type) {
             if( (parid && wits.has(parid)) && !mustcontain.has(wit) ) 
                 continue;
             else newwits.add(wit);
         }
-        else if(type === 'ac' && pc && wits.has(pc) && !mustcontain.has(wit) && !mustcontain.has(pc)) { 
-                newwits.add(parid);
-        }
-        else if(type === 'pc' && ac && wits.has(ac) && !mustcontain.has(wit) && !mustcontain.has(ac)) {
+        else if(other && wits.has(other) && !mustcontain.has(wit) && !mustcontain.has(other)) { 
                 newwits.add(parid);
         }
         else newwits.add(wit);
@@ -193,7 +192,7 @@ const processReadings = (n,otherdocs,otherrdgs,lemma,opts,posapp,negapp) => {
         else {
             const newstr = opts.normlem ? normword || trimmed : 
                     trimmed;
-            const realrdg = opts.witnesses ? 
+            const realrdg = opts.witnesses && otherrdgs.get(id) ? 
                 otherrdgs.get(id)[n] :
                 trimmed;
             const negwits = negapp.get(newstr) || new Map();
@@ -378,12 +377,12 @@ const makeApp = (doc, ed, opts) =>  {
     
     const words = doc.querySelector(`TEI[n="${opts.base}"]`).querySelectorAll('w');
     const otherdocs = doc.querySelectorAll(`TEI:not([n="${opts.base}"])`);
-    const otherrdgs = new Map(
+    const otherrdgs = opts.witnesses ? new Map(
         [...otherdocs].map(d => {
             const docid = d.getAttribute('n');
             const rdgs = getXMLRdgs(opts.blockid,d,opts.witnesses.get(docid),idsel);
             return [docid, rdgs];
-        }));
+        })) : null;
 
     let ret = '';
     let start = 0;
@@ -476,16 +475,24 @@ const addApparatus = (doc, listappstr, alignxml, block, alignmentfn) => {
         xmlFormat(`<listApp>${listappstr}</listApp>`, formatopts);
 };
 
-const getWits = doc => {
-    const wits = doc.querySelectorAll('witness');
-    return [...wits].map(w => {
-        return {
-            name: w.getAttribute('xml:id'),
-            filename: w.getAttribute('source') || w.closest('[source]').getAttribute('source'),
-            type: w.getAttribute('n'),
-            select: w.getAttribute('select')
-        };
-    });
+const getWits = (doc,alignxml) => {
+    const wits = [...doc.querySelectorAll('witness'),...alignxml.querySelectorAll('witness')];
+    const witmap = wits.reduce((acc,w) => {
+        const id = w.getAttribute('xml:id');
+        if(!acc.has(id)) {
+
+            const newitem = {
+                name: id,
+                filename: w.getAttribute('source') ||
+                          w.closest('[source]').getAttribute('source'),
+                type: w.getAttribute('n') || w.getAttribute('type'), //TODO: deprecate
+                select: w.getAttribute('select')
+            };
+            acc.set(id, newitem);
+        }
+        return acc;
+    }, new Map());
+    return [...witmap.values()];
 };
 
 export { makeApp, addWitnesses, addApparatus, getWits };

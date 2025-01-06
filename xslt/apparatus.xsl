@@ -6,8 +6,23 @@
 
 <xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes"/>
 
+<xsl:template name="pointersvg">
+    <svg width="235.08" height="188" version="1.1" viewBox="0 0 235.08 188" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+        <style type="text/css">
+            .st0{fill:none;stroke:rgb(168,81,16);stroke-width:10;stroke-linecap:round;stroke-linejoin:round;}
+        </style>
+        <path class="st0" d="m2.3798 176.26v-164.52c0-5.1785 5.9714-9.3612 13.365-9.3612h203.45c7.3932 0 13.365 4.1827 13.365 9.3612v164.52c0 5.1785-5.9714 9.3612-13.365 9.3612h-203.45c-7.3931-0.19918-13.365-4.3818-13.365-9.3612z"/>
+        <line class="st0" x1="48.587" x2="48.587" y1="185.42" y2="2.3798"/>
+        <line class="st0" x1="232.7" x2="50.009" y1="139.81" y2="139.81"/>
+        <line class="st0" x1="232.7" x2="50.009" y1="94" y2="94"/>
+        <line class="st0" x1="232.7" x2="50.009" y1="48.09" y2="48.09"/>
+        <line class="st0" x1="94.368" x2="94.368" y1="185.42" y2="2.3798"/>
+        <line class="st0" x1="140.72" x2="140.72" y1="185.42" y2="2.3798"/>
+        <line class="st0" x1="186.5" x2="186.5" y1="185.42" y2="2.3798"/>
+    </svg>
+</xsl:template>
 <xsl:template name="splitwit">
-    <xsl:param name="mss" select="@wit"/>
+    <xsl:param name="mss" select="@wit | @select"/>
     <xsl:param name="corresp"/>
         <!--xsl:if test="string-length($mss)"-->
         <!--xsl:if test="not($mss=@wit)"><xsl:text>,</xsl:text></xsl:if-->
@@ -16,6 +31,7 @@
              <xsl:variable name="msstring" select="substring-before(
                                         concat($mss,' '),
                                       ' ')"/>
+
              <xsl:variable name="cleanstr" select="substring-after($msstring,'#')"/>
              <xsl:attribute name="data-id"><xsl:value-of select="$cleanstr"/></xsl:attribute>
              <!--xsl:variable name="witness" select="/x:TEI/x:teiHeader/x:fileDesc/x:sourceDesc/x:listWit//x:witness[@xml:id=$cleanstr]"/-->
@@ -110,7 +126,27 @@
 </xsl:template>
 
 <xsl:template match="x:text//x:p">
+    <xsl:variable name="xmlid" select="@xml:id"/>
+    <xsl:variable name="id"><xsl:text>#</xsl:text><xsl:value-of select="$xmlid"/></xsl:variable>
+    <xsl:variable name="apparatus" select="//x:standOff[@type='apparatus' and @corresp=$id]"/>
+    <xsl:variable name="parallels" select="//x:standOff[@type='parallels' and @corresp=$id]"/>
     <xsl:choose>
+        <xsl:when test="$apparatus or $parallels">
+            <div class="lg wide">
+                <div>
+                    <xsl:call-template name="lang"/>
+                    <xsl:attribute name="class">
+                        <xsl:text>text-block p edition</xsl:text>
+                    </xsl:attribute>
+                    <xsl:apply-templates/>
+                    <xsl:attribute name="id"><xsl:value-of select="$xmlid"/></xsl:attribute>
+                </div>
+                <xsl:call-template name="apparatus-standoff">
+                    <xsl:with-param name="apparatus" select="$apparatus"/>
+                    <xsl:with-param name="parallels" select="$parallels"/>
+                </xsl:call-template>
+            </div>
+        </xsl:when>
         <xsl:when test=".//x:app and not(//x:facsimile/x:graphic)">
             <div>
                 <xsl:attribute name="class">para wide</xsl:attribute>
@@ -167,8 +203,28 @@
     </xsl:choose>
 </xsl:template>
 
-<xsl:template match="x:text//x:lg">
+<xsl:template match="x:text//x:lg"> <!-- not child of x:div[@rend='parallel'] -->
+    <xsl:variable name="xmlid" select="@xml:id"/>
+    <xsl:variable name="id"><xsl:text>#</xsl:text><xsl:value-of select="$xmlid"/></xsl:variable>
+    <xsl:variable name="apparatus" select="//x:standOff[@type='apparatus' and @corresp=$id]"/>
+    <xsl:variable name="parallels" select="//x:standOff[@type='parallels' and @corresp=$id]"/>
     <xsl:choose>
+        <xsl:when test="$apparatus or $parallels">
+            <div class="lg wide">
+                <div>
+                    <xsl:call-template name="lang"/>
+                    <xsl:attribute name="class">
+                        <xsl:text>text-block lg edition</xsl:text>
+                    </xsl:attribute>
+                    <xsl:apply-templates/>
+                    <xsl:attribute name="id"><xsl:value-of select="$xmlid"/></xsl:attribute>
+                </div>
+                <xsl:call-template name="apparatus-standoff">
+                    <xsl:with-param name="apparatus" select="$apparatus"/>
+                    <xsl:with-param name="parallels" select="$parallels"/>
+                </xsl:call-template>
+            </div>
+        </xsl:when>
         <xsl:when test=".//x:app and not(//x:facsimile/x:graphic)">
             <div>
                 <xsl:attribute name="class">lg wide</xsl:attribute>
@@ -196,19 +252,9 @@
     </xsl:choose>
 </xsl:template>
 
-<xsl:template match="x:lem">
-    <span class="lem-inline">
-        <xsl:call-template name="lang"/>
-        <xsl:apply-templates/>
-    </span>
-</xsl:template>
-
-<!--xsl:template match="x:app">
-        <xsl:apply-templates/>
-</xsl:template-->
-
+<!-- start of tooltip apparatus -->
 <xsl:template match="x:app">
-    <span class="app-inline">
+    <span class="app-inline ignored">
         <xsl:attribute name="data-anno"/>
         <span>
             <xsl:choose>
@@ -238,6 +284,13 @@
 <xsl:template match="x:rdg">
     <xsl:call-template name="reading"/>
 </xsl:template>
+<xsl:template match="x:lem">
+    <span class="lem-inline">
+        <xsl:call-template name="lang"/>
+        <xsl:apply-templates/>
+    </span>
+</xsl:template>
+<!-- end of tooltip apparatus -->
 
 <xsl:template match="x:abbr[@corresp]">
     <xsl:variable name="cleanstr" select="substring-after(@corresp,'#')"/>
@@ -288,59 +341,19 @@
 </xsl:template>
 
 <xsl:template name="apparatus">
-    <xsl:for-each select=".//x:app">
-        <span class="app">
-            <xsl:choose>
-                <xsl:when test="x:lem">
-                    <xsl:call-template name="lemma"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <span class="lem lem-anchor">*</span>
-                </xsl:otherwise>
-            </xsl:choose>
-            <xsl:if test="x:rdg | x:rdgGrp">
-                <span>
-                    <xsl:for-each select="./x:rdg | ./x:rdgGrp">
-                        <xsl:call-template name="reading"/>
-                    </xsl:for-each>
-                </span>
-            </xsl:if>
-            <xsl:for-each select="x:note">
-                <xsl:text> </xsl:text>
-                <xsl:apply-templates select="."/>
-            </xsl:for-each>
-        </span>
-        <xsl:text> </xsl:text>
-    </xsl:for-each>
-    <!--xsl:for-each select=".//x:note[@place='apparatus']">
-        <span class="note">
-            <xsl:apply-templates select="./node()"/>
-        </span>
-    </xsl:for-each-->
+    <xsl:call-template name="apparatus-inline"/>
     <xsl:if test="@source">
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="@source"/></xsl:attribute>
             <xsl:attribute name="data-anno">Textual alignment of this section</xsl:attribute>
             <xsl:attribute name="class">alignment-pointer</xsl:attribute>
             <xsl:attribute name="lang">zxx</xsl:attribute>
-                <svg width="235.08" height="188" version="1.1" viewBox="0 0 235.08 188" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
-                <style type="text/css">
-                    .st0{fill:none;stroke:rgb(168,81,16);stroke-width:10;stroke-linecap:round;stroke-linejoin:round;}
-                </style>
-                <path class="st0" d="m2.3798 176.26v-164.52c0-5.1785 5.9714-9.3612 13.365-9.3612h203.45c7.3932 0 13.365 4.1827 13.365 9.3612v164.52c0 5.1785-5.9714 9.3612-13.365 9.3612h-203.45c-7.3931-0.19918-13.365-4.3818-13.365-9.3612z"/>
-                <line class="st0" x1="48.587" x2="48.587" y1="185.42" y2="2.3798"/>
-                <line class="st0" x1="232.7" x2="50.009" y1="139.81" y2="139.81"/>
-                <line class="st0" x1="232.7" x2="50.009" y1="94" y2="94"/>
-                <line class="st0" x1="232.7" x2="50.009" y1="48.09" y2="48.09"/>
-                <line class="st0" x1="94.368" x2="94.368" y1="185.42" y2="2.3798"/>
-                <line class="st0" x1="140.72" x2="140.72" y1="185.42" y2="2.3798"/>
-                <line class="st0" x1="186.5" x2="186.5" y1="185.42" y2="2.3798"/>
-                </svg>
+            <xsl:call-template name="pointersvg"/>
         </xsl:element>
     </xsl:if>
 </xsl:template>
 
-<xsl:template name="lemma">
+<!--xsl:template name="lemma">
     <xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/>
     <span>
         <xsl:attribute name="class">lem</xsl:attribute>
@@ -356,10 +369,62 @@
         </span>
     </xsl:if>
     <xsl:text> </xsl:text>
+</xsl:template-->
+
+<xsl:template name="app">
+    <xsl:param name="corresp"/>
+    <xsl:element name="span">
+        <xsl:attribute name="class">app</xsl:attribute>
+        <xsl:choose>
+            <xsl:when test="x:lem">
+                <xsl:call-template name="lemma">
+                    <xsl:with-param name="corresp" select="$corresp"/>
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+                <span class="lem lem-anchor">†</span>
+            </xsl:otherwise>
+        </xsl:choose>
+        <xsl:if test="x:rdg | x:rdgGrp">
+            <span>
+                <xsl:for-each select="./x:rdg | ./x:rdgGrp">
+                    <xsl:call-template name="reading">
+                        <xsl:with-param name="corresp" select="$corresp"/>
+                    </xsl:call-template>
+                </xsl:for-each>
+            </span>
+        </xsl:if>
+        <xsl:for-each select="x:note">
+            <xsl:text> </xsl:text>
+            <xsl:apply-templates select="."/>
+        </xsl:for-each>
+    </xsl:element>
+    <xsl:text> </xsl:text>
+</xsl:template>
+
+<xsl:template name="lemma">
+    <xsl:param name="corresp"/>
+    <!--xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/-->
+    <xsl:element name="span">
+        <xsl:attribute name="class">lem</xsl:attribute>
+        <xsl:attribute name="data-corresp"><xsl:value-of select="@corresp"/></xsl:attribute>
+        <xsl:attribute name="data-text"><xsl:value-of select="x:lem/text()"/></xsl:attribute>
+        <xsl:apply-templates select="x:lem/node()"/>
+    </xsl:element>
+    <xsl:if test="x:lem/@wit">
+        <span>
+            <xsl:attribute name="class">lem-wit</xsl:attribute>
+            <xsl:call-template name="splitwit">
+                <xsl:with-param name="mss" select="x:lem/@wit"/>
+                <xsl:with-param name="corresp" select="$corresp"/>
+            </xsl:call-template>
+        </span>
+    </xsl:if>
+    <xsl:text> </xsl:text>
 </xsl:template>
 
 <xsl:template name="reading">
-    <xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/>
+    <xsl:param name="corresp" select="ancestor::*[@corresp]/@corresp"/>
     <span>
         <xsl:attribute name="class">rdg</xsl:attribute>
         <span>
@@ -376,7 +441,7 @@
                 </xsl:otherwise>
             </xsl:choose>
         </span>
-        <xsl:for-each select="./x:rdg[@type='sandhi']">
+        <xsl:for-each select="./x:rdg[@type='minor']">
             <span class="rdg-alt">
                 <xsl:attribute name="data-wit">
                     <xsl:value-of select="translate(@wit,'#','')"/>
@@ -398,7 +463,148 @@
 <xsl:template match="x:anchor">
     <span>
         <xsl:attribute name="class">anchor</xsl:attribute>
+        <xsl:attribute name="data-teiname">anchor</xsl:attribute>
         <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
     </span>
 </xsl:template>
+<xsl:template match="x:text//x:div[@xml:id] | x:text//x:div[@rend='parallel']">
+    <xsl:element name="div">
+        <xsl:attribute name="class">lg wide</xsl:attribute>
+        <xsl:call-template name="lang"/>
+        <xsl:variable name="xmlid" select="@xml:id | ./x:lg/@xml:id | ./x:p/@xml:id"/>
+        <xsl:if test="$xmlid">
+            <xsl:attribute name="id"><xsl:value-of select="$xmlid"/></xsl:attribute>
+        </xsl:if>
+        <xsl:apply-templates/>
+        <xsl:variable name="id"><xsl:text>#</xsl:text><xsl:value-of select="$xmlid"/></xsl:variable>
+        <xsl:variable name="apparatus" select="//x:standOff[@type='apparatus' and @corresp=$id]"/>
+        <xsl:variable name="parallels" select="//x:standOff[@type='parallels' and @corresp=$id]"/>
+        <xsl:choose>
+            <xsl:when test="$apparatus or $parallels">
+                <xsl:call-template name="apparatus-standoff">
+                    <xsl:with-param name="apparatus" select="$apparatus"/>
+                    <xsl:with-param name="parallels" select="$parallels"/>
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:when test=".//x:app">
+                <div>
+                    <xsl:attribute name="class">
+                        <xsl:text>apparatus-block hidden</xsl:text>
+                    </xsl:attribute>
+                    <xsl:call-template name="lang"/>
+                    <xsl:call-template name="apparatus"/>
+                </div>
+            </xsl:when>
+        </xsl:choose>
+    </xsl:element>
+</xsl:template>
+<xsl:template match="x:div[@xml:id]/x:p | x:div[@rend='parallel']/x:p">
+    <xsl:element name="div">
+        <xsl:attribute name="class">
+            <xsl:text>text-block p </xsl:text>
+            <xsl:choose>
+                <xsl:when test="@type='translation'"><xsl:text>translation</xsl:text></xsl:when>
+                <xsl:when test="../@rend = 'parallel' and @xml:lang"><xsl:text>translation</xsl:text></xsl:when>
+                <xsl:otherwise><xsl:text>edition nolemmaunderline</xsl:text></xsl:otherwise>
+            </xsl:choose>
+        </xsl:attribute>
+        <xsl:call-template name="lang"/>
+        <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template>
+<xsl:template match="x:div[@xml:id]/x:lg | x:div[@rend='parallel']/x:lg">
+    <xsl:element name="div">
+        <xsl:call-template name="lang"/>
+        <xsl:attribute name="class">
+            <xsl:text>text-block lg </xsl:text>
+            <xsl:choose>
+                <xsl:when test="@type='translation'"><xsl:text>translation</xsl:text></xsl:when>
+                <xsl:when test="../@rend = 'parallel' and @xml:lang"><xsl:text>translation</xsl:text></xsl:when>
+                <xsl:otherwise><xsl:text>edition nolemmaunderline</xsl:text></xsl:otherwise>
+            </xsl:choose>
+        </xsl:attribute>
+        <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template>
+<xsl:template name="apparatus-standoff">
+    <xsl:param name="apparatus"/>
+    <xsl:param name="parallels"/>
+    <xsl:variable name="xmlid" select="./x:lg/@xml:id | ./x:p/@xml:id"/>
+    <xsl:variable name="idname" select="concat('#',$xmlid)"/>
+    <xsl:variable name="hideapp" select="./*[@type='translation'] or ./x:lg[@xml:lang] or ./x:p[@xml:lang]"/>
+    <xsl:element name="div">
+        <xsl:attribute name="class">
+            <xsl:text>apparatus-block</xsl:text>
+            <xsl:if test="$hideapp">
+                <xsl:text> hidden</xsl:text>
+            </xsl:if>
+        </xsl:attribute>
+        <xsl:call-template name="apparatus-inline"/>
+        <xsl:apply-templates select="$apparatus/x:interp"/>
+        <xsl:apply-templates select="$apparatus/x:listApp"/>
+        <xsl:if test="$apparatus/@source">
+            <xsl:element name="a">
+                <xsl:attribute name="href"><xsl:value-of select="$apparatus/@source"/></xsl:attribute>
+                <xsl:attribute name="data-anno">Textual alignment of this section</xsl:attribute>
+                <xsl:attribute name="class">alignment-pointer</xsl:attribute>
+                <xsl:attribute name="lang">zxx</xsl:attribute>
+                <xsl:call-template name="pointersvg"/>
+            </xsl:element>
+        </xsl:if>
+        <xsl:if test="$parallels">
+            <xsl:call-template name="notesblock">
+                <xsl:with-param name="standOff" select="$parallels"/>
+            </xsl:call-template>
+        </xsl:if>
+    </xsl:element>
+</xsl:template>
+
+<xsl:template name="notesblock">
+    <xsl:param name="standOff"/>
+    <xsl:element name="hr">
+        <xsl:attribute name="class">apparatus-divider</xsl:attribute>
+    </xsl:element>
+    <xsl:for-each select="$standOff/x:note">
+        <span class="anchored-note">
+            <xsl:attribute name="data-target">
+                    <xsl:value-of select="@target"/>
+            </xsl:attribute>
+            <xsl:call-template name="lang"/>
+            <xsl:apply-templates/>
+        </span>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template match="x:interp[@type='normalization']">
+    <xsl:apply-templates/>
+</xsl:template>
+<xsl:template match="x:desc[@type='tagfilters']">
+    <div class="ignoredtags" lang="en">
+        <xsl:apply-templates select="x:tag[@subtype='ignore']"/>
+    </div>
+</xsl:template>
+<xsl:template match="x:desc[@type='tagfilters']/x:tag">
+    <div class="tagselector"><xsl:apply-templates/></div>
+</xsl:template>
+
+<xsl:template match="x:standOff/x:listApp">
+    <xsl:variable name="corresp" select="translate(../@corresp,'#','')"/>
+    <xsl:for-each select="x:app">
+        <xsl:call-template name="app">
+            <xsl:with-param name="corresp" select="$corresp"/>
+        </xsl:call-template>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="apparatus-inline">
+    <xsl:for-each select=".//x:app">
+        <xsl:call-template name="app">
+            <xsl:with-param name="corresp" select="./ancestor::*[@xml:id]/@xml:id"/>
+        </xsl:call-template>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template match="x:standOff[@type='apparatus']"/>
+<xsl:template match="x:standOff[@type='parallels']"/>
+
 </xsl:stylesheet>

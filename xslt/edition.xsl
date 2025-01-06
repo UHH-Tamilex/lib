@@ -275,7 +275,7 @@
 
 <xsl:template match="x:listPerson"/>
 
-<xsl:template match="x:text/x:body/x:div">
+<!--xsl:template match="x:text/x:body/x:div">
     <xsl:element name="div">
         <xsl:attribute name="class">lg wide</xsl:attribute>
         <xsl:call-template name="lang"/>
@@ -370,7 +370,7 @@
         <xsl:text>
 </xsl:text>
     </xsl:element>
-</xsl:template>
+</xsl:template-->
 <xsl:template match="x:choice">
     <xsl:element name="span">
     <xsl:attribute name="class">
@@ -492,7 +492,7 @@
 
 <xsl:template match="x:standOff[@type='apparatus']"/>
 
-<xsl:template name="apparatus2">
+<!--xsl:template name="apparatus2">
     <xsl:param name="apparatus"/>
     <xsl:param name="parallels"/>
     <xsl:element name="div">
@@ -613,14 +613,6 @@
 </xsl:template>
 <xsl:template name="lemma">
     <xsl:param name="corresp"/>
-    <!--xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/-->
-    <!--xsl:if test="$debugging = 'true'">
-        <xsl:element name="span">
-            <xsl:attribute name="class">lemmalookup</xsl:attribute>
-            <xsl:attribute name="data-anno">find lemma in the text</xsl:attribute>
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="12"><g stroke-width="2" stroke="#6c6c6c" fill="none"><path d="M11.29 11.71l-4-4"/><circle cx="5" cy="5" r="4"/></g></svg>
-        </xsl:element>
-    </xsl:if-->
     <xsl:element name="span">
         <xsl:attribute name="class">lem</xsl:attribute>
         <xsl:attribute name="data-corresp"><xsl:value-of select="@corresp"/></xsl:attribute>
@@ -641,7 +633,6 @@
 
 <xsl:template name="reading">
     <xsl:param name="corresp"/>
-    <!--xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/-->
     <span>
         <xsl:attribute name="class">rdg</xsl:attribute>
         <span>
@@ -675,19 +666,6 @@
         </span>
     </span>
     <xsl:text> </xsl:text>
-</xsl:template>
-<!--xsl:template match="x:lg">
-    <xsl:element name="div">
-        <xsl:attribute name="class">lg</xsl:attribute>
-        <xsl:if test="@corresp">
-            <xsl:attribute name="data-corresp"><xsl:value-of select="@corresp"/></xsl:attribute>
-        </xsl:if>
-        <xsl:if test="@met">
-            <xsl:attribute name="data-anno"><xsl:value-of select="@met"/></xsl:attribute>
-        </xsl:if>
-        <xsl:call-template name="lang"/>
-        <xsl:apply-templates select="x:l"/>
-    </xsl:element>
 </xsl:template-->
 
 <xsl:template match="x:c">
