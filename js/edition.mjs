@@ -535,8 +535,10 @@ const go = () => {
         }
     }
     else {
+        /*
         for(const app of document.querySelectorAll('.apparatus-block'))
             app.style.display = 'block';
+            */
         if(Debugging) {
             const apparatusbutton = document.getElementById('apparatusbutton');
             apparatusbutton.style.display = 'block';
