@@ -1,4 +1,5 @@
-import alignApparatus from './apparatus.mjs';
+import alignApparatus from './apparatus-eva.mjs';
+import { makeApp, addWitnesses, addApparatus, getWits } from './apparatus.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 
 var curDoc = null;
@@ -120,7 +121,6 @@ const generateApp = async e => {
     if(listApp.hasOwnProperty('errors'))
         output.innerHTML = listApp.errors.join('<br>');
     else {
-        console.log(listApp.output);
         newDoc = curDoc.cloneNode(true);
         let curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
         if(!curStandOff) {
@@ -427,7 +427,7 @@ const getTEIRdgs = (rdgs,blockid,witdocs,alignment,dataN) => {
 const getWitOrder = el => {
     return [...el.querySelectorAll('witness')].map(w => w.getAttribute('xml:id'));
 };
-
+/*
 const makeApp = async (doc, opts) =>  {
     const base = doc.querySelector(`TEI[n="${opts.base}"]`);
     if(!base) return {error: `${opts.base} not found in alignment file.`};
@@ -465,11 +465,6 @@ const makeApp = async (doc, opts) =>  {
             else if(trimmed === lemma)
                 posapp.add(id);
             else {
-                /*
-                const newstr = otherword.textContent === '' ? 
-                    '[om.]' : 
-                    otherword.textContent;
-                */
                 const newstr = normlem ? 
                     otherword.getAttribute('lemma') || trimmed : 
                         trimmed;
@@ -490,12 +485,6 @@ const makeApp = async (doc, opts) =>  {
         app = app + `  <lem ${poswits}>${word.innerHTML.trim()}</lem>\n`;
         
         for(const rdg of negapp.values()) {
-            /*
-            const newrdgs = getTEIRdgs(rdg,opts.blockid,witdocs,doc,dataN);
-            const rdgstr = newrdgs.keys().next().value;
-            const negwits = curriedWitList([...newrdgs.values()].flat());
-            const allwits = [...newrdgs];
-            */
             const rdgstr = rdg.keys().next().value;
             const negwits = curriedWitList([...rdg.values()].flat());
             const allwits = [...rdg];
@@ -519,5 +508,5 @@ const makeApp = async (doc, opts) =>  {
     return `<listApp>\n${ret}\n</listApp>\n` + 
         (curListWit ? '' : new XMLSerializer().serializeToString(doc.querySelector('listWit')));
 };
-
+*/
 export { addVariants };
