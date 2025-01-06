@@ -518,8 +518,8 @@ const go = () => {
     if(document.querySelector('.translation')) {
         const apparatusbutton = document.getElementById('apparatusbutton');
         if(document.querySelector('div.apparatus-block span.app')) {
-            apparatusbutton.style.display = 'block';
-            apparatusbutton.addEventListener('click',apparatusswitch);
+            //apparatusbutton.style.display = 'block';
+            //apparatusbutton.addEventListener('click',apparatusswitch);
             if(Debugging) {
                 const appedit = document.getElementById('apparatuseditbutton');
                 appedit.style.display = 'block';

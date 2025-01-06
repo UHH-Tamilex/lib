@@ -64,6 +64,14 @@ const findEls = (range) => {
     return false;
 };
 
+const getIgnoreTags = par => {
+    const ignorediv = par.querySelector('.ignoredtags');
+    if(!ignorediv) return new Set();
+    return new Set(
+        [...ignorediv.querySelectorAll('.tagselector')].map(el => el.textContent)
+    );
+};
+
 const highlight = {
     inline(targ) {
         const par = targ.closest('div.text-block');
@@ -80,10 +88,11 @@ const highlight = {
         if(!par) return;
         const left = par.parentElement.querySelector('.text-block'); // or .edition?
         if(targ.dataset.corresp) {
+            const ignoretags = getIgnoreTags(par);
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.revert(left);
             }
-            highlightcoords(targ,left);
+            highlightcoords(targ,left,ignoretags);
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.refreshCache(left);
                 Transliterate.activate(left);
@@ -146,7 +155,7 @@ const showRangeCoords = (startel,coord) => {
             ], 200);
 };
 */
-const rangeFromCoords = (positions, lem, target) => {
+const rangeFromCoords = (positions, lem, target, ignoretags=new Set()) => {
     const range = document.createRange();
 
     const realNextSibling = (walker) => {
@@ -173,7 +182,7 @@ const rangeFromCoords = (positions, lem, target) => {
                 continue;
             }
             
-            if(cur.classList.contains('ignored')) {
+            if(cur.classList.contains('ignored') || ignoretags.has(cur.dataset.teiname)) {
                 cur = realNextSibling(walker);
                 continue;
             }
@@ -208,9 +217,9 @@ const rangeFromCoords = (positions, lem, target) => {
     return range;
 };
 
-const highlightcoords = (lem,target) => {
+const highlightcoords = (lem,target,ignoretags) => {
     const multiple = lem.dataset.corresp.split(';').reverse();
-    for(const coord of multiple) highlightcoord(coord.split(','), lem, target);
+    for(const coord of multiple) highlightcoord(coord.split(','), lem, target, ignoretags);
 };
 
 const wrongSeg = (txtnode) => {
@@ -253,7 +262,7 @@ const matchCounts = (alignment,m,pos='start') => {
     return matches;
 };
 
-const highlightcoord = (positions, lem, target, highlightfn = highlightrange) => {
+const highlightcoord = (positions, lem, target, ignoretags, highlightfn = highlightrange) => {
     // if there is an alignment, update coords 
     if(target.dataset.alignment) {
         const alignment = target.dataset.alignment.split(',');
@@ -261,7 +270,7 @@ const highlightcoord = (positions, lem, target, highlightfn = highlightrange) =>
                      matchCounts(alignment,parseInt(positions[1]),'end')
                     ];
     }
-    const range = rangeFromCoords(positions, lem, target);
+    const range = rangeFromCoords(positions, lem, target, ignoretags);
     if(!findEls(range))
         return highlightfn(range);
 
@@ -436,12 +445,48 @@ const Events = {
         suggestLemmata(lemma,left);
 
     },
+    toggleApparatus(e) {
+        const button = document.getElementById('apparatusbutton');
+        const apparatussvg = document.getElementById('apparatussvg');
+        const translationsvg = document.getElementById('translationsvg');
+        const apparati = document.querySelectorAll('.apparatus-block');
+
+        if(!translationsvg.checkVisibility()) {
+            for(const apparatus of apparati) {
+                //apparatus.previousElementSibling.style.width = '60%';
+                apparatus.parentNode.querySelector('.edition').classList.remove('nolemmaunderline');
+                const translation = apparatus.parentNode.querySelector('.translation');
+                if(translation) translation.classList.add('hidden');
+                apparatus.classList.remove('hidden');
+            }
+            apparatussvg.style.display = 'none';
+            translationsvg.style.display = 'block';
+            target.dataset.anno = 'translation';
+        }
+        else {
+            for(const apparatus of apparati) {
+                //apparatus.previousElementSibling.style.width = 'unset';
+                apparatus.parentNode.querySelector('.edition').classList.add('nolemmaunderline');
+                const translation = apparatus.parentNode.querySelector('.translation');
+                if(translation) translation.classList.remove('hidden');
+                apparatus.classList.add('hidden');
+            }
+            translationsvg.style.display = 'none';
+            apparatussvg.style.display = 'block';
+            target.dataset.anno = 'apparatus of variants';
+        }
+    }
 };
 
 const init = () => {
     document.addEventListener('mouseover',Events.docMouseover);
     document.addEventListener('mouseout',Events.docMouseout);
     if(Debugging) document.addEventListener('click',Events.docClick);
+    if(document.querySelector('.apparatus-block.hidden')) {
+        const apparatusbutton = document.getElementById('apparatusbutton');
+        apparatusbutton.style.display = 'block';
+        apparatusbutton.addEventListener('click',Events.toggleApparatus);
+    }
 };
 
 const ApparatusViewer = {
