@@ -264,20 +264,26 @@ const realNextSibling = walker => {
     return null;
 };
 
+const removeContainer = el => {
+    while(el.firstChild)
+        el.parentNode.insertBefore(el.firstChild,el);
+    el.remove();
+};
+
 const cleanBlock = (blockid,idsel,wit) => {
     const block = wit.xml.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`).cloneNode(true);
     for(const el of block.querySelectorAll('caesura, l, lg')) { // TODO: what if caesura isn't ignored?
-        while(el.firstChild)
-            el.parentNode.insertBefore(el.firstChild,el);
-        el.remove();
+        removeContainer(el);
     }
     if(wit.type || wit.select) {
-        if(wit.type === 'pc')
-            for(const del of block.querySelectorAll('del'))
-                del.remove();
-        if(wit.type === 'ac')
-            for(const add of block.querySelectorAll('add'))
-                add.remove();
+        for(const del of block.querySelectorAll('del')) {
+            if(wit.type === 'pc') del.remove();
+            if(wit.type === 'ac')  removeContainer(del);
+        }
+        for(const add of block.querySelectorAll('add')) {
+            if(wit.type === 'ac') add.remove();
+            if(wit.type === 'pc')  removeContainer(add);
+        }
         if(!wit.select)
             for(const rdg of block.querySelectorAll('rdg'))
                 rdg.remove();
