@@ -532,7 +532,7 @@
         <xsl:with-param name="hyphen"><xsl:value-of select="$hyphen"/></xsl:with-param>
     </xsl:call-template>
 </xsl:template>
-<xsl:template match="x:q[@rend='block']//x:lg//x:lb | x:quote[@rend='block']//x:lg//x:lb | x:q[not(@rend)]//x:lb | x:quote[not(@rend)]//x:lb">
+<xsl:template match="x:q[@rend='block']//x:lg//x:lb | x:quote[@rend='block']//x:lg//x:lb | x:q[not(@rend)]//x:lb | x:quote[not(@rend)]//x:lb | x:standOff[@type='apparatus']//x:lb">
     <xsl:call-template name="lb">
         <xsl:with-param name="diplo">false</xsl:with-param>
     </xsl:call-template>
@@ -605,7 +605,7 @@
         <xsl:with-param name="excerpt"><xsl:value-of select="$excerpt"/></xsl:with-param>
     </xsl:call-template>
 </xsl:template>
-<xsl:template match="x:q[@rend='block']//x:lg//x:pb | x:quote[@rend='block']//x:lg//x:pb">
+<xsl:template match="x:q[@rend='block']//x:lg//x:pb | x:quote[@rend='block']//x:lg//x:pb | x:standOff[@type='apparatus']//x:pb">
     <xsl:param name="excerpt">no</xsl:param>
     <xsl:call-template name="pb">
         <xsl:with-param name="diplo">false</xsl:with-param>
