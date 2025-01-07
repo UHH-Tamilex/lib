@@ -306,7 +306,6 @@ const cleanBlock = (blockid,idsel,wit) => {
         }
     }
     block.normalize();
-    console.log(block.innerHTML);
     return block;
 };
 
