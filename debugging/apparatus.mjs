@@ -306,6 +306,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         }
     }
     block.normalize();
+    console.log(block.innerHTML);
     return block;
 };
 
@@ -444,7 +445,7 @@ const addWitnesses = (doc, listwit, idsel='*|id') => {
         
         const witclone = wit.cloneNode(true);
 
-        const parwit = wit.closest('witness');
+        const parwit = wit.parentNode.closest('witness');
         if(!parwit)
             doclistwit.appendChild(witclone);
         else {
@@ -454,7 +455,7 @@ const addWitnesses = (doc, listwit, idsel='*|id') => {
                 let docparlistwit = docparwit.querySelector('listWit');
                 if(!docparlistwit) {
                         docparlistwit = doc.createElementNS(nURI,'listWit');
-                        docparwit.appendChild(el);
+                        docparwit.appendChild(docparlistwit);
                 }
                 docparlistwit.appendChild(witclone);
             }
@@ -489,7 +490,6 @@ const getWits = (doc,alignxml) => {
     const witmap = wits.reduce((acc,w) => {
         const id = w.getAttribute('xml:id');
         if(!acc.has(id)) {
-
             const newitem = {
                 name: id,
                 filename: w.getAttribute('source') ||

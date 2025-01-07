@@ -86,7 +86,7 @@ const findAlignmentFile = async () => {
     const xmltext = await res.text();
     document.getElementById('foundfile').textContent = srcname;
     document.getElementById('usefoundfile').addEventListener('click',() => {
-        getFile({alignment: {text: xmltext, filename: srcname}});     
+        getFile({alignment: {text: xmltext}, name: srcname});     
     });
     filefinder.style.display = 'block';
     popup.querySelector('label[for="teifile"]').textContent = 'Use a different file...';
@@ -245,7 +245,7 @@ const getFile = async (e) => {
     }    
     
     addWitnesses(newDoc, app.listwit);
-    addApparatus(newDoc, app.listapp, xml, blockid, alignment.filename);
+    addApparatus(newDoc, app.listapp, xml, blockid, e.name);
     const curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
     /*
     if(!curStandOff) {
