@@ -272,9 +272,8 @@ const removeContainer = el => {
 
 const cleanBlock = (blockid,idsel,wit) => {
     const block = wit.xml.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`).cloneNode(true);
-    for(const el of block.querySelectorAll('caesura, l, lg')) { // TODO: what if caesura isn't ignored?
+    for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
-    }
     if(wit.type || wit.select) {
         for(const del of block.querySelectorAll('del')) {
             if(wit.type === 'pc') del.remove();
@@ -284,6 +283,10 @@ const cleanBlock = (blockid,idsel,wit) => {
             if(wit.type === 'ac') add.remove();
             if(wit.type === 'pc')  removeContainer(add);
         }
+        for(const subst of block.querySelectorAll('subst'))
+            if(wit.type === 'ac' || wit.type === 'pc')
+                removeContainer(subst);
+
         if(!wit.select)
             for(const rdg of block.querySelectorAll('rdg'))
                 rdg.remove();
