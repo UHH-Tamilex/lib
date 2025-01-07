@@ -86,6 +86,13 @@ section div.wide {
     content: '.';
 }
 
+.rdg span.milestone.diplo::before, .rdg span.milestone.diplo.biggap::before {
+    content: '';
+}
+.rdg span.milestone.diplo, .rdg span.milestone.diplo.biggap {
+    font-size: 1rem;
+}
+
 .lem-wit {
     word-break: break-all;
     margin-right: 0.5em;
@@ -219,6 +226,10 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 }
 
 .ignoredtags {
+    display: none;
+}
+
+.hidden {
     display: none;
 }
 
