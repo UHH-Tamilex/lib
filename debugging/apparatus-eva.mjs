@@ -164,6 +164,7 @@ const processApparatus = (str,curDoc) => {
         
         const ret = {line: line, cirs: cirs, lemma: entries.shift(), readings: entries};
         if(faulty) ret.notes = ['Faulty.'];
+        return ret;
     });
     return apparatus.filter(l => l);
 };
