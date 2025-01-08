@@ -61,10 +61,14 @@ const getWitList = (doc, opts, arr) => {
             return [...newwits].sort(sorter);
         return [...newwits];
     }
+
+    if(newwits.size === 0)
+        return '';
+
     if(sorter)
         return `${attr}="${[...newwits].sort(sorter).map(w => '#' + w).join(' ')}"`;
-    else
-        return `${attr}="${[...newwits].map(w => '#' + w).join(' ')}"`;
+    
+    return `${attr}="${[...newwits].map(w => '#' + w).join(' ')}"`;
 };
 
 const curry = f => {
@@ -221,6 +225,7 @@ const formatMinorReadings = (arr,doc,witlistopts) => {
 const processNegApp = (negapp, doc, witlistopts) => {
     const curriedWitList = curry(getWitList)(doc)(witlistopts);
     let app = '';
+    console.log(negapp);
     for(const rdg of negapp.values()) {
         /*
         const newrdgs = getTEIRdgs(rdg,opts.blockid,witdocs,doc,dataN);
@@ -271,7 +276,8 @@ const removeContainer = el => {
 };
 
 const cleanBlock = (blockid,idsel,wit) => {
-    const block = wit.xml.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`).cloneNode(true);
+    const block = wit.xml.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`)?.cloneNode(true);
+    if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
     if(wit.type || wit.select) {
@@ -312,6 +318,7 @@ const cleanBlock = (blockid,idsel,wit) => {
 const getXMLRdgs = (blockid, alignment, wit, idsel = '*|id') => {
     const doc = wit.xml;
     const block = cleanBlock(blockid,idsel,wit);
+    if(!block) return;
     const words = [...alignment.querySelectorAll('w')];
     const ignoretags = ((par) => {
         const filters = par.querySelector('ab[type="tagfilters"]');
