@@ -225,7 +225,6 @@ const formatMinorReadings = (arr,doc,witlistopts) => {
 const processNegApp = (negapp, doc, witlistopts) => {
     const curriedWitList = curry(getWitList)(doc)(witlistopts);
     let app = '';
-    console.log(negapp);
     for(const rdg of negapp.values()) {
         /*
         const newrdgs = getTEIRdgs(rdg,opts.blockid,witdocs,doc,dataN);
