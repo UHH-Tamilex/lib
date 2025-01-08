@@ -133,10 +133,15 @@ const alignAppToText = (app,text) => {
 };
 
 const processApparatus = (str,curDoc) => {
-    const apparatus = str.trim().split(/[Ɛ#•$]/).map(l => {
+    const apparatus = str.trim().replaceAll('FF•','•FF').split(/[Ɛ#•$]/).map(l => {
         if(l === '') return null;
 
-        const clean = l.trim();
+        let clean = l.trim();
+        let faulty = false;
+        if(clean.startsWith('FF')) {
+            faulty = true;
+            clean = clean.slice(2).trim();
+        }
         const placeres = /^(\d+-?)([a-z\-]*)/.exec(clean);
         if(!placeres) {
             const note = curDoc.createElementNS('http://www.tei-c.org/ns/1.0','note');
@@ -157,7 +162,8 @@ const processApparatus = (str,curDoc) => {
             return {reading: Sanscript.t(rdg,'tamil','iast'), witnesses: wits};
         });
         
-        return {line: line, cirs: cirs, lemma: entries.shift(), readings: entries};
+        const ret = {line: line, cirs: cirs, lemma: entries.shift(), readings: entries};
+        if(faulty) ret.notes = ['Faulty.'];
     });
     return apparatus.filter(l => l);
 };
