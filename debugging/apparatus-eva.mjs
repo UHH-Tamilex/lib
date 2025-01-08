@@ -194,10 +194,10 @@ const formatReading = (str) => {
      return str.replace(/^[\da-f\-•#$Ɛ.]+/,'')
          .replace(/\s*\|\s*/,'\n')
          .trim()
+         .replace(/\//g,'<note xml:lang="en">[om.]</note>')
          .replace(/‡+/g,(match) => `<gap reason="lost" quantity="${match.length}" unit="character"/>`)
          .replace(/<sic>(_+)<\/sic>/g,(match,p1) => `<space quantity="${p1.length}" unit="character"/>`)
-         .replace(/\[/g,'<sic>').replace(/\]/g,'</sic>')
-         .replace(/\//g,'<note xml:lang="en">[om.]</note>');
+         .replace(/\[/g,'<sic>').replace(/\]/g,'</sic>');
 };
 
 export default alignApparatus;
