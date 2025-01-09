@@ -584,7 +584,7 @@ const go = () => {
     }
 
     GitHubFunctions.latestCommits();
-    document.addEventListener('copy',events.removeHyphens);
+    document.addEventListener('copy',removeHyphens);
 };
 
 window.addEventListener('load',go);
