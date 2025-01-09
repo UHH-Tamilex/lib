@@ -321,7 +321,7 @@ const cleanBlock = (blockid,idsel,wit) => {
             }
             if(foundreading) {
                 lem.remove();
-                removeContainer(rdg);
+                removeContainer(foundreading);
             }
             else removeContainer(lem);
         }
@@ -332,7 +332,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         for(const app of apps) {
             for(const rdg of app.querySelectorAll('rdg'))
                 rdg.remove();
-            app.querySelector('lem').remove();
+            removeContainer(app.querySelector('lem'));
             removeContainer(app);
         }
     }
