@@ -291,25 +291,35 @@ const cleanBlock = (blockid,idsel,wit) => {
         for(const subst of block.querySelectorAll('subst'))
             if(wit.type === 'ac' || wit.type === 'pc')
                 removeContainer(subst);
-
-        if(!wit.select)
+         
+       const apps = block.querySelectorAll('app');
+       if(!wit.select) {
             for(const rdg of block.querySelectorAll('rdg'))
                 rdg.remove();
+            for(const lem of block.querySelectorAll('lem'))
+                removeContainer(lem);
+        }
         else {
-            for(const app of block.querySelectorAll('app')) {
+            for(const app of apps) {
                 const lem = app.querySelector('lem');
                 const rdgs = app.querySelectorAll('rdg');
                 let foundreading = false;
                 for(const rdg of rdgs) {
-                    if(rdg.getAttribute('wit').split(' ').includes(wit.select))
-                        foundreading = true;
+                    if(rdg.getAttribute('wit').split(' ').includes(wit.select)) {
+                        foundreading = rdg;
+                    }
                     else
                         rdg.remove();
                 }
-                if(foundreading) lem.remove();
+                if(foundreading) {
+                    lem.remove();
+                    removeContainer(rdg);
+                }
                 else removeContainer(lem);
             }
         }
+        for(const app of apps)
+                removeContainer(app);
     }
     block.normalize();
     return block;
