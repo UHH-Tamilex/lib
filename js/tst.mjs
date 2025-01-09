@@ -73,9 +73,12 @@ const init = function() {
 };
 
 const findCorresp = (corresps) => {
-    const str = corresps.map(c => `[data-corresp~='${c}'], [id='${c}']`).join(' ');
-    const el = document.querySelector(str);
-    return el || false;
+    let res = document;
+    for(const c of corresps) {
+        res = res.querySelector(`[data-corresp~='${c}'], [id='${c}']`);
+        if(!res) return false;
+    }
+    return res;
 };
 
 const scrollTo = (el) => {
