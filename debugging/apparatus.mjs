@@ -284,6 +284,12 @@ const cleanBlock = (blockid,idsel,wit) => {
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
 
+    const pbunit = wit.xml.querySelector('supportDesc extent measure')?.getAttribute('unit');
+    console.log(pbunit);
+    if(pbunit) {
+        for(const pb of block.querySelectorAll('pb')) pb.setAttribute('type', pbunit);
+    }
+
     const apps = block.querySelectorAll('app');
     const substs = block.querySelectorAll('subst');
     const dels = block.querySelectorAll('del');
