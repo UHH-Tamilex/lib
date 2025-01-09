@@ -298,7 +298,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         else {
             for(const app of block.querySelectorAll('app')) {
                 const lem = app.querySelector('lem');
-                const rdgs = app.querySelector('rdg');
+                const rdgs = app.querySelectorAll('rdg');
                 let foundreading = false;
                 for(const rdg of rdgs) {
                     if(rdg.getAttribute('wit').split(' ').includes(wit.select))
@@ -307,6 +307,7 @@ const cleanBlock = (blockid,idsel,wit) => {
                         rdg.remove();
                 }
                 if(foundreading) lem.remove();
+                else removeContainer(lem);
             }
         }
     }
