@@ -150,7 +150,7 @@ div.lg div.l.indent9 {
     font-size: 1.2rem; 
     margin-right: 0.25rem;
 }
-.text-block.p[lang^='ta-Taml'], p {
+.text-block.p[lang^='ta-Taml'], p[lang^='ta-Taml'] {
     line-height: 2.3rem;
     font-size: 1.15rem;
 }
