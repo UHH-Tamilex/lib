@@ -43,11 +43,15 @@ const getWitList = (doc, opts, arr) => {
         const parid = par?.getAttribute('xml:id');
         const other = parid && type === 'ac' ? 
                 par.querySelector('witness[n="pc"], witness[type="pc"]')?.getAttribute('xml:id') :
-                      parid && type == 'pc' ?
+                      parid && (type == 'pc'  || !type) ?
                 par.querySelector('witness[n="ac"], witness[type="ac"]')?.getAttribute('xml:id') : null;
 
         if(!type) {
-            if( (parid && wits.has(parid)) && !mustcontain.has(wit) ) 
+            if( !mustcontain.has(wit) &&
+                (parid && 
+                    (wits.has(parid) || wits.has(other))
+                )
+              ) 
                 continue;
             else newwits.add(wit);
         }
