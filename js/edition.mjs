@@ -95,13 +95,18 @@ const apparatusswitch = (e) => {
     }
 };
 
+const getEdition = standoff => {
+    const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''));
+    return target.querySelector('.edition') || target;
+};
+
 const wordsplit = (e) => {
     const target = document.getElementById('wordsplitbutton');
     const script = document.getElementById('transbutton').lang === 'en' ? 'taml' : 'iast';
     const standoffs = document.querySelectorAll('.standOff[data-type="wordsplit"]');
     if(target.dataset.anno === 'word-split text') {
         for(const standoff of standoffs) {
-            const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''))?.querySelector('.edition');
+            const target = getEdition(standoff);
         
             target.classList.add('animation');
             if(document.getElementById('transbutton').lang === 'en') {
@@ -122,7 +127,7 @@ const wordsplit = (e) => {
     }
     else {
         for(const standoff of standoffs) {
-            const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''))?.querySelector('.edition');
+            const target = getEdition(standoff);
             if(document.getElementById('transbutton').lang === 'en')
                 Transliterate.revert(target);
             removemarkup(standoff);
@@ -301,7 +306,7 @@ const countLines = lines => {
 };
 
 const applymarkup = (standoff) => {
-    const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''))?.querySelector('.edition');
+    const target = getEdition(standoff);
     if(!target) return;
     
     const cache = new Map();
@@ -407,7 +412,7 @@ const applymarkup = (standoff) => {
 };
 
 const removemarkup = (standoff) => {
-    const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''))?.querySelector('.edition');
+    const target = getEdition(standoff);
     if(!target) return;
 
     const cached = cachedContent.get(target);

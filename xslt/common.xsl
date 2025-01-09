@@ -120,11 +120,14 @@
 <xsl:template name="lg">
     <xsl:element name="div">
         <xsl:attribute name="class">lg</xsl:attribute>
-        <xsl:if test="@corresp or @xml:id">
+        <xsl:if test="@corresp">
             <xsl:attribute name="data-corresp">
-                <xsl:value-of select="@xml:id"/>
-                <xsl:text> </xsl:text>
                 <xsl:value-of select="translate(@corresp,'#','')"/>
+            </xsl:attribute>
+        </xsl:if>
+        <xsl:if test="@xml:id">
+            <xsl:attribute name="id">
+                <xsl:value-of select="@xml:id"/>
             </xsl:attribute>
         </xsl:if>
         <xsl:if test="@met">
