@@ -28,10 +28,10 @@ const alignmentXSLT = `<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.or
 <xsl:template match="x:teiCorpus">
     <xsl:element name="table"><xsl:apply-templates/></xsl:element>
 </xsl:template>
+<xsl:template match="x:teiHeader"/>
 <xsl:template match="x:TEI">
     <xsl:apply-templates/>
 </xsl:template>
-<xsl:template match="x:listWit"/>
 <xsl:template match="x:text">
     <xsl:element name="tr">
         <xsl:element name="th">
