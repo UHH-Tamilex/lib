@@ -330,7 +330,7 @@ const cleanBlock = (blockid,idsel,wit) => {
     }
     else { // no ac/pc, not variant reading
         for(const app of apps) {
-            for(const rdgs of app.querySelectorAll('rdg'))
+            for(const rdg of app.querySelectorAll('rdg'))
                 rdg.remove();
             app.querySelector('lem').remove();
             removeContainer(app);
