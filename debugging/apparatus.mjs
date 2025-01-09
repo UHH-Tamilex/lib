@@ -279,47 +279,62 @@ const cleanBlock = (blockid,idsel,wit) => {
     if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
-    if(wit.type || wit.select) {
-        for(const del of block.querySelectorAll('del')) {
+
+    const apps = block.querySelectorAll('app');
+    const substs = block.querySelectorAll('subst');
+    const dels = block.querySelectorAll('del');
+    const adds = block.querySelectorAll('add');
+
+    for(const subst of substs) removeContainer(subst);
+
+    if(wit.type) {
+        for(const del of dels) {
             if(wit.type === 'pc') del.remove();
             if(wit.type === 'ac')  removeContainer(del);
         }
-        for(const add of block.querySelectorAll('add')) {
+        for(const add of adds) {
             if(wit.type === 'ac') add.remove();
             if(wit.type === 'pc')  removeContainer(add);
         }
-        for(const subst of block.querySelectorAll('subst'))
-            if(wit.type === 'ac' || wit.type === 'pc')
-                removeContainer(subst);
-         
-       const apps = block.querySelectorAll('app');
-       if(!wit.select) {
-            for(const rdg of block.querySelectorAll('rdg'))
+        for(const app of apps) {
+            for(const rdgs of app.querySelectorAll('rdg'))
                 rdg.remove();
-            for(const lem of block.querySelectorAll('lem'))
-                removeContainer(lem);
+            app.querySelector('lem').remove();
+            removeContainer(app);
         }
-        else {
-            for(const app of apps) {
-                const lem = app.querySelector('lem');
-                const rdgs = app.querySelectorAll('rdg');
-                let foundreading = false;
-                for(const rdg of rdgs) {
-                    if(rdg.getAttribute('wit').split(' ').includes(wit.select)) {
-                        foundreading = rdg;
-                    }
-                    else
-                        rdg.remove();
+    }
+    else if(wit.select) {
+        for(const del of dels)
+            del.remove();
+        for(const add of adds)
+            removeContainer(add);
+        for(const app of apps) {
+            const lem = app.querySelector('lem');
+            const rdgs = app.querySelectorAll('rdg');
+            let foundreading = false;
+            for(const rdg of rdgs) {
+                if(rdg.getAttribute('wit').split(' ').includes(wit.select)) {
+                    foundreading = rdg;
                 }
-                if(foundreading) {
-                    lem.remove();
-                    removeContainer(rdg);
-                }
-                else removeContainer(lem);
+                else
+                    rdg.remove();
             }
+            if(foundreading) {
+                lem.remove();
+                removeContainer(rdg);
+            }
+            else removeContainer(lem);
         }
-        for(const app of apps)
-                removeContainer(app);
+
+        for(const app of apps) removeContainer(app);
+    }
+    else { // no ac/pc, not variant reading
+        for(const app of apps) {
+            for(const rdgs of app.querySelectorAll('rdg'))
+                rdg.remove();
+            app.querySelector('lem').remove();
+            removeContainer(app);
+        }
     }
     block.normalize();
     return block;
