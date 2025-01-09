@@ -382,7 +382,7 @@
                 </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
-                <span class="lem lem-anchor">†</span>
+                <span class="lem lem-anchor">*</span>
             </xsl:otherwise>
         </xsl:choose>
         <xsl:if test="x:rdg | x:rdgGrp">
