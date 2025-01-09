@@ -299,7 +299,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         for(const app of apps) {
             for(const rdg of app.querySelectorAll('rdg'))
                 rdg.remove();
-            app.querySelector('lem').remove();
+            removeContainer(app.querySelector('lem'));
             removeContainer(app);
         }
     }
@@ -313,7 +313,7 @@ const cleanBlock = (blockid,idsel,wit) => {
             const rdgs = app.querySelectorAll('rdg');
             let foundreading = false;
             for(const rdg of rdgs) {
-                if(rdg.getAttribute('wit').split(' ').includes(wit.select)) {
+                if(rdg.getAttribute('wit').split(/\s+/).includes(wit.select)) {
                     foundreading = rdg;
                 }
                 else
@@ -328,7 +328,9 @@ const cleanBlock = (blockid,idsel,wit) => {
 
         for(const app of apps) removeContainer(app);
     }
-    else { // no ac/pc, not variant reading
+    else { // pc lemma reading
+        for(const del of dels) del.remove();
+        for(const add of adds) removeContainer(add);
         for(const app of apps) {
             for(const rdg of app.querySelectorAll('rdg'))
                 rdg.remove();
