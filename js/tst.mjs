@@ -28,11 +28,11 @@ const init = function() {
     if(viewer) {
         _state.manifest = viewer.dataset.manifest;
         const param = params.get('facs');
-        const page = facs || (param ? parseInt(param) - 1 : null);
+        const page = facs || (param ? parseInt(param) - 1 : null) || viewer.dataset.start;
         if(_state.mirador)
-            MiradorWrapper.refresh(_state.mirador,viewer.dataset.manifest, page || viewer.dataset.start);
+            MiradorWrapper.refresh(_state.mirador,viewer.dataset.manifest, page);
         else
-            _state.mirador = MiradorWrapper.start('viewer',viewer.dataset.manifest,page || viewer.dataset.start);
+            _state.mirador = MiradorWrapper.start('viewer',viewer.dataset.manifest, page);
     }
     
     // initialize events for the record text
@@ -62,8 +62,10 @@ const init = function() {
     // check for GitHub commit history
     GitHubFunctions.latestCommits();
 
-    if(document.querySelector('.app'))
+    if(document.querySelector('.app')) {
         ApparatusViewer.init();
+        ApparatusViewer.setTransliterator(Transliterate);
+    }
 
     recordcontainer.addEventListener('click',events.docClick);
     recordcontainer.addEventListener('copy',events.removeHyphens);
@@ -130,7 +132,7 @@ const findFacs = (startel) => {
 
     var p = prev(startel);
     while(p) {
-        if(!p) return '';
+        if(!p || !p.dataset) return '';
         if('loc' in p.dataset) {
             return p.dataset.loc;
         }
@@ -143,7 +145,7 @@ const events = {
 
     docClick: function(e) {
         const locel = e.target.closest('[data-loc]');
-        if(locel) {
+        if(locel && !e.target.closest('.app')) {
             MiradorWrapper.jumpTo(_state.mirador,_state.manifest,locel.dataset.loc);
             return;
         }
@@ -159,7 +161,7 @@ const events = {
             return;
         }
 
-        if(e.target.dataset.hasOwnProperty('scroll')) {
+        if(e.target.dataset && e.target.dataset.hasOwnProperty('scroll')) {
             e.preventDefault();
             const el = document.getElementById(e.target.href.split('#')[1]);
             el.scrollIntoView({behavior: 'smooth', inline:'end'});
