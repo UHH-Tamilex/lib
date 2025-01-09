@@ -468,6 +468,16 @@ const findCorrespLine = e => {
     },{once: true});
 };
 
+const removeHyphens = ev => {
+    ev.preventDefault();
+    const hyphenRegex = new RegExp('\u00AD','g');
+    var sel = window.getSelection().toString();
+    sel = ev.target.closest('textarea') ? 
+        sel :
+        sel.replace(hyphenRegex,'');
+    (ev.clipboardData || window.clipboardData).setData('Text',sel);
+};
+
 const go = () => {
     const searchparams = new URLSearchParams(window.location.search);
     if(document.getElementById('editionscript').dataset.debugging === 'true')
@@ -574,6 +584,7 @@ const go = () => {
     }
 
     GitHubFunctions.latestCommits();
+    document.addEventListener('copy',events.removeHyphens);
 };
 
 window.addEventListener('load',go);
