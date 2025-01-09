@@ -461,7 +461,7 @@ const Events = {
             }
             apparatussvg.style.display = 'none';
             translationsvg.style.display = 'block';
-            target.dataset.anno = 'translation';
+            translationsvg.parentNode.dataset.anno = 'translation';
         }
         else {
             for(const apparatus of apparati) {
