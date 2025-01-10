@@ -473,7 +473,7 @@ const Events = {
             }
             translationsvg.style.display = 'none';
             apparatussvg.style.display = 'block';
-            target.dataset.anno = 'apparatus of variants';
+            translationsvg.parentNode.dataset.anno = 'apparatus of variants';
         }
     }
 };
