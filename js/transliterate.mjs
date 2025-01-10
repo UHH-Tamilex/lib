@@ -353,7 +353,9 @@ transliterator.jiggleWordsplits = (par = _state.parEl) => {
           ) {
             markToRevert(node);
 
-            const prev = realPrev(node.previousSibling);
+            const prev = node.querySelector('.highlit') ? 
+                realPrev(node.previousSibling).firstChild :
+                realPrev(node.previousSibling);
             prev.data = prev.data + node.dataset.character;
 
             const temp = node.querySelector('.temporary');
@@ -361,7 +363,9 @@ transliterator.jiggleWordsplits = (par = _state.parEl) => {
             else node.lastChild.data = '';
         }
         else if(node.classList.contains('glide') || node.classList.contains('geminated')) {
-            const next = node.nextSibling;
+            const next = node.querySelector('.highlit') ? 
+                node.nextSibling?.firstChild :
+                node.nextSibling;
             if(!next || next.nodeType !== 3)
                 continue;
             
