@@ -470,7 +470,7 @@ const findCorrespLine = e => {
 
 const removeHyphens = ev => {
     ev.preventDefault();
-    const hyphenRegex = new RegExp('\u00AD','g');
+    const hyphenRegex = new RegExp(/\u00AD/,'g');
     var sel = window.getSelection().toString();
     sel = ev.target.closest('textarea') ? 
         sel :
