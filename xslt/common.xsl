@@ -141,11 +141,30 @@
     <xsl:call-template name="lg"/>
 </xsl:template>
 
-<xsl:template match="x:l">
+<!--xsl:template match="x:l">
     <xsl:element name="div">
         <xsl:call-template name="lang"/>
         <xsl:attribute name="class">l</xsl:attribute>
         <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template-->
+
+<xsl:template match="x:l">
+    <xsl:element name="div">
+        <xsl:attribute name="class">
+            <xsl:text>l</xsl:text>
+            <xsl:if test="@rend">
+                <xsl:text> </xsl:text>
+                <xsl:value-of select="@rend"/>
+            </xsl:if>
+        </xsl:attribute>
+        <xsl:if test="@corresp">
+            <xsl:attribute name="data-corresp"><xsl:value-of select="@corresp"/></xsl:attribute>
+        </xsl:if>
+        <xsl:call-template name="lang"/>
+        <xsl:apply-templates/>
+        <xsl:text>
+</xsl:text>
     </xsl:element>
 </xsl:template>
 
