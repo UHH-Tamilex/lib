@@ -353,9 +353,7 @@ transliterator.jiggleWordsplits = (par = _state.parEl) => {
           ) {
             markToRevert(node);
 
-            const prev = node.querySelector('.highlit') ? 
-                realPrev(node.previousSibling).firstChild :
-                realPrev(node.previousSibling);
+            const prev = realPrev(node.previousSibling);
             prev.data = prev.data + node.dataset.character;
 
             const temp = node.querySelector('.temporary');
@@ -363,9 +361,7 @@ transliterator.jiggleWordsplits = (par = _state.parEl) => {
             else node.lastChild.data = '';
         }
         else if(node.classList.contains('glide') || node.classList.contains('geminated')) {
-            const next = node.querySelector('.highlit') ? 
-                node.nextSibling?.firstChild :
-                node.nextSibling;
+            const next = realNext(node.nextSibling);
             if(!next || next.nodeType !== 3)
                 continue;
             
@@ -1035,14 +1031,18 @@ const refreshCache = (par) => {
 };
 
 const realPrev = el => {
-    if(el.classList?.contains('temporary'))
-        return el.firstChild;
+    if(el?.classList?.contains('temporary'))
+        el = el.firstChild;
+    if(el?.classList?.contains('highlit'))
+        el = el.firstChild;
     return el;
 };
 
 const realNext = el => {
     if(el?.classList?.contains('temporary'))
-        return el.firstChild;
+        el = el.firstChild;
+    if(el?.classList?.contains('highlit'))
+        el = el.firstChild;
     return el;
 };
 
