@@ -1,11 +1,3 @@
-.text-block.edition[lang^='ta-Taml'] {
-    word-spacing: 1rem;
-    /*font-size: 1.2rem;*/`
-}
-:lang('en') {
-    word-spacing: normal;
-}
-
 #record-fat section > table {
     max-width: unset;
     width: 100%;
