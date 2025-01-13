@@ -446,7 +446,7 @@ transliterator.revert = (par = _state.parEl) => {
 };
     
 transliterator.activate = (par = _state.parEl) => {
-    const subst = par.querySelectorAll('span.subst, span.choice, span.expan');
+    const subst = par.querySelectorAll('span.subst, span.choice, span.expan, span.damage');
     for(const s of subst)
         if(s.lang.startsWith('sa') || s.lang.startsWith('ta')) transliterator.jiggle(s);
         //TODO: Also other languages?
@@ -544,9 +544,15 @@ transliterator.jiggle = node => {
 
         const txt = kid.textContent.trim();
         if(txt === '') continue;
+        if(txt.textContent === '_' || txt.textContent === '·') {
+            const virama = Sanscript.schemes[_state.isoToScript.get(script)].virama;
+            text.textContent = virama;
+        }
         if(txt === 'a') { 
+            /*
             if(kid.nodeType === 1)
                 add_virama.push(kid);
+            */
             kid.textContent = '';
             continue;
         }
@@ -679,7 +685,7 @@ transliterator.jiggle = node => {
     for (const el of add_at_beginning) {
         node.insertBefore(el,node.firstChild);
     }
-    
+    /* 
     const virama = Sanscript.schemes[_state.isoToScript.get(script)].virama;
     for (const el of add_virama) {
         const newel = el.nodeName === 'DEL' ? 
@@ -693,7 +699,7 @@ transliterator.jiggle = node => {
         newel.append(virama);
         el.replaceWith(newel);
     }
-
+    */
     if(telugu_del_headstroke) {
         for (const el of telugu_kids) {
             const lasttxtnode = findTextNode(el,true);

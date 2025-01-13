@@ -7,7 +7,16 @@
 <xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes"/>
 
 <xsl:template match="x:text">
-    <xsl:variable name="textid" select="substring-after(@corresp,'#')"/>
+    <xsl:variable name="textid">
+        <xsl:choose>
+            <xsl:when test="@corresp">
+                <xsl:value-of select="substring-after(@corresp,'#')"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="//x:idno[@type='siglum']"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
     <xsl:element name="hr">
         <xsl:attribute name="id">
             <xsl:text>text-</xsl:text>
@@ -30,9 +39,11 @@
                 <xsl:element name="td">
                     <xsl:variable name="title" select="ancestor::x:TEI/x:teiHeader/x:fileDesc/x:sourceDesc/x:msDesc/x:msContents/x:msItem[@xml:id=$textid]/x:title"/>
                     <xsl:attribute name="lang"><xsl:value-of select="$title/@xml:lang"/></xsl:attribute>
-                    <span class="line-view-icon" title="diplomatic display">
-                        <svg height='25px' width='25px' fill="#000000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 512 512"><g id="#hamburger"><g><g><path d="M486,493H26c-3.866,0-7-3.134-7-7V26c0-3.866,3.134-7,7-7h460c3.866,0,7,3.134,7,7v460C493,489.866,489.866,493,486,493z      M33,479h446V33H33V479z"></path></g><g><path d="M436,133H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,133,436,133z"></path></g><g><path d="M436,263H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,263,436,263z"></path></g><g><path d="M436,393H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,393,436,393z"></path></g></g></g></svg>
-                    </span>
+                    <xsl:if test="not(@type='edition')">
+                        <span class="line-view-icon" title="diplomatic display">
+                            <svg height='25px' width='25px' fill="#000000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 512 512"><g id="#hamburger"><g><g><path d="M486,493H26c-3.866,0-7-3.134-7-7V26c0-3.866,3.134-7,7-7h460c3.866,0,7,3.134,7,7v460C493,489.866,489.866,493,486,493z      M33,479h446V33H33V479z"></path></g><g><path d="M436,133H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,133,436,133z"></path></g><g><path d="M436,263H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,263,436,263z"></path></g><g><path d="M436,393H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,393,436,393z"></path></g></g></g></svg>
+                        </span>
+                    </xsl:if>
                     <xsl:apply-templates select="$title"/>
                 </xsl:element>
                 <xsl:element name="td">
@@ -61,6 +72,9 @@
 <xsl:template match="x:text/x:body | x:text/x:front | x:text//x:div">
     <xsl:element name="div">
         <xsl:call-template name="lang"/>
+        <xsl:if test="@rend='parallel'">
+            <xsl:attribute name="class">parallel</xsl:attribute>
+        </xsl:if>
         <xsl:apply-templates/>
     </xsl:element>
 </xsl:template>
@@ -268,7 +282,9 @@
 
 <xsl:template match="x:gap | x:damage">
     <xsl:element name="span">
-        <xsl:attribute name="lang">en</xsl:attribute>
+        <xsl:if test="not(node())">
+            <xsl:attribute name="lang">en</xsl:attribute>
+        </xsl:if>
         <xsl:attribute name="class">
             <xsl:value-of select="local-name()"/>
             <xsl:if test="@reason='ellipsis'">
@@ -276,67 +292,72 @@
             </xsl:if>
         </xsl:attribute>
         <xsl:attribute name="data-anno">
-            <xsl:text>gap</xsl:text>
-                <xsl:choose>
-                    <xsl:when test="@quantity">
-                        <xsl:text> of </xsl:text><xsl:value-of select="@quantity"/>
-                        <xsl:choose>
-                        <xsl:when test="@unit">
-                        <xsl:text> </xsl:text><xsl:value-of select="@unit"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                        <xsl:text> akṣara</xsl:text>
-                        </xsl:otherwise>
-                        </xsl:choose>
-                            <xsl:if test="@quantity &gt; '1'">
-                                <xsl:text>s</xsl:text>
-                            </xsl:if>
-                    </xsl:when>
-                    <xsl:when test="@extent">
-                        <xsl:text> of </xsl:text><xsl:value-of select="@extent"/>
-                    </xsl:when>
-                </xsl:choose>
-                <xsl:if test="@reason | @agent">
-                    <xsl:text> (</xsl:text>
-                    <xsl:value-of select="@reason"/>
-                    <xsl:if test="@reason and @agent">
-                        <xsl:text>, </xsl:text>
-                    </xsl:if>
-                    <xsl:value-of select="@agent"/>
-                    <xsl:text>)</xsl:text>
-                </xsl:if>
-        </xsl:attribute>
-        <xsl:variable name="spacechar">
             <xsl:choose>
-                <xsl:when test="@reason='ellipsis'">…</xsl:when>
-                <xsl:when test="@reason='lost'">‡</xsl:when>
-                <xsl:otherwise>?</xsl:otherwise>
+                <xsl:when test="name() = 'damage'">
+                    <xsl:text>damage</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>gap</xsl:text>
+                </xsl:otherwise>
             </xsl:choose>
-        </xsl:variable>
-        <xsl:variable name="extentnum" select="translate(@extent,translate(@extent,'0123456789',''),'')"/>
-        <xsl:choose>
-            <xsl:when test="count(./*) &gt; 0"><xsl:apply-templates/></xsl:when>
-            <xsl:otherwise>
-                <xsl:element name="span">
+            <xsl:choose>
+                <xsl:when test="@quantity">
+                    <xsl:text> of </xsl:text><xsl:value-of select="@quantity"/>
+                    <xsl:choose>
+                    <xsl:when test="@unit">
+                    <xsl:text> </xsl:text><xsl:value-of select="@unit"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                    <xsl:text> akṣara</xsl:text>
+                    </xsl:otherwise>
+                    </xsl:choose>
+                        <xsl:if test="@quantity &gt; '1'">
+                            <xsl:text>s</xsl:text>
+                        </xsl:if>
+                </xsl:when>
+                <xsl:when test="@extent">
+                    <xsl:text> of </xsl:text><xsl:value-of select="@extent"/>
+                </xsl:when>
+            </xsl:choose>
+            <xsl:if test="@reason | @agent">
+                <xsl:text> (</xsl:text>
+                <xsl:value-of select="@reason"/>
+                <xsl:if test="@reason and @agent">
+                    <xsl:text>, </xsl:text>
+                </xsl:if>
+                <xsl:value-of select="@agent"/>
+                <xsl:text>)</xsl:text>
+            </xsl:if>
+        </xsl:attribute>
+        <xsl:if test="not(node())">
+            <xsl:variable name="spacechar">
                 <xsl:choose>
-                    <xsl:when test="@quantity &gt; 0">
-                        <xsl:call-template name="repeat">
-                            <xsl:with-param name="output"><xsl:value-of select="$spacechar"/></xsl:with-param>
-                            <xsl:with-param name="count" select="@quantity"/>
-                        </xsl:call-template>
-
-                    </xsl:when>
-                    <xsl:when test="number($extentnum) &gt; 0">
-                        <xsl:call-template name="repeat">
-                            <xsl:with-param name="output"><xsl:value-of select="$spacechar"/></xsl:with-param>
-                            <xsl:with-param name="count" select="$extentnum"/>
-                        </xsl:call-template>
-                    </xsl:when>
-                    <xsl:otherwise><xsl:text>…</xsl:text></xsl:otherwise>
+                    <xsl:when test="@reason='ellipsis'">…</xsl:when>
+                    <xsl:when test="@reason='lost'">‡</xsl:when>
+                    <xsl:otherwise>?</xsl:otherwise>
                 </xsl:choose>
-                </xsl:element>
-            </xsl:otherwise>
-        </xsl:choose>
+            </xsl:variable>
+            <xsl:variable name="extentnum" select="translate(@extent,translate(@extent,'0123456789',''),'')"/>
+            <xsl:element name="span">
+            <xsl:choose>
+                <xsl:when test="@quantity &gt; 0">
+                    <xsl:call-template name="repeat">
+                        <xsl:with-param name="output"><xsl:value-of select="$spacechar"/></xsl:with-param>
+                        <xsl:with-param name="count" select="@quantity"/>
+                    </xsl:call-template>
+
+                </xsl:when>
+                <xsl:when test="number($extentnum) &gt; 0">
+                    <xsl:call-template name="repeat">
+                        <xsl:with-param name="output"><xsl:value-of select="$spacechar"/></xsl:with-param>
+                        <xsl:with-param name="count" select="$extentnum"/>
+                    </xsl:call-template>
+                </xsl:when>
+                <xsl:otherwise><xsl:text>…</xsl:text></xsl:otherwise>
+            </xsl:choose>
+            </xsl:element>
+        </xsl:if>
+        <xsl:apply-templates/>
     </xsl:element>
 </xsl:template>
 
@@ -623,7 +644,7 @@
         </xsl:attribute>
         <xsl:attribute name="lang">en</xsl:attribute>
         <xsl:variable name="facs" select="@facs"/>
-        <xsl:variable name="unit" select="ancestor::x:TEI/x:teiHeader/x:fileDesc/x:sourceDesc/x:msDesc/x:physDesc/x:objectDesc/x:supportDesc/x:extent/x:measure/@unit"/>
+        <xsl:variable name="unit" select="ancestor::x:TEI/x:teiHeader/x:fileDesc/x:sourceDesc/x:msDesc/x:physDesc/x:objectDesc/x:supportDesc/x:extent/x:measure/@unit | @type"/>
         <!--xsl:if test="$excerpt = 'no' and @break = 'no'">
             <xsl:attribute name="data-nobreak"/>
         </xsl:if-->
@@ -760,10 +781,10 @@
 <xsl:template match="x:caesura">
 <xsl:variable name="pretext" select="preceding::text()[1]"/>
 <xsl:if test="normalize-space(substring($pretext,string-length($pretext))) != ''">
-    <span class="caesura">-</span>
+    <span class="caesura ignored" data-teiname="caesura">-</span>
 </xsl:if>
     <xsl:element name="br">
-    <xsl:attribute name="class">caesura</xsl:attribute>
+    <xsl:attribute name="class">caesura ignored</xsl:attribute>
     </xsl:element>
 </xsl:template>
 
@@ -788,6 +809,7 @@
 <xsl:template match="x:note[@place='foot']">
     <xsl:variable name="anchor" select="./x:c[@type='anchor']"/>
     <xsl:element name="span">
+        <xsl:attribute name="teiname">note</xsl:attribute>
         <xsl:attribute name="data-anno"/>
         <xsl:attribute name="class">footnote<xsl:if test="not($anchor)"> numbered</xsl:if></xsl:attribute>
         <!--xsl:choose>
@@ -806,6 +828,7 @@
 <xsl:template match="x:note">
 <xsl:element name="span">
     <xsl:call-template name="lang"/>
+    <xsl:attribute name="teiname">note</xsl:attribute>
     <xsl:attribute name="class">note
         <xsl:choose>
             <xsl:when test="@place='above' or @place='top-margin' or @place='left-margin'"> super</xsl:when>
