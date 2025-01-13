@@ -282,9 +282,14 @@
 
 <xsl:template match="x:gap | x:damage">
     <xsl:element name="span">
-        <xsl:if test="not(node())">
-            <xsl:attribute name="lang">en</xsl:attribute>
-        </xsl:if>
+        <xsl:choose>
+            <xsl:when test="not(node())">
+                <xsl:attribute name="lang">en</xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:call-template name="lang"/>
+            </xsl:otherwise>
+        </xsl:choose>
         <xsl:attribute name="class">
             <xsl:value-of select="local-name()"/>
             <xsl:if test="@reason='ellipsis'">
@@ -1037,4 +1042,10 @@
     </xsl:element>
 </xsl:template>
 
+<xsl:template match="x:retrace">
+    <span class="retrace" data-anno="retraced">
+        <xsl:call-template name="lang"/>
+        <xsl:apply-templates/>
+    </span>
+</xsl:template>
 </xsl:stylesheet>
