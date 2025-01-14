@@ -279,7 +279,8 @@ const removeContainer = el => {
 };
 
 const cleanBlock = (blockid,idsel,wit) => {
-    const block = wit.xml.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`)?.cloneNode(true);
+    const text = wit.xml.querySelector(`text[corresp=#${wit.name}]`) || wit.xml.querySelector('text');
+    const block = text.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`)?.cloneNode(true);
     if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
@@ -353,9 +354,10 @@ const cleanBlock = (blockid,idsel,wit) => {
 };
 
 const getXMLRdgs = (blockid, alignment, wit, idsel = '*|id') => {
-    const doc = wit.xml;
     const block = cleanBlock(blockid,idsel,wit);
     if(!block) return;
+
+    const doc = wit.xml;
     const words = [...alignment.querySelectorAll('w')];
     const ignoretags = ((par) => {
         const filters = par.querySelector('ab[type="tagfilters"]');
