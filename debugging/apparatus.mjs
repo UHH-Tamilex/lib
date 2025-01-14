@@ -279,7 +279,7 @@ const removeContainer = el => {
 };
 
 const cleanBlock = (blockid,idsel,wit) => {
-    const text = wit.xml.querySelector(`text[corresp=#${wit.name}]`) || wit.xml.querySelector('text');
+    const text = wit.xml.querySelector(`text[corresp="#${wit.name}"]`) || wit.xml.querySelector('text');
     const block = text.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`)?.cloneNode(true);
     if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
