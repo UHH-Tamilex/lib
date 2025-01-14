@@ -286,7 +286,6 @@ const cleanBlock = (blockid,idsel,wit) => {
         removeContainer(el);
 
     const pbunit = wit.xml.querySelector('supportDesc extent measure')?.getAttribute('unit');
-    console.log(pbunit);
     if(pbunit) {
         for(const pb of block.querySelectorAll('pb')) pb.setAttribute('type', pbunit);
     }

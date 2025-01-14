@@ -4,6 +4,8 @@ import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 
 var curDoc = null;
 var newDoc = null;
+const cachedAlignments = new Map();
+
 const filename = window.location.pathname.split('/').pop();
 
 const loadDoc = async () => {
@@ -60,6 +62,11 @@ const addVariants = () => {
     
     findAlignmentFile();
 
+    document.getElementById('usefoundfile').addEventListener('click',() => {
+        const name = document.getElementById('foundfile').textContent;
+        getFile({alignment: {text: cachedAlignments.get(name)}, name: name});     
+    });
+
     document.getElementById('variantsswitcher').addEventListener('click',switchType);
     document.getElementById('addapparatus').addEventListener('click',generateApp);
     document.getElementById('saveapparatus').addEventListener('click',saveAs);
@@ -84,10 +91,10 @@ const findAlignmentFile = async () => {
         return;
     }
     const xmltext = await res.text();
+    
+    cachedAlignments.set(srcname, xmltext);
+
     document.getElementById('foundfile').textContent = srcname;
-    document.getElementById('usefoundfile').addEventListener('click',() => {
-        getFile({alignment: {text: xmltext}, name: srcname});     
-    });
     filefinder.style.display = 'block';
     popup.querySelector('label[for="teifile"]').textContent = 'Use a different file...';
 };
@@ -190,7 +197,7 @@ const getFile = async (e) => {
 
     if(!curDoc) await loadDoc();
 
-    let xml = alignment ?
+    const xml = alignment ?
         parseString(alignment.text) :
         await (async () => {
             const input = document.getElementById('teifile');
@@ -198,9 +205,9 @@ const getFile = async (e) => {
             const text = await readOne(file);
             return parseString(text,file.name);
         })();
+    
 
     newDoc = curDoc.cloneNode(true);
-    
     const cachedwitnesses = new Map();
     const cachedfiles = new Map();
     for(const wit of getWits(newDoc,xml)) {
