@@ -212,6 +212,7 @@ const getFile = async (e) => {
             }
             if(file) { // file could be null from loadOtherDoc
                 cachedwitnesses.set(wit.name, {
+                    name: wit.name,
                     type: wit.type,
                     select: wit.select,
                     xml: file
