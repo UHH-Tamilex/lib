@@ -331,7 +331,8 @@
         </xsl:attribute>
         <xsl:apply-templates/>
     </xsl:element>
-</xsl:template>
+</xsl:template-->
+
 <xsl:template match="x:lg[@type='alternate']">
     <xsl:element name="div">
         <xsl:call-template name="lang"/>
@@ -370,7 +371,8 @@
         <xsl:text>
 </xsl:text>
     </xsl:element>
-</xsl:template-->
+</xsl:template>
+
 <xsl:template match="x:choice">
     <xsl:element name="span">
     <xsl:attribute name="class">
