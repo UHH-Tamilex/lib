@@ -123,7 +123,7 @@ const countWalker = el => {
 };
 
 const loadDoc = async () => {
-    const res = await fetch(filename);
+    const res = await fetch(filename,{cache: 'no-cache'});
     const xmltext = await res.text();
     _state.curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
