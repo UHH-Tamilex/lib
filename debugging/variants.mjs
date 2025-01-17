@@ -6,16 +6,10 @@ var curDoc = null;
 var newDoc = null;
 const cachedAlignments = new Map();
 
-const filename = window.location.pathname.split('/').pop();
+const thisFilename = window.location.pathname.split('/').pop();
 
-const loadDoc = async () => {
-    const res = await fetch(filename);
-    const xmltext = await res.text();
-    curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
-};
-
-const loadOtherDoc = async (fn) => {
-    const res = await fetch(fn);
+const loadDoc = async (fn) => {
+    const res = await fetch(fn,{cache: 'no-cache'});
     if(!res.ok) return null;
     const xmltext = await res.text();
     return (new DOMParser()).parseFromString(xmltext, 'text/xml');
@@ -84,7 +78,7 @@ const findAlignmentFile = async () => {
     popup.querySelector('.output-boxen').style.display = 'none';
     const blockid = popup.querySelector('select[name="edblock"]').value;
     const srcname = `alignments/${blockid}.xml`;
-    const res = await fetch(srcname);
+    const res = await fetch(srcname,{cache: 'no-cache'});
     if(!res.ok) {
         filefinder.style.display = 'none';
         popup.querySelector('label[for="teifile"]').textContent = 'Select alignment file...';
@@ -101,7 +95,7 @@ const findAlignmentFile = async () => {
 
 const saveAs = async () => {
     const fileHandle = await showSaveFilePicker({
-        suggestedName: filename,
+        suggestedName: thisFilename,
         types: [
             { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
         ],
@@ -115,7 +109,7 @@ const saveAs = async () => {
 
 const generateApp = async e => {
 
-    if(!curDoc) await loadDoc();
+    if(!curDoc) await loadDoc(thisFilename);
 
     const popup = document.getElementById('variants-popup');
     const blockid = popup.querySelector('select[name="edblock"]').value;
@@ -195,7 +189,7 @@ const getFile = async (e) => {
     const blockid = popup.querySelector('select[name="edblock"]').value;
     const alignment = e.alignment;
 
-    if(!curDoc) await loadDoc();
+    if(!curDoc) await loadDoc(thisFilename);
 
     const xml = alignment ?
         parseString(alignment.text) :
@@ -214,10 +208,10 @@ const getFile = async (e) => {
         if(!cachedwitnesses.get(wit.name)) {
             let file = cachedfiles.get(wit.filename);
             if(!file) {
-                file = await loadOtherDoc(wit.filename);
+                file = await loadDoc(wit.filename);
                 cachedfiles.set(wit.filename,file);
             }
-            if(file) { // file could be null from loadOtherDoc
+            if(file) { // file could be null from loadDoc
                 cachedwitnesses.set(wit.name, {
                     name: wit.name,
                     type: wit.type,
