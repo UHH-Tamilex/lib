@@ -212,7 +212,7 @@ const getFile = async (e) => {
     const cachedfiles = new Map();
     for(const wit of getWits(newDoc,xml)) {
         if(!cachedwitnesses.get(wit.name)) {
-            let file = cachedfiles.get(wit.name);
+            let file = cachedfiles.get(wit.filename);
             if(!file) {
                 file = await loadOtherDoc(wit.filename);
                 cachedfiles.set(wit.filename,file);
