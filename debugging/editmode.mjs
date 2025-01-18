@@ -1,8 +1,11 @@
 import Splitter from './splits.mjs';
 import Apparatuser from './variants.mjs';
+import { saveAs } from './utils.mjs';
 
 const _state = {
-    curDoc: null
+    curDoc: null,
+    filename: window.location.pathname.split('/').pop()
+
 };
 
 Splitter.sharedState = _state;
@@ -21,6 +24,7 @@ const startEditMode = async transliterator => {
     addEditButtons(blocks);
     document.getElementById('button_wordsplitbutton').addEventListener('click',Splitter.addWordSplits);
     document.getElementById('button_editbutton').addEventListener('click',Apparatuser.addVariants);
+    document.getElementById('button_savebutton').addEventListener('click',saveAs.bind(null,_state.filename, _state.curDoc));
 };
 
 const addEditButtons = blocks => {for(const block of blocks) addEditButton(block);};

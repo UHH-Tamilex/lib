@@ -1,13 +1,8 @@
 import alignApparatus from './apparatus-eva.mjs';
 import { makeApp, addWitnesses, addApparatus, getWits } from './apparatus.mjs';
-import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
-
-//var curDoc = null;
-//var newDoc = null;
+import { saveAs } from './utils.mjs';
 
 const cachedAlignments = new Map();
-
-const thisFilename = window.location.pathname.split('/').pop();
 
 const loadDoc = async (fn) => {
     const res = await fetch(fn,{cache: 'no-cache'});
@@ -38,11 +33,6 @@ const switchType = e => {
 
 };
 const addVariants = () => {
-    /*
-    const popup = document.createElement('div');
-    popup.className = 'popup';
-    */
-    //const selector = document.createElement('select');
     const blackout = document.getElementById('blackout');
     document.getElementById('splits-popup').style.display = 'none';
     const popup = document.getElementById('variants-popup');
@@ -64,7 +54,7 @@ const addVariants = () => {
 
     document.getElementById('variantsswitcher').addEventListener('click',switchType);
     document.getElementById('addapparatus').addEventListener('click',generateApp);
-    document.getElementById('saveapparatus').addEventListener('click',saveAs);
+    document.getElementById('saveapparatus').addEventListener('click',saveAs.bind(null,Apparatuser.sharedState.filename, Apparatuser.sharedState.curDoc));
     popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
     selector.addEventListener('change',findAlignmentFile);
 
@@ -94,23 +84,7 @@ const findAlignmentFile = async () => {
     popup.querySelector('label[for="teifile"]').textContent = 'Use a different file...';
 };
 
-const saveAs = async () => {
-    const fileHandle = await showSaveFilePicker({
-        suggestedName: thisFilename,
-        types: [
-            { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
-        ],
-    });
-    const serialized = (new XMLSerializer()).serializeToString(Apparatuser.sharedState.curDoc);
-    const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
-    const writer = await fileHandle.createWritable();
-    writer.write(file);
-    writer.close();
-};
-
 const generateApp = async e => {
-
-    //if(!curDoc) await loadDoc(thisFilename);
 
     const popup = document.getElementById('variants-popup');
     const blockid = popup.querySelector('select[name="edblock"]').value;
@@ -130,7 +104,6 @@ const generateApp = async e => {
     if(listApp.hasOwnProperty('errors'))
         output.innerHTML = listApp.errors.join('<br>');
     else {
-        //newDoc = curDoc.cloneNode(true);
         let curStandOff = Apparatuser.sharedState.curDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
         if(!curStandOff) {
             curStandOff = Apparatuser.sharedState.curDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
@@ -190,8 +163,6 @@ const getFile = async (e) => {
     const blockid = popup.querySelector('select[name="edblock"]').value;
     const alignment = e.alignment;
 
-    //if(!curDoc) await loadDoc(thisFilename);
-
     const xml = alignment ?
         parseString(alignment.text) :
         await (async () => {
@@ -201,8 +172,6 @@ const getFile = async (e) => {
             return parseString(text,file.name);
         })();
     
-
-    //newDoc = curDoc.cloneNode(true);
     const cachedwitnesses = new Map();
     const cachedfiles = new Map();
     for(const wit of getWits(Apparatuser.sharedState.curDoc,xml)) {
@@ -297,254 +266,11 @@ const copyToClipboard = async (xml,popup) => {
     }
     setTimeout(() => tip.remove(),1000);
 };
-/*
-const mergeGroups = (doc) => {
-    const els = doc.querySelectorAll('cl');
-    for(const el of els) {
-        const firstw = el.removeChild(el.firstElementChild);
-        while(el.firstElementChild) {
-            const norm1 = firstw.getAttribute('lemma') || firstw.textContent;
-            const norm2 = el.firstElementChild.getAttribute('lemma') || el.firstElementChild.textContent;
-            firstw.setAttribute('lemma',norm1 + norm2);
-            while(el.firstElementChild.firstChild)
-                firstw.appendChild(el.firstElementChild.firstChild);
-            el.firstElementChild.remove();
-        }
-        if(firstw.getAttribute('lemma') === firstw.textContent)
-            firstw.removeAttribute('lemma');
-        el.parentNode.insertBefore(firstw,el);
-        el.parentNode.removeChild(el);
-    }
-};
-
-const makeSorter = order => {
-    return (a,b) => {
-        const aindex = order.indexOf(a);
-        const bindex = order.indexOf(b);
-        return aindex < bindex ? -1 : 1;
-    };
-};
-
-const getWitList = (doc, sorter, arr) => {
-    const listWit = doc.querySelector('listWit');
-    const wits = new Set(arr);
-    const newwits = new Set();
-    for(const wit of wits) {
-        const witel = listWit.querySelector(`witness[*|id="${wit}"]`);
-        const type = witel.getAttribute('type');
-        const par = witel.parentNode;
-        const parid = par.nodeName === 'witness' ? par.getAttribute('xml:id') : null;
-        const ac = parid && par.querySelector('witness[type="ac"]')?.getAttribute('xml:id');
-        const pc = parid && par.querySelector('witness[type="pc"]')?.getAttribute('xml:id');
-
-        if(!type) {
-            if( (parid && wits.has(parid)) || 
-                (ac && pc && wits.has(ac) && wits.has(pc)) ) 
-                continue;
-            else newwits.add(wit);
-        }
-        else if(type === 'ac' && pc && wits.has(pc)) {
-                newwits.add(parid);
-        }
-        else if(type === 'pc' && ac && wits.has(ac)) {
-                newwits.add(parid);
-        }
-        else newwits.add(wit);
-    }
-    if(sorter)
-        return `wit="${[...newwits].sort(sorter).map(w => '#' + w).join(' ')}"`;
-    else
-        return `wit="${[...newwits].map(w => '#' + w).join(' ')}"`;
-};
-
-const curry = f => {
-    return a => {
-        return b => {
-            return c => {
-                return f(a,b,c);
-            };
-        };
-    };
-};
-
-const fetchFile = async fn => {
-    const response = await fetch(fn);
-    const str = await response.text();
-    return str;
-};
-const loadOtherTEI = async (listWit) => {
-    const files = new Map();
-    const wits = new Map();
-    for(const witel of listWit.querySelectorAll('witness')) {
-        const filename = witel.closest('[source]').getAttribute('source');
-        if(!files.has(filename)) files.set(filename,parseString(await fetchFile(filename),filename));
-
-        wits.set(witel.getAttribute('xml:id'), {
-            file: files.get(filename),
-            type: witel.getAttribute('type'),
-            subtype: witel.getAttribute('subtype')
-        });
-    }
-
-    return wits;
-};
-
-const getStart = (el, n) => {
-    const ws = el.querySelectorAll('w');
-    let ret = 0;
-    for(const w of ws) {
-       if(w.getAttribute('n') === 'n') break;
-       ret = ret + w.textContent.length;
-    }
-    return ret;
-};
-
-const getTEIRdg = (witfile, blockid, positions) => {
-    const block = witfile.file.querySelector(`[*|id="${blockid}"], [corresp="#${blockid}"]`);
-    const type = witfile.type;
-    const subtype = witfile.subtype;
-
-    const walker = block.ownerDocument.createTreeWalker(block,NodeFilter.SHOW_ALL, { acceptNode() {return NodeFilter.FILTER_ACCEPT;}});
-    let start = 0;
-    let started = false;
-    const range = new Range();
-
-    while(walker.nextNode()) {
-        const cur = walker.currentNode;
-
-        if(cur.nodeType === 1) {
-            if(cur.nodeName === 'lem' && type && type !== 'ac' && type !== 'pc') continue;
-            if(cur.nodeName === 'add' && type === 'ac') continue;
-            if(cur.nodeName === 'del' && type !== 'ac') continue;
-            if(cur.nodeName === 'rdg' && !cur.getAttribute('wit').split(' ').includes(subtype)) continue;
-        }
-        
-        else if(cur.nodeType === 3) {
-            const nodecount = cur.data.length;
-            const end = start + nodecount;
-            if(!started && positions[0] <= end) {
-                const realpos = positions[0]-start;
-                range.setStart(cur,realpos);
-                started = true;
-            }
-            if(positions[1] <= end) {
-                const realpos = positions[1]-start;
-                range.setEnd(cur,realpos);
-                break;
-            }
-            start = end;
-        }
-    }
-    const div = document.createElement('div');
-    div.appendChild(range.cloneContents());
-    return div.innerHTML.trim();
-};
-
-const getTEIRdgs = (rdgs,blockid,witdocs,alignment,dataN) => {
-    const newrdgs = new Map();
-    for(const [rdg,wits] of rdgs) {
-        for(const wit of wits) {
-            const witfile = witdocs.get(wit);
-            const row = alignment.querySelector(`TEI[n="${wit}"] text`);
-            const startcount = getStart(row,dataN);
-            const endcount = startcount + rdg.length;
-            console.log(`${wit}, ${rdg}`);
-            const xmlrdg = getTEIRdg(witfile,blockid,[startcount,endcount]);
-            
-            const newentry = newrdgs.get(xmlrdg) || [];
-            newentry.push(wit);
-            newrdgs.set(xmlrdg,newentry);
-        }
-    }
-    return newrdgs;
-};
-*/
 
 const getWitOrder = el => {
     return [...el.querySelectorAll('witness')].map(w => w.getAttribute('xml:id'));
 };
-/*
-const makeApp = async (doc, opts) =>  {
-    const base = doc.querySelector(`TEI[n="${opts.base}"]`);
-    if(!base) return {error: `${opts.base} not found in alignment file.`};
-    if(opts.mergerdgs) mergeGroups(doc);
-    
-    const curListWit = curDoc.querySelector('listWit');
 
-    const sorter = curListWit ? makeSorter(getWitOrder(curListWit)) : null;
-    
-    const curriedWitList = curry(getWitList)(doc)(sorter);
-    
-    //const witdocs = await loadOtherTEI(doc.querySelector('listWit'));
-
-    let ret = '';
-    let start = 0;
-    const words = doc.querySelector(`TEI[n="${opts.base}"]`).querySelectorAll('w');
-    for(const word of words) {
-        const dataN = word.getAttribute('n');
-
-        const lemma = opts.normlem ? 
-            (word.getAttribute('lemma') || word.textContent.trim()) :
-            word.textContent.trim();
-
-        const end = start + word.textContent.replaceAll(/\s/g,'').length; // TODO: skip some elements
-        let app = `<app corresp="${start},${end}">\n`;
-
-        const posapp = new Set();
-        const negapp = new Map();
-        const otherwords = doc.querySelectorAll(`TEI:not([n="${opts.base}"]) w[n="${dataN}"]`);
-        for(const otherword of otherwords) {
-            const id = otherword.closest('TEI').getAttribute('n');
-            const trimmed = otherword.textContent.trim();
-            if(opts.normlem && otherword.getAttribute('lemma') === lemma)
-                posapp.add(id);
-            else if(trimmed === lemma)
-                posapp.add(id);
-            else {
-                const newstr = normlem ? 
-                    otherword.getAttribute('lemma') || trimmed : 
-                        trimmed;
-                const negwits = negapp.get(newstr) || new Map();
-                const negrdg = negwits.get(trimmed) || [];
-                negrdg.push(id);
-                negwits.set(trimmed,negrdg);
-                negapp.set(newstr,negwits);
-            }
-        }
-
-        start = end;
-        
-        if(negapp.size === 0)
-            continue;
-        
-        const poswits = curriedWitList(posapp);
-        app = app + `  <lem ${poswits}>${word.innerHTML.trim()}</lem>\n`;
-        
-        for(const rdg of negapp.values()) {
-            const rdgstr = rdg.keys().next().value;
-            const negwits = curriedWitList([...rdg.values()].flat());
-            const allwits = [...rdg];
-            allwits.shift();
-
-            if(allwits.length === 0)
-                app = app + `  <rdg ${negwits}>${rdgstr}</rdg>\n`;
-            else {
-                const morerdgs = allwits.map(e => {
-                    const witstr = curriedWitList(e[1]);
-                    return `<rdg type="sandhi" ${witstr}>${e[0]}</rdg>`;
-                }).join('');
-                app = app + `  <rdgGrp ${negwits}><rdg type="main">${rdgstr}</rdg>${morerdgs}</rdgGrp>\n`;
-            }
-        }
-        app = app + '</app>\n';    
-
-        ret = ret + app;
-    }
-
-    return `<listApp>\n${ret}\n</listApp>\n` + 
-        (curListWit ? '' : new XMLSerializer().serializeToString(doc.querySelector('listWit')));
-};
-*/
 const Apparatuser = {
     addVariants: addVariants,
     sharedState: null

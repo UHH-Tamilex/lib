@@ -1,3 +1,5 @@
+import { showSaveFilePicker } from './native-file-system-adapter/es6.js';
+
 const decodeRLE = s => s.replaceAll(/(\d+)([MLRG])/g, (_, count, chr) => chr.repeat(count));
 
 const realNextSibling = (walker) => {
@@ -57,4 +59,18 @@ const matchCounts = (alignment,linecounts) => {
     return realcounts;
 };
 
-export {decodeRLE, matchCounts, countLines};
+const saveAs = async (filename,doc) => {
+    const fileHandle = await showSaveFilePicker({
+        suggestedName: filename,
+        types: [
+            { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
+        ],
+    });
+    const serialized = (new XMLSerializer()).serializeToString(doc);
+    const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
+    const writer = await fileHandle.createWritable();
+    writer.write(file);
+    writer.close();
+};
+
+export {decodeRLE, matchCounts, countLines, saveAs};

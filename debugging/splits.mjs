@@ -4,17 +4,14 @@ import makeAlignmentTable from './alignmenttable.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 import { init as cmWrapper } from './cmwrapper.mjs';
 import { serializeWordsplits, getEditionText } from './serializeStandOff.mjs';
+import { saveAs } from './utils.mjs';
 
 const _state = {
-    //curDoc: null,
-    //newDoc: null,
     noteCM: null,
     tamlines: null,
     wordsplits: null,
     changed: false
 };
-
-const filename = window.location.pathname.split('/').pop();
 
 const addWordSplits = () => {
     const blackout = document.getElementById('blackout');
@@ -32,7 +29,7 @@ const addWordSplits = () => {
     selector.addEventListener('change',maybeFillWordSplits);
     
     document.getElementById('alignbutton').addEventListener('click',showSplits);
-    document.getElementById('saveasbutton').addEventListener('click',saveAs);
+    document.getElementById('saveasbutton').addEventListener('click',saveAs.bind(null,Splitter.sharedState.filename, Splitter.sharedState.curDoc));
     document.querySelector('#splits-popup .popup-output').addEventListener('click',listEdit.click);
     document.querySelector('#splits-popup .popup-output').addEventListener('keydown',listEdit.keydown);
     document.querySelector('#splits-popup .popup-output').addEventListener('focusin',listEdit.focusin);
@@ -122,13 +119,6 @@ const countWalker = el => {
     return count;
 };
 
-/*
-const loadDoc = async () => {
-    const res = await fetch(filename,{cache: 'no-cache'});
-    const xmltext = await res.text();
-    Splitter.sharedState.curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
-};
-*/
 const maybeFillWordSplits = (e) => {
     if(!_state.changed)
         fillWordSplits(e);
@@ -139,7 +129,6 @@ const maybeFillWordSplits = (e) => {
 };
 
 const fillWordSplits = e => {
-    //if(!_state.curDoc) await loadDoc();
     const selected = e.target.options[e.target.options.selectedIndex].value;
     const standOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
 
@@ -192,7 +181,6 @@ const getNotes = str => {
 };
 
 const showSplits = async () => {
-    //if(!_state.curDoc) await loadDoc();
     if(_state.noteCM) _state.noteCM.save();
 
     const popup = document.getElementById('splits-popup');
@@ -271,7 +259,6 @@ const showSplits = async () => {
 
     output.innerHTML = '';
     output.appendChild(res);
-    //_state.newDoc = _state.curDoc.cloneNode(true);
     let curStandOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${blockid}"]`);
     if(!curStandOff) {
         curStandOff = Splitter.sharedState.curDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
@@ -326,20 +313,6 @@ const refreshTranslation = (lines,wordlist) => {
         ret = ret + '\n';
     }
     return ret;
-};
-
-const saveAs = async () => {
-    const fileHandle = await showSaveFilePicker({
-        suggestedName: filename,
-        types: [
-            { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
-        ],
-    });
-    const serialized = (new XMLSerializer()).serializeToString(Splitter.sharedState.curDoc);
-    const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
-    const writer = await fileHandle.createWritable();
-    writer.write(file);
-    writer.close();
 };
 
 const copyToClipboard = (xml,popup) => {
