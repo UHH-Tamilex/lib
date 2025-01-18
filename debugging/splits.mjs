@@ -247,7 +247,7 @@ const showSplits = async () => {
     const xslsheet = await loadDoc('lib/debugging/wordlist.xsl'); // TODO: this path is fixed
     xproc.importStylesheet(xslsheet);
     //const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
-    const res = xproc.transformToDocument(parser.parseFromString(standOff,'text/xml')).querySelector('table');
+    const res = xproc.transformToDocument((new DOMParser()).parseFromString(standOff,'text/xml')).querySelector('table');
     if(document.getElementById('transbutton').lang === 'en')
         for(const th of res.querySelectorAll('[lang="ta-Latn"]')) {
             th.textContent = Sanscript.t(th.textContent,'iast','tamil');
