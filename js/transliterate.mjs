@@ -424,7 +424,8 @@ transliterator.revert = (par = _state.parEl) => {
             const rev = _state.reverselangs.get(curnode.lang);
             if(rev) curnode.lang = rev;
         }
-        else if(curnode.nodeType === Node.TEXT_NODE) {
+        else if(curnode.nodeType === Node.TEXT_NODE && curnode.parentNode.lang) {
+            // ignore svgs that have no lang attribute
             // lang attribute has already been reversed (hence take index 1)
             const parlang = curnode.parentNode.lang.split('-');
             const fromLatn = parlang[1];
@@ -486,8 +487,8 @@ transliterator.activate = (par = _state.parEl) => {
             const rev = _state.reverselangs.get(curnode.lang);
             if(rev) curnode.lang = rev;
         }
-        else if(curnode.nodeType === Node.TEXT_NODE) {
-           
+        else if(curnode.nodeType === Node.TEXT_NODE && curnode.parentNode.lang) {
+            // ignore svgs that have no lang attribute
             const [lang, script] = curnode.parentNode.lang.split('-');
 
             if(_state.availlangs.includes(lang)) {
