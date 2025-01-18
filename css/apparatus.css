@@ -32,6 +32,7 @@ section div.wide {
 
 .app {
     margin-right: 2em;
+    white-space: nowrap;
 }
 
 .lem-inline:not(.lem-anchor) {
@@ -62,6 +63,7 @@ section div.wide {
 .lem {
     font-weight: bold;
     margin-right: 0.5em;
+    white-space: normal;
 }
 
 .lem:not(.lem-anchor)::after {
@@ -69,13 +71,18 @@ section div.wide {
 }
 
 .rdg-text {
+    white-space: normal;
+}
+
+.rdg {
 }
 
 .rdg-alt {
     display: none;
 }
 
-.rdg {
+.mshover {
+    border-bottom: 2px dotted rgb(168,81,16);
 }
 
 .rdg:not(:last-child) .rdg-wit .msid:last-child::after, .lem-wit > .msid:last-child::after {
@@ -116,10 +123,6 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 .msid a[href]::after {
     background: none;
     padding-right: 0;
-}
-
-.mshover {
-    border-bottom: 2px dotted rgb(168,81,16);
 }
 
 .listWit {
