@@ -1,6 +1,6 @@
 import Splitter from './splits.mjs';
 import Apparatuser from './variants.mjs';
-import { saveAs } from './utils.mjs';
+import { loadDoc, saveAs } from './utils.mjs';
 
 const _state = {
     curDoc: null,
@@ -11,11 +11,6 @@ const _state = {
 Splitter.sharedState = _state;
 Apparatuser.sharedState = _state;
 
-const loadDoc = async (fn,cache='no-cache') => {
-    const res = await fetch(fn, {cache: cache});
-    const xmltext = await res.text();
-    return (new DOMParser()).parseFromString(xmltext, 'text/xml');
-};
 const startEditMode = async transliterator => {
     injectCSS();
     revealButtons();

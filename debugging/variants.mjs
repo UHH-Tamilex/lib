@@ -1,15 +1,8 @@
 import alignApparatus from './apparatus-eva.mjs';
 import { makeApp, addWitnesses, addApparatus, getWits } from './apparatus.mjs';
-import { saveAs } from './utils.mjs';
+import { loadDoc, saveAs } from './utils.mjs';
 
 const cachedAlignments = new Map();
-
-const loadDoc = async (fn) => {
-    const res = await fetch(fn,{cache: 'no-cache'});
-    if(!res.ok) return null;
-    const xmltext = await res.text();
-    return (new DOMParser()).parseFromString(xmltext, 'text/xml');
-};
 
 const switchType = e => {
     const targ = e.target.closest('.switcher > div');

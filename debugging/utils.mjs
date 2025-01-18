@@ -73,4 +73,11 @@ const saveAs = async (filename,doc) => {
     writer.close();
 };
 
-export {decodeRLE, matchCounts, countLines, saveAs};
+const loadDoc = async (fn,cache='no-cache') => {
+    const res = await fetch(fn, {cache: cache});
+    if(!res.ok) return null;
+    const xmltext = await res.text();
+    return (new DOMParser()).parseFromString(xmltext, 'text/xml');
+};
+
+export {decodeRLE, matchCounts, countLines, saveAs, loadDoc};

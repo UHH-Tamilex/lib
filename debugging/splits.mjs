@@ -3,7 +3,7 @@ import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { init as cmWrapper } from './cmwrapper.mjs';
 import { serializeWordsplits, getEditionText } from './serializeStandOff.mjs';
-import { saveAs } from './utils.mjs';
+import { loadDoc, saveAs } from './utils.mjs';
 
 const _state = {
     noteCM: null,
@@ -244,9 +244,7 @@ const showSplits = async () => {
 
     const standOff =`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit" corresp="#${blockid}">\n${ret.xml}\n</standOff>`;
     const xproc = new XSLTProcessor();
-    const resp = await fetch('lib/debugging/wordlist.xsl');
-    const parser = new DOMParser();
-    const xslsheet = parser.parseFromString(await resp.text(), 'text/xml');
+    const xslsheet = await loadDoc('lib/debugging/wordlist.xsl'); // TODO: this path is fixed
     xproc.importStylesheet(xslsheet);
     //const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
     const res = xproc.transformToDocument(parser.parseFromString(standOff,'text/xml')).querySelector('table');
