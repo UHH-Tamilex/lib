@@ -6,8 +6,8 @@ import { init as cmWrapper } from './cmwrapper.mjs';
 import { serializeWordsplits, getEditionText } from './serializeStandOff.mjs';
 
 const _state = {
-    curDoc: null,
-    newDoc: null,
+    //curDoc: null,
+    //newDoc: null,
     noteCM: null,
     tamlines: null,
     wordsplits: null,
@@ -122,12 +122,13 @@ const countWalker = el => {
     return count;
 };
 
+/*
 const loadDoc = async () => {
     const res = await fetch(filename,{cache: 'no-cache'});
     const xmltext = await res.text();
-    _state.curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
+    Splitter.sharedState.curDoc = (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
-
+*/
 const maybeFillWordSplits = (e) => {
     if(!_state.changed)
         fillWordSplits(e);
@@ -137,10 +138,10 @@ const maybeFillWordSplits = (e) => {
     }
 };
 
-const fillWordSplits = async (e) => {
-    if(!_state.curDoc) await loadDoc();
+const fillWordSplits = e => {
+    //if(!_state.curDoc) await loadDoc();
     const selected = e.target.options[e.target.options.selectedIndex].value;
-    const standOff = _state.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
+    const standOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${selected}"]`);
 
     if(!standOff) {
         clearSplits();
@@ -191,7 +192,7 @@ const getNotes = str => {
 };
 
 const showSplits = async () => {
-    if(!_state.curDoc) await loadDoc();
+    //if(!_state.curDoc) await loadDoc();
     if(_state.noteCM) _state.noteCM.save();
 
     const popup = document.getElementById('splits-popup');
@@ -235,11 +236,7 @@ const showSplits = async () => {
     }
 
     const blockid = popup.querySelector('select').value;
-    /*
-    const textblock = document.getElementById(blockid).querySelector('.text-block');
-    const text = Transliterate.getCachedText(textblock);
-    */
-    const textblock = _state.curDoc.querySelector(`[*|id="${blockid}"]`);
+    const textblock = Splitter.sharedState.curDoc.querySelector(`[*|id="${blockid}"]`);
     const edition = textblock.querySelector('[type="edition"]');
     let text = edition ? getEditionText(edition) : getEditionText(textblock);
 
@@ -274,13 +271,13 @@ const showSplits = async () => {
 
     output.innerHTML = '';
     output.appendChild(res);
-    _state.newDoc = _state.curDoc.cloneNode(true);
-    let curStandOff = _state.newDoc.querySelector(`standOff[type="wordsplit"][corresp="#${blockid}"]`);
+    //_state.newDoc = _state.curDoc.cloneNode(true);
+    let curStandOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${blockid}"]`);
     if(!curStandOff) {
-        curStandOff = _state.newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
+        curStandOff = Splitter.sharedState.curDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
         curStandOff.setAttribute('corresp',`#${blockid}`);
         curStandOff.setAttribute('type','wordsplit');
-        _state.newDoc.documentElement.appendChild(curStandOff);
+        Splitter.sharedState.curDoc.documentElement.appendChild(curStandOff);
     }
     curStandOff.innerHTML = `\n${ret.xml}\n`;
 
@@ -338,7 +335,7 @@ const saveAs = async () => {
             { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
         ],
     });
-    const serialized = (new XMLSerializer()).serializeToString(_state.newDoc);
+    const serialized = (new XMLSerializer()).serializeToString(Splitter.sharedState.curDoc);
     const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
     const writer = await fileHandle.createWritable();
     writer.write(file);
@@ -572,7 +569,7 @@ const makeEntries = (list) => {
 const Splitter = {
     addWordSplits: addWordSplits,
     listEdit: listEdit,
-    refreshTranslation
+    sharedState: null
 };
 
 export default Splitter;

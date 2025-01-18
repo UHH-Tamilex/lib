@@ -36,7 +36,8 @@ const serializeWordsplits = (standOff, serializer) => {
             if(word.note) allnotes.push(cleanNote(word.note));
         }
     }
-    const lines = [...doc.querySelectorAll(`[*|id="${selected}"] [type="edition"] l`)];
+    const block = doc.querySelector(`[*|id="${selected}"]`);
+    const lines = block.querySelectorAll('[type="edition"] l') || block.querySelectorAll('l');
     const linecounts = countLines(lines);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');

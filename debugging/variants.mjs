@@ -2,8 +2,9 @@ import alignApparatus from './apparatus-eva.mjs';
 import { makeApp, addWitnesses, addApparatus, getWits } from './apparatus.mjs';
 import { showSaveFilePicker } from '../js/native-file-system-adapter/es6.js';
 
-var curDoc = null;
-var newDoc = null;
+//var curDoc = null;
+//var newDoc = null;
+
 const cachedAlignments = new Map();
 
 const thisFilename = window.location.pathname.split('/').pop();
@@ -100,7 +101,7 @@ const saveAs = async () => {
             { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
         ],
     });
-    const serialized = (new XMLSerializer()).serializeToString(newDoc);
+    const serialized = (new XMLSerializer()).serializeToString(Apparatuser.sharedState.curDoc);
     const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
     const writer = await fileHandle.createWritable();
     writer.write(file);
@@ -109,11 +110,11 @@ const saveAs = async () => {
 
 const generateApp = async e => {
 
-    if(!curDoc) await loadDoc(thisFilename);
+    //if(!curDoc) await loadDoc(thisFilename);
 
     const popup = document.getElementById('variants-popup');
     const blockid = popup.querySelector('select[name="edblock"]').value;
-    const listApp = await alignApparatus(curDoc, blockid);
+    const listApp = await alignApparatus(Apparatuser.sharedState.curDoc, blockid);
 
 
     const outputboxen = popup.querySelector('.output-boxen');
@@ -129,14 +130,14 @@ const generateApp = async e => {
     if(listApp.hasOwnProperty('errors'))
         output.innerHTML = listApp.errors.join('<br>');
     else {
-        newDoc = curDoc.cloneNode(true);
-        let curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
+        //newDoc = curDoc.cloneNode(true);
+        let curStandOff = Apparatuser.sharedState.curDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
         if(!curStandOff) {
-            curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
+            curStandOff = Apparatuser.sharedState.curDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
             curStandOff.setAttribute('corresp',`#${blockid}`);
             curStandOff.setAttribute('type','apparatus');
         }
-        newDoc.documentElement.appendChild(curStandOff);
+        Apparatuser.sharedState.curDoc.documentElement.appendChild(curStandOff);
         curStandOff.innerHTML = listApp.output;
         const standOff = curStandOff.outerHTML;
         output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
@@ -189,7 +190,7 @@ const getFile = async (e) => {
     const blockid = popup.querySelector('select[name="edblock"]').value;
     const alignment = e.alignment;
 
-    if(!curDoc) await loadDoc(thisFilename);
+    //if(!curDoc) await loadDoc(thisFilename);
 
     const xml = alignment ?
         parseString(alignment.text) :
@@ -201,10 +202,10 @@ const getFile = async (e) => {
         })();
     
 
-    newDoc = curDoc.cloneNode(true);
+    //newDoc = curDoc.cloneNode(true);
     const cachedwitnesses = new Map();
     const cachedfiles = new Map();
-    for(const wit of getWits(newDoc,xml)) {
+    for(const wit of getWits(Apparatuser.sharedState.curDoc,xml)) {
         if(!cachedwitnesses.get(wit.name)) {
             let file = cachedfiles.get(wit.filename);
             if(!file) {
@@ -221,7 +222,7 @@ const getFile = async (e) => {
             }
         }
     }
-    const app = await makeApp(xml, newDoc, {
+    const app = await makeApp(xml, Apparatuser.sharedState.curDoc, {
         base: document.querySelector('.text-siglum').textContent,
         normlem: document.getElementById('normlem').checked, 
         mergerdgs: document.getElementById('mergerdgs').checked,
@@ -247,9 +248,9 @@ const getFile = async (e) => {
         return;
     }    
     
-    addWitnesses(newDoc, app.listwit);
-    addApparatus(newDoc, app.listapp, xml, blockid, e.name);
-    const curStandOff = newDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
+    addWitnesses(Apparatuser.sharedState.curDoc, app.listwit);
+    addApparatus(Apparatuser.sharedState.curDoc, app.listapp, xml, blockid, e.name);
+    const curStandOff = Apparatuser.sharedState.curDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
     /*
     if(!curStandOff) {
         curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
@@ -544,4 +545,8 @@ const makeApp = async (doc, opts) =>  {
         (curListWit ? '' : new XMLSerializer().serializeToString(doc.querySelector('listWit')));
 };
 */
-export { addVariants };
+const Apparatuser = {
+    addVariants: addVariants,
+    sharedState: null
+};
+export default Apparatuser;

@@ -70,6 +70,9 @@ section div.wide {
     content: ']';
 }
 
+.rdgs {
+    white-space: normal;
+}
 .rdg-text {
     white-space: normal;
 }

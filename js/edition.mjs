@@ -2,13 +2,9 @@ import { Transliterate } from './transliterate.mjs';
 import { GitHubFunctions } from './githubfunctions.mjs';
 import { ApparatusViewer } from './apparatus.mjs';
 import { AlignmentViewer } from './alignment.mjs';
-import Splitter from '../debugging/splits.mjs';
-import { addVariants } from '../debugging/variants.mjs';
-import { Sanscript } from './sanscript.mjs';
 import WordLookup from './wordlookup.mjs';
 import './tooltip.mjs';
-
-var Debugging = false;
+import startEditMode from '../debugging/editmode.mjs';
 
 const cachedContent = new Map();
 
@@ -480,10 +476,11 @@ const removeHyphens = ev => {
 
 const go = () => {
     const searchparams = new URLSearchParams(window.location.search);
-    if(document.getElementById('editionscript').dataset.debugging === 'true')
-        Debugging = true;
-    else if(searchparams.get('debugging') === 'true')
-        Debugging = true;
+    const islocal = ['localhost','127.0.0.1'].includes(window.location.hostname);
+    if(searchparams.get('noedit') === null && (searchparams.get('edit') !== null || islocal)) {
+        startEditMode(Transliterate);
+    }
+
     if(searchparams.get('evastyle') !== null)
        EvaStyleGo(); 
 
@@ -509,38 +506,34 @@ const go = () => {
     if(document.querySelector('.standOff[data-type="wordsplit"]')) {
         wordsplitbutton.style.display = 'block';
         wordsplitbutton.addEventListener('click',wordsplit);
+        /*
         if(Debugging) {
             const splitedit = document.getElementById('wordspliteditbutton');
             splitedit.style.display = 'block';
             splitedit.addEventListener('click',Splitter.addWordSplits);
-        }
+        } */
     }
- 
+    /* 
     else if(Debugging) {
         wordsplitbutton.style.display = 'block';
         wordsplitbutton.style.border = '1px dashed grey';
         wordsplitbutton.dataset.anno = 'add word splits';
         wordsplitbutton.querySelector('svg').style.stroke = 'grey';
-        /*
-        const uploader = document.createElement('input');
-        uploader.type = 'file';
-        uploader.addEventListener('change',addwordsplit);
-        wordsplitbutton.addEventListener('click',() => {uploader.click();});
-        */
         wordsplitbutton.addEventListener('click',Splitter.addWordSplits);
-    }
+    }*/
 
     if(document.querySelector('.translation')) {
         const apparatusbutton = document.getElementById('apparatusbutton');
         if(document.querySelector('div.apparatus-block span.app')) {
-            //apparatusbutton.style.display = 'block';
-            //apparatusbutton.addEventListener('click',apparatusswitch);
+            /*
             if(Debugging) {
                 const appedit = document.getElementById('apparatuseditbutton');
                 appedit.style.display = 'block';
                 appedit.addEventListener('click',addVariants);
             }
+            */
         }
+        /*
         else if(Debugging) {
             apparatusbutton.style.display = 'block';
             apparatusbutton.style.border = '1px dashed grey';
@@ -548,12 +541,10 @@ const go = () => {
             apparatusbutton.querySelector('svg').style.stroke = 'grey';
             apparatusbutton.addEventListener('click',addVariants);
         }
+        */
     }
     else {
         /*
-        for(const app of document.querySelectorAll('.apparatus-block'))
-            app.style.display = 'block';
-            */
         if(Debugging) {
             const apparatusbutton = document.getElementById('apparatusbutton');
             apparatusbutton.style.display = 'block';
@@ -562,6 +553,7 @@ const go = () => {
             appedit.style.display = 'block';
             appedit.addEventListener('click',addVariants);
         }
+        */
     }
     //wordsplit({target: analyzebutton});
     //cleanup(document);
@@ -585,6 +577,9 @@ const go = () => {
 
     GitHubFunctions.latestCommits();
     document.addEventListener('copy',removeHyphens);
+
+    if(searchparams.get('Taml') !== null)
+        document.getElementById('transbutton').click();
 };
 
 window.addEventListener('load',go);

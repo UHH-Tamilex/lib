@@ -200,17 +200,16 @@ span.invisible {
 #topbar > div {
     margin: 0 0 1rem 0;
 }
-#topbar > div:not(.disabled):hover {
+#buttoncontainer > div:hover {
     background: #ff9900;
     border: 1px solid #ff9900;
-    cursor: pointer;
 }
-
+/*
 .disabled {
     opacity: 0.4;
     border: 1px solid rgba(0,0,0,0.4);
 }
-
+*/
 #transbutton {
     width: fit-content;
     position: relative;

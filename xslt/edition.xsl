@@ -15,7 +15,6 @@
 <xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" indent="no"/>
 
 <xsl:param name="root">./lib/</xsl:param>
-<xsl:param name="debugging">true</xsl:param>
 
 <xsl:template match="x:TEI">
     <xsl:call-template name="TEI"/>
@@ -70,34 +69,26 @@
             <xsl:attribute name="rel">stylesheet</xsl:attribute>
             <xsl:attribute name="href"><xsl:value-of select="$root"/>css/edition.css</xsl:attribute>
         </xsl:element>
-        <!--xsl:if test="$debugging = 'true'"-->
-            <xsl:element name="link">
-                <xsl:attribute name="rel">stylesheet</xsl:attribute>
-                <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/debugging.css</xsl:attribute>
-            </xsl:element>
-            <!--xsl:element name="script">
-                <xsl:attribute name="src">debugging/papaparse.min.js</xsl:attribute>
-            </xsl:element-->
-            <xsl:element name="link">
-                <xsl:attribute name="rel">stylesheet</xsl:attribute>
-                <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/codemirror.css</xsl:attribute>
-            </xsl:element>
-            <xsl:element name="link">
-                <xsl:attribute name="rel">stylesheet</xsl:attribute>
-                <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/prism.css</xsl:attribute>
-            </xsl:element>
-            <xsl:element name="script">
-                <xsl:attribute name="src"><xsl:value-of select="$root"/>debugging/prism.js</xsl:attribute>
-                <xsl:attribute name="data-manual"/>
-            </xsl:element>
-        <!--/xsl:if-->
+        <xsl:element name="link">
+            <xsl:attribute name="rel">stylesheet</xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/debugging.css</xsl:attribute>
+        </xsl:element>
+        <xsl:element name="link">
+            <xsl:attribute name="rel">stylesheet</xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/codemirror.css</xsl:attribute>
+        </xsl:element>
+        <xsl:element name="link">
+            <xsl:attribute name="rel">stylesheet</xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="$root"/>debugging/prism.css</xsl:attribute>
+        </xsl:element>
+        <xsl:element name="script">
+            <xsl:attribute name="src"><xsl:value-of select="$root"/>debugging/prism.js</xsl:attribute>
+            <xsl:attribute name="data-manual"/>
+        </xsl:element>
         <xsl:element name="script">
             <xsl:attribute name="type">module</xsl:attribute>
             <xsl:attribute name="src"><xsl:value-of select="$root"/>js/edition.mjs</xsl:attribute>
             <xsl:attribute name="id">editionscript</xsl:attribute>
-            <xsl:if test="$debugging = 'true'">
-                <xsl:attribute name="data-debugging">true</xsl:attribute>
-            </xsl:if>
         </xsl:element>
     </xsl:element>
 </xsl:template>
@@ -120,6 +111,7 @@
                     </xsl:choose>
                     <xsl:element name="div">
                         <xsl:attribute name="id">topbar</xsl:attribute>
+                        <div id="buttoncontainer">
                         <xsl:element name="div">
                             <xsl:attribute name="id">transbutton</xsl:attribute>
                             <xsl:attribute name="data-anno">change script</xsl:attribute>
@@ -132,27 +124,15 @@
 <svg id="metricalsvg" width="22" height="22" version="1.1" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg"><a><path d="m3.059 5.646-0.707 0.707 1.646 1.647h-3.772v1h3.772l-1.646 1.646 0.707 0.707 2.853-2.853zm4.941 11.354h1v-17h-1z"/></a><path d="m13.018 7.9969h3.772v1h-3.772l1.646 1.646-0.707 0.707-2.853-2.853 2.854-2.854 0.707 0.707z"/></svg>
                         </xsl:element>
                         <xsl:element name="div">
-                            <xsl:attribute name="id">wordspliteditbutton</xsl:attribute>
-                            <xsl:attribute name="data-anno">Edit word splits</xsl:attribute>
-<svg id="wordspliteditsvg" version="1.1" width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-<path d="M77.926,94.924H8.217C6.441,94.924,5,93.484,5,91.706V21.997c0-1.777,1.441-3.217,3.217-3.217h34.854 c1.777,0,3.217,1.441,3.217,3.217s-1.441,3.217-3.217,3.217H11.435v63.275h63.274V56.851c0-1.777,1.441-3.217,3.217-3.217 c1.777,0,3.217,1.441,3.217,3.217v34.855C81.144,93.484,79.703,94.924,77.926,94.924z"/>
-<path d="M94.059,16.034L84.032,6.017c-1.255-1.255-3.292-1.255-4.547,0l-9.062,9.073L35.396,50.116 c-0.29,0.29-0.525,0.633-0.686,1.008l-7.496,17.513c-0.526,1.212-0.247,2.617,0.676,3.539c0.622,0.622,1.437,0.944,2.274,0.944 c0.429,0,0.858-0.086,1.276-0.257l17.513-7.496c0.375-0.161,0.719-0.397,1.008-0.686l35.026-35.026l9.073-9.062 C95.314,19.326,95.314,17.289,94.059,16.034z M36.286,63.79l2.928-6.821l3.893,3.893L36.286,63.79z M46.925,58.621l-5.469-5.469 L73.007,21.6l5.47,5.469L46.925,58.621z M81.511,24.034l-5.469-5.469l5.716-5.716l5.469,5.459L81.511,24.034z"/>
-</svg>
-                        </xsl:element>
-                        <xsl:element name="div">
                             <xsl:attribute name="id">apparatusbutton</xsl:attribute>
                             <xsl:attribute name="data-anno">apparatus of variants</xsl:attribute>
 <svg id="apparatussvg" width="22" height="21" fill="#000000" version="1.1" viewBox="0 0 381.66 415.46" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#000"><path d="m10.395 208.37c2.6785-185.49 346.77-166.49 346.77-166.49" stroke-width="20.48px"/><path d="m10.239 206.9c2.6785 185.49 346.77 166.49 346.77 166.49" stroke-width="20.48px"/><path d="m14.182 210.85 315.07 0.84841" stroke-width="20.581px"/><g stroke-width="21.098px"><path d="m287.4 179.06 54.215 32.066-51.981 34.443"/><path d="m307.59 9.0797 54.215 32.066-51.981 34.443"/><path d="m305.3 340.15 54.215 32.066-51.981 34.443"/></g></g></svg>
 <svg id="translationsvg" width="22" height="21" fill="#000000" version="1.1" viewBox="0 0 381.66 415.46" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#000" stroke-width="22.641px"><path d="m-0.58397 41.896h381.87"/><path d="m-0.58397 205.74h381.87"/><path d="m-0.58397 369.58h381.87"/></g></svg>
                         </xsl:element>
-                        <xsl:element name="div">
-                            <xsl:attribute name="id">apparatuseditbutton</xsl:attribute>
-                            <xsl:attribute name="data-anno">Edit apparatus</xsl:attribute>
-<svg id="wordspliteditsvg" version="1.1" width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-<path d="M77.926,94.924H8.217C6.441,94.924,5,93.484,5,91.706V21.997c0-1.777,1.441-3.217,3.217-3.217h34.854 c1.777,0,3.217,1.441,3.217,3.217s-1.441,3.217-3.217,3.217H11.435v63.275h63.274V56.851c0-1.777,1.441-3.217,3.217-3.217 c1.777,0,3.217,1.441,3.217,3.217v34.855C81.144,93.484,79.703,94.924,77.926,94.924z"/>
-<path d="M94.059,16.034L84.032,6.017c-1.255-1.255-3.292-1.255-4.547,0l-9.062,9.073L35.396,50.116 c-0.29,0.29-0.525,0.633-0.686,1.008l-7.496,17.513c-0.526,1.212-0.247,2.617,0.676,3.539c0.622,0.622,1.437,0.944,2.274,0.944 c0.429,0,0.858-0.086,1.276-0.257l17.513-7.496c0.375-0.161,0.719-0.397,1.008-0.686l35.026-35.026l9.073-9.062 C95.314,19.326,95.314,17.289,94.059,16.034z M36.286,63.79l2.928-6.821l3.893,3.893L36.286,63.79z M46.925,58.621l-5.469-5.469 L73.007,21.6l5.47,5.469L46.925,58.621z M81.511,24.034l-5.469-5.469l5.716-5.716l5.469,5.459L81.511,24.034z"/>
-</svg>
-                        </xsl:element>
+                        </div>
+                        <button id="button_wordsplitbutton">Edit word splits</button>
+                        <button id="button_editbutton">Edit apparatus</button>
+                        <button id="button_savebutton">Save as...</button>
                     </xsl:element>
                     <xsl:element name="article">
                         <xsl:apply-templates/>
