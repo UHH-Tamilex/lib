@@ -25,7 +25,7 @@ const switchType = e => {
     }
 
 };
-const addVariants = () => {
+const addVariants = (id) => {
     const blackout = document.getElementById('blackout');
     document.getElementById('splits-popup').style.display = 'none';
     const popup = document.getElementById('variants-popup');
@@ -35,25 +35,35 @@ const addVariants = () => {
         const option = document.createElement('option');
         option.value = lg.id;
         option.append(lg.id);
+        if(id && lg.id === id)
+            option.selected = true;
         selector.append(option);
     }
     
     findAlignmentFile();
+
+    popup.style.display = 'flex';
+    blackout.style.display = 'flex';
+};
+
+const saveThis = () => 
+    saveAs(Apparatuser.sharedState.filename, Apparatuser.sharedState.curDoc);
+
+const init = () => {
+    // TODO: only add event listeners once
+    document.getElementById('variantsswitcher').addEventListener('click',switchType);
+    document.getElementById('addapparatus').addEventListener('click',generateApp);
+    document.getElementById('saveapparatus').addEventListener('click',saveThis);
+    const popup = document.getElementById('variants-popup');
+    popup.querySelector('.closeicon').addEventListener('click',cancelPopup);
+    popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
+    popup.querySelector('select').addEventListener('change',findAlignmentFile);
 
     document.getElementById('usefoundfile').addEventListener('click',() => {
         const name = document.getElementById('foundfile').textContent;
         getFile({alignment: {text: cachedAlignments.get(name)}, name: name});     
     });
 
-    document.getElementById('variantsswitcher').addEventListener('click',switchType);
-    document.getElementById('addapparatus').addEventListener('click',generateApp);
-    document.getElementById('saveapparatus').addEventListener('click',saveAs.bind(null,Apparatuser.sharedState.filename, Apparatuser.sharedState.curDoc));
-    popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
-    selector.addEventListener('change',findAlignmentFile);
-
-    popup.style.display = 'flex';
-    blackout.style.display = 'flex';
-    blackout.addEventListener('click',cancelPopup);
 };
 
 const findAlignmentFile = async () => {
@@ -119,10 +129,6 @@ const generateApp = async e => {
 };
 
 const cancelPopup = (e) => {
-    const targ = e.target.closest('.closeicon svg');
-    if(!targ) return;
-
-
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
     blackout.querySelector('select').innerHTML = '';
@@ -266,6 +272,7 @@ const getWitOrder = el => {
 
 const Apparatuser = {
     addVariants: addVariants,
+    init: init,
     sharedState: null
 };
 export default Apparatuser;

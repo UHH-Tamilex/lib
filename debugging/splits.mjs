@@ -12,7 +12,27 @@ const _state = {
     changed: false
 };
 
-const addWordSplits = () => {
+const saveThis = () => 
+    saveAs(Splitter.sharedState.filename, Splitter.sharedState.curDoc);
+
+const init = () => {
+    document.getElementById('alignbutton').addEventListener('click',showSplits);
+    document.getElementById('saveasbutton').addEventListener('click',saveThis);
+    const popup = document.getElementById('splits-popup');
+    popup.querySelector('.popup-output').addEventListener('click',listEdit.click);
+    popup.querySelector('.popup-output').addEventListener('keydown',listEdit.keydown);
+    popup.querySelector('.popup-output').addEventListener('focusin',listEdit.focusin);
+    popup.querySelector('select').addEventListener('change',maybeFillWordSplits);
+    for(const ta of popup.querySelectorAll('textarea'))
+        ta.addEventListener('change',() => {_state.changed = true;});
+
+    popup.querySelector('.closeicon').addEventListener('click',cancelPopup);
+
+    document.getElementById('previewswitcher').addEventListener('click',codePreview);
+    document.getElementById('notesswitcher').addEventListener('click',notesView);
+};
+
+const addWordSplits = (id) => {
     const blackout = document.getElementById('blackout');
     document.getElementById('variants-popup').style.display = 'none';
     const popup = document.getElementById('splits-popup');
@@ -22,24 +42,14 @@ const addWordSplits = () => {
         const option = document.createElement('option');
         option.value = lg.id;
         option.append(lg.id);
+        if(id && lg.id === id)
+            option.selected = true;
         selector.append(option);
     }
     fillWordSplits({target: selector});
-    selector.addEventListener('change',maybeFillWordSplits);
     
-    document.getElementById('alignbutton').addEventListener('click',showSplits);
-    document.getElementById('saveasbutton').addEventListener('click',saveAs.bind(null,Splitter.sharedState.filename, Splitter.sharedState.curDoc));
-    document.querySelector('#splits-popup .popup-output').addEventListener('click',listEdit.click);
-    document.querySelector('#splits-popup .popup-output').addEventListener('keydown',listEdit.keydown);
-    document.querySelector('#splits-popup .popup-output').addEventListener('focusin',listEdit.focusin);
-    for(const ta of document.querySelectorAll('#splits-popup textarea'))
-        ta.addEventListener('change',() => {_state.changed = true;});
-
     blackout.style.display = 'flex';
     popup.style.display = 'flex';
-    blackout.addEventListener('click',cancelPopup);
-    document.getElementById('previewswitcher').addEventListener('click',codePreview);
-    document.getElementById('notesswitcher').addEventListener('click',notesView);
 };
 const codePreview = e => {
     const targ = e.target.closest('.switcher > div');
@@ -162,9 +172,6 @@ const clearSplits = () => {
 };
 
 const cancelPopup = (e) => {
-    const targ = e.target.closest('.closeicon svg');
-    if(!targ) return;
-
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
     blackout.querySelector('select').innerHTML = '';
@@ -539,6 +546,7 @@ const makeEntries = (list) => {
 const Splitter = {
     addWordSplits: addWordSplits,
     listEdit: listEdit,
+    init: init,
     sharedState: null
 };
 

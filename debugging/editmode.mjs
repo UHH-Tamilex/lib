@@ -20,6 +20,9 @@ const startEditMode = async transliterator => {
     document.getElementById('button_wordsplitbutton').addEventListener('click',Splitter.addWordSplits);
     document.getElementById('button_editbutton').addEventListener('click',Apparatuser.addVariants);
     document.getElementById('button_savebutton').addEventListener('click',saveAs.bind(null,_state.filename, _state.curDoc));
+
+    Apparatuser.init();
+    Splitter.init();
 };
 
 const addEditButtons = blocks => {for(const block of blocks) addEditButton(block);};
@@ -27,6 +30,7 @@ const addEditButtons = blocks => {for(const block of blocks) addEditButton(block
 const addEditButton = blockel => {
     const xmlid = blockel.getAttribute('xml:id');
     const block = document.getElementById(xmlid);
+    /*
     const editbutton = document.createElement('div');
     editbutton.className = 'editbutton ignored';
     editbutton.lang = 'en';
@@ -34,6 +38,29 @@ const addEditButton = blockel => {
     editbutton.dataset.anno = `Edit apparatus for ${xmlid}`;
     //editbutton.addEventListener('click',editApp.bind(null,{block: xmlid}));
     block.prepend(editbutton);
+    */
+    const editmenu = document.createElement('div');
+    editmenu.className = 'editmenu ignored';
+    editmenu.lang = 'en';
+
+    const wsbutton = document.createElement('button');
+    wsbutton.className = 'mini_wordsplit';
+    const wssvg = document.getElementById('wordsplitsvg').cloneNode(true);
+    wssvg.removeAttribute('id');
+    wsbutton.appendChild(wssvg);
+    wsbutton.dataset.anno = `Edit word splits for ${xmlid}`;
+    wsbutton.addEventListener('click',Splitter.addWordSplits.bind(null,xmlid));
+
+    const appbutton = document.createElement('button');
+    appbutton.className = 'mini_apparatus';
+    const appsvg = document.getElementById('apparatussvg').cloneNode(true);
+    appsvg.removeAttribute('id');
+    appbutton.appendChild(appsvg);
+    appbutton.dataset.anno = `Edit apparatus for ${xmlid}`;
+    appbutton.addEventListener('click',Apparatuser.addVariants.bind(null,xmlid));
+
+    editmenu.append(wsbutton, appbutton);
+    block.prepend(editmenu);
 };
 
 const revealButtons = () => {
