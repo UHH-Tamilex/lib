@@ -437,7 +437,7 @@ const makeApp = (doc, ed, opts) =>  {
             const witfile = opts.witnesses.get(docid);
             if(!witfile) {
                 alert(`can't find file for ${docid}.`);
-                return null;
+                return [docid,null];
             }
             const rdgs = getXMLRdgs(opts.blockid,d,witfile,idsel);
             return [docid, rdgs];
