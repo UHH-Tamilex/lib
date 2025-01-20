@@ -434,7 +434,12 @@ const makeApp = (doc, ed, opts) =>  {
     const otherrdgs = opts.witnesses ? new Map(
         [...otherdocs].map(d => {
             const docid = d.getAttribute('n');
-            const rdgs = getXMLRdgs(opts.blockid,d,opts.witnesses.get(docid),idsel);
+            const witfile = opts.witnesses.get(docid);
+            if(!witfile) {
+                alert(`can't find file for ${docid}.`);
+                return null;
+            }
+            const rdgs = getXMLRdgs(opts.blockid,d,witfile,idsel);
             return [docid, rdgs];
         })) : null;
 
