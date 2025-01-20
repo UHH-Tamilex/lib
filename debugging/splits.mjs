@@ -546,6 +546,7 @@ const makeEntries = (list) => {
 const Splitter = {
     addWordSplits: addWordSplits,
     listEdit: listEdit,
+    refreshTranslation: refreshTranslation,
     init: init,
     sharedState: null
 };
