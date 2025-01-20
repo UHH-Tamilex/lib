@@ -66,7 +66,7 @@ const saveAs = async (filename,doc) => {
             { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
         ],
     });
-    const serialized = doc instanceof String ? 
+    const serialized = typeof doc === 'string' ? 
         doc :
         (new XMLSerializer()).serializeToString(doc);
     const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
