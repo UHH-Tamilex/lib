@@ -66,7 +66,9 @@ const saveAs = async (filename,doc) => {
             { description: 'TEI XML', accept: { 'text/xml': [ '.xml'] } }
         ],
     });
-    const serialized = (new XMLSerializer()).serializeToString(doc);
+    const serialized = doc instanceof String ? 
+        doc :
+        (new XMLSerializer()).serializeToString(doc);
     const file = new Blob([serialized], {type: 'text/xml;charset=utf-8'});
     const writer = await fileHandle.createWritable();
     writer.write(file);
