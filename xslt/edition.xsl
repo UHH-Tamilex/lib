@@ -132,7 +132,7 @@
                         </div>
                         <button id="button_wordsplitbutton">Edit word splits</button>
                         <button id="button_editbutton">Edit apparatus</button>
-                        <button id="button_savebutton">Save as...</button>
+                        <button id="button_savebutton" class="important">Save as...</button>
                     </xsl:element>
                     <xsl:element name="article">
                         <xsl:apply-templates/>
@@ -189,7 +189,7 @@
                         </div>
                         <div class="buttondiv">
                             <button type="button" id="alignbutton">Align</button>
-                            <button type="button" id="saveasbutton">Save as...</button>
+                            <button type="button" class="important" id="saveasbutton">Save as...</button>
                         </div>
                         <div class="output-boxen">
                             <div class="popup-warnings"></div>
@@ -238,7 +238,7 @@
                             </div>
                             <div class="output-boxen">
                                 <div class="popup-output"></div>
-                                <button type="button" id="saveapparatus">Save as...</button>
+                                <button type="button" class="important" id="saveapparatus">Save as...</button>
                             </div>
                         </div>
                         <div class="switcher" id="variantsswitcher">

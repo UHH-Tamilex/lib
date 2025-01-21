@@ -1,6 +1,7 @@
 import alignApparatus from './apparatus-eva.mjs';
 import { makeApp, addWitnesses, addApparatus, getWits } from './apparatus.mjs';
-import { loadDoc, saveAs } from './utils.mjs';
+import { loadDoc, saveAs, addEditButton } from './utils.mjs';
+import previewDoc from './preview.mjs';
 
 const cachedAlignments = new Map();
 
@@ -52,6 +53,7 @@ const saveThis = () =>
 const init = () => {
     // TODO: only add event listeners once
     document.getElementById('variantsswitcher').addEventListener('click',switchType);
+    // evaStyle
     document.getElementById('addapparatus').addEventListener('click',generateApp);
     document.getElementById('saveapparatus').addEventListener('click',saveThis);
     const popup = document.getElementById('variants-popup');
@@ -87,6 +89,7 @@ const findAlignmentFile = async () => {
     popup.querySelector('label[for="teifile"]').textContent = 'Use a different file...';
 };
 
+// Eva style
 const generateApp = async e => {
 
     const popup = document.getElementById('variants-popup');
@@ -198,9 +201,7 @@ const getFile = async (e) => {
         witnesses: cachedwitnesses
     });
 
-    //popup.style.height = '80%';
-    //popup.querySelector('.boxen').style.height = 'unset';
-
+    /*
     const outputboxen = popup.querySelector('.output-boxen');
     outputboxen.style.display = 'block';
     const output = outputboxen.querySelector('.popup-output');
@@ -210,34 +211,40 @@ const getFile = async (e) => {
     output.style.whiteSpace = 'break-spaces';
     output.style.height = '600px';
     output.style.width = '100%';
-    
     if(app.error) {
         output.innerHTML = app.error;
         return;
     }    
-    
+    */
+    if(app.error) {
+        alert(app.error);
+        return;
+    }
+
     addWitnesses(Apparatuser.sharedState.curDoc, app.listwit);
     addApparatus(Apparatuser.sharedState.curDoc, app.listapp, xml, blockid, e.name);
     const curStandOff = Apparatuser.sharedState.curDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
-    /*
-    if(!curStandOff) {
-        curStandOff = newDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
-        curStandOff.setAttribute('corresp',`#${blockid}`);
-        curStandOff.setAttribute('type','apparatus');
+    const standOff = curStandOff.outerHTML;
+    //output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
+    //copyToClipboard(standOff,popup);
+
+    //document.getElementById('saveapparatus').style.display = 'block';
+    const newDoc = await previewDoc(Apparatuser.sharedState.curDoc);
+    const newblock = newDoc.getElementById(blockid);
+    const oldblock = document.getElementById(blockid);
+    oldblock.parentNode.replaceChild(newblock,oldblock);
+    newblock.classList.add('edited');
+    cancelPopup();
+    document.getElementById(blockid).scrollIntoView({behavior: 'smooth',block: 'center'}); 
+    addEditButton(blockid);
+
+    // keep clicking until the apparatus appears... pretty hacky solution
+    const appbutton = document.getElementById('apparatusbutton');
+    appbutton.click();
+    if(document.querySelector('.apparatus-block.hidden'))  {
+        appbutton.click();
     }
 
-    if(alignment)
-        curStandOff.setAttribute('source',alignment.filename);
-    curStandOff.innerHTML = app;
-
-    newDoc.documentElement.appendChild(curStandOff);
-    */
-    //const standOff = `<standOff type="apparatus" corresp="#${blockid}">\n<listApp>\n${app}\n</listApp>\n</standOff>`;
-    const standOff = curStandOff.outerHTML;
-    output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
-    copyToClipboard(standOff,popup);
-
-    document.getElementById('saveapparatus').style.display = 'block';
 };
 
 const copyToClipboard = async (xml,popup) => {

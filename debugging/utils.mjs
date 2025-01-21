@@ -82,4 +82,31 @@ const loadDoc = async (fn,cache='no-cache') => {
     return (new DOMParser()).parseFromString(xmltext, 'text/xml');
 };
 
-export {decodeRLE, matchCounts, countLines, saveAs, loadDoc};
+const addEditButtons = blocks => {for(const block of blocks) addEditButton(block);};
+
+const addEditButton = blockel => {
+    const xmlid = typeof blockel === 'string' ? blockel : blockel.getAttribute('xml:id');
+    const block = document.getElementById(xmlid);
+    const editmenu = document.createElement('div');
+    editmenu.className = 'editmenu ignored';
+    editmenu.lang = 'en';
+
+    const wsbutton = document.createElement('button');
+    wsbutton.className = 'mini_wordsplit';
+    const wssvg = document.getElementById('wordsplitsvg').cloneNode(true);
+    wssvg.removeAttribute('id');
+    wsbutton.appendChild(wssvg);
+    wsbutton.dataset.anno = `Edit word splits for ${xmlid}`;
+
+    const appbutton = document.createElement('button');
+    appbutton.className = 'mini_apparatus';
+    const appsvg = document.getElementById('apparatussvg').cloneNode(true);
+    appsvg.removeAttribute('id');
+    appbutton.appendChild(appsvg);
+    appbutton.dataset.anno = `Edit apparatus for ${xmlid}`;
+
+    editmenu.append(wsbutton, appbutton);
+    block.prepend(editmenu);
+};
+
+export {decodeRLE, matchCounts, countLines, saveAs, loadDoc, addEditButtons, addEditButton};
