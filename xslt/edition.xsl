@@ -167,8 +167,8 @@
                         <div class="popup-options">
                             <select name="edblock"></select>
                             <div>
-                                <input name="lookup" type="checkbox"/>
-                                <label for="lookup">Grammar lookup</label>
+                                <input name="lookup" id="input_lookup" type="checkbox"/>
+                                <label for="input_lookup">Grammar lookup</label>
                             </div>
                         </div>
                         <div class="boxen">
