@@ -1,6 +1,7 @@
 import alignApparatus from './apparatus-eva.mjs';
 import { makeApp, addWitnesses, addApparatus, getWits } from './apparatus.mjs';
-import { loadDoc, saveAs, addEditButton } from './utils.mjs';
+import { loadDoc, saveAs } from './fileops.mjs';
+import { addEditButton } from './utils.mjs';
 import previewDoc from './preview.mjs';
 
 const cachedAlignments = new Map();

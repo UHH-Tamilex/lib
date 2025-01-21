@@ -3,7 +3,7 @@ import { Sanscript } from '../js/sanscript.mjs';
 import makeAlignmentTable from './alignmenttable.mjs';
 import { init as cmWrapper } from './cmwrapper.mjs';
 import { serializeWordsplits, getEditionText } from './serializeStandOff.mjs';
-import { loadDoc, saveAs } from './utils.mjs';
+import { loadDoc, saveAs } from './fileops.mjs';
 
 const _state = {
     noteCM: null,

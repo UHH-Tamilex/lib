@@ -1,6 +1,7 @@
 import Splitter from './splits.mjs';
 import Apparatuser from './variants.mjs';
-import { loadDoc, saveAs, addEditButtons } from './utils.mjs';
+import { addEditButtons } from './utils.mjs';
+import { loadDoc, saveAs } from './fileops.mjs';
 
 const _state = {
     curDoc: null,
