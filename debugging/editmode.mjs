@@ -12,7 +12,7 @@ const _state = {
 Splitter.sharedState = _state;
 Apparatuser.sharedState = _state;
 
-const startEditMode = async transliterator => {
+const startEditMode = async Transliterator => {
     injectCSS();
     revealButtons();
     _state.curDoc = await loadDoc(window.location.pathname);
@@ -23,8 +23,8 @@ const startEditMode = async transliterator => {
     document.getElementById('button_savebutton').addEventListener('click',saveAs.bind(null,_state.filename, _state.curDoc));
     
     document.getElementById('recordcontainer').addEventListener('click',docClick);
-    Apparatuser.init();
-    Splitter.init();
+    Apparatuser.init(Transliterator);
+    Splitter.init(Transliterator);
 };
 
 const revealButtons = () => {

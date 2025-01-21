@@ -4,6 +4,10 @@ import { loadDoc, saveAs } from './fileops.mjs';
 import { addEditButton } from './utils.mjs';
 import previewDoc from './preview.mjs';
 
+const _state = {
+    Transliterator: null
+};
+
 const cachedAlignments = new Map();
 
 const switchType = e => {
@@ -51,7 +55,7 @@ const addVariants = (id) => {
 const saveThis = () => 
     saveAs(Apparatuser.sharedState.filename, Apparatuser.sharedState.curDoc);
 
-const init = () => {
+const init = (transliterator) => {
     // TODO: only add event listeners once
     document.getElementById('variantsswitcher').addEventListener('click',switchType);
     // evaStyle
@@ -66,7 +70,8 @@ const init = () => {
         const name = document.getElementById('foundfile').textContent;
         getFile({alignment: {text: cachedAlignments.get(name)}, name: name});     
     });
-
+    
+    _state.Transliterator = transliterator;
 };
 
 const findAlignmentFile = async () => {
@@ -235,6 +240,7 @@ const getFile = async (e) => {
     const oldblock = document.getElementById(blockid);
     oldblock.parentNode.replaceChild(newblock,oldblock);
     newblock.classList.add('edited');
+    _state.Transliterator.refreshCache(newblock);
     cancelPopup();
     document.getElementById(blockid).scrollIntoView({behavior: 'smooth',block: 'center'}); 
     addEditButton(blockid);
