@@ -84,4 +84,4 @@ const addEditButton = blockel => {
     block.prepend(editmenu);
 };
 
-export {decodeRLE, matchCounts, countLines, saveAs, loadDoc, addEditButtons, addEditButton};
+export {decodeRLE, matchCounts, countLines, addEditButtons, addEditButton};
