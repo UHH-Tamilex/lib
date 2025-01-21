@@ -48,6 +48,7 @@ const gramAbbreviations = [
     ['p.a.','perfective aspect'],
     ['p.n.','proper name'],
     ['part.n.','participial noun'],
+    ['pass.','passive'],
     ['pey.','peyareccam'],
     ['pers.pron.','personal pronoun'],
     ['pres.','present tense'],
