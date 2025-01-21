@@ -293,6 +293,8 @@ button.important {
 .editmenu button svg {
     height: 0.7rem;
     width: 0.7rem;
+    position: relative;
+    top: -0.1rem;
 }
 .editmenu button:hover {
     background-color: #eeee99;
