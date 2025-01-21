@@ -534,8 +534,8 @@ const addApparatus = (doc, listappstr, alignxml, block, alignmentfn) => {
         xmlFormat(`<listApp>${listappstr}</listApp>`, formatopts);
 };
 
-const getWits = (doc,alignxml) => {
-    const wits = [...doc.querySelectorAll('witness'),...alignxml.querySelectorAll('witness')];
+const getWits = (...args) => {
+    const wits = args.reduce((acc,cur) => [...acc,...cur.querySelectorAll('witness')],[]);
     const witmap = wits.reduce((acc,w) => {
         const id = w.getAttribute('xml:id');
         if(!acc.has(id)) {
