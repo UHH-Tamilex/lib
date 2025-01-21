@@ -26,7 +26,7 @@ const init = () => {
     for(const ta of popup.querySelectorAll('textarea'))
         ta.addEventListener('change',() => {_state.changed = true;});
 
-    popup.querySelector('.closeicon').addEventListener('click',cancelPopup);
+    popup.querySelector('.closeicon svg').addEventListener('click',cancelPopup);
 
     document.getElementById('previewswitcher').addEventListener('click',codePreview);
     document.getElementById('notesswitcher').addEventListener('click',notesView);

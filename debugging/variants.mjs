@@ -57,7 +57,7 @@ const init = () => {
     document.getElementById('addapparatus').addEventListener('click',generateApp);
     document.getElementById('saveapparatus').addEventListener('click',saveThis);
     const popup = document.getElementById('variants-popup');
-    popup.querySelector('.closeicon').addEventListener('click',cancelPopup);
+    popup.querySelector('.closeicon svg').addEventListener('click',cancelPopup);
     popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
     popup.querySelector('select').addEventListener('change',findAlignmentFile);
 
