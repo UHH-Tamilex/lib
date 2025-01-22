@@ -247,6 +247,8 @@ const getFile = async (e) => {
 
     // keep clicking until the apparatus appears... pretty hacky solution
     const appbutton = document.getElementById('apparatusbutton');
+    if(!appbutton) return;
+
     appbutton.click();
     if(document.querySelector('.apparatus-block.hidden'))  {
         appbutton.click();

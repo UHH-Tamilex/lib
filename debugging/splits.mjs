@@ -28,7 +28,15 @@ const Preview = async () => {
         const block = document.getElementById(id);
         block.classList.add('edited');
     }
+    // keep clicking until the wordsplit appears... pretty hacky solution
+    const wordsplitbutton = document.getElementById('wordsplitbutton');
+    wordsplitbutton.click();
+
     cancelPopup();
+
+    if(!document.querySelector('.word.split'))  {
+        wordsplitbutton.click();
+    }
 };
 
 const updateChanged = () => {
@@ -195,6 +203,7 @@ const fillWordSplits = e => {
 const resetOutput = () => {
     document.getElementById('alignbutton').innerHTML = 'Align';
     document.getElementById('saveasbutton').style.display = 'none';
+    document.getElementById('previewbutton').style.display = 'none';
     const popup = document.getElementById('splits-popup');
     popup.querySelector('.output-boxen').style.display = 'none';
     popup.querySelector('.popup-output').innerHTML = '';
@@ -232,6 +241,7 @@ const showSplits = async () => {
     document.getElementById('saveasbutton').style.display = 'block';
     document.getElementById('saveasbutton').disabled = false;
     document.getElementById('saveasbutton').title = '';
+    document.getElementById('previewbutton').style.display = 'block';
 
     popup.querySelector('.output-boxen').style.display = 'flex';
 

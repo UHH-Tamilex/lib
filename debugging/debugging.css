@@ -70,7 +70,7 @@
 #alignbutton {
     margin-right: 0.5rem;
 }
-#saveasbutton {
+#saveasbutton, #previewbutton {
     display: none;
 }
 .popup button {
