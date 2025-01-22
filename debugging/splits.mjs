@@ -9,11 +9,24 @@ const _state = {
     noteCM: null,
     tamlines: null,
     wordsplits: null,
+    changedBlocks: [],
     changed: false
 };
 
-const saveThis = () => 
+const saveThis = () => {
+    for(const block of _state.changedBlocks) {
+        let curStandOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${block.id}"]`);
+        if(!curStandOff) {
+            curStandOff = Splitter.sharedState.curDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
+            curStandOff.setAttribute('corresp',`#${block.id}`);
+            curStandOff.setAttribute('type','wordsplit');
+            Splitter.sharedState.curDoc.documentElement.appendChild(curStandOff);
+        }
+        curStandOff.innerHTML = `\n${block.str}\n`;
+    }
     saveAs(Splitter.sharedState.filename, Splitter.sharedState.curDoc);
+    _state.changedBlocks = [];
+};
 
 const init = () => {
     document.getElementById('alignbutton').addEventListener('click',showSplits);
@@ -263,14 +276,7 @@ const showSplits = async () => {
 
     output.innerHTML = '';
     output.appendChild(res);
-    let curStandOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${blockid}"]`);
-    if(!curStandOff) {
-        curStandOff = Splitter.sharedState.curDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
-        curStandOff.setAttribute('corresp',`#${blockid}`);
-        curStandOff.setAttribute('type','wordsplit');
-        Splitter.sharedState.curDoc.documentElement.appendChild(curStandOff);
-    }
-    curStandOff.innerHTML = `\n${ret.xml}\n`;
+    _state.changedBlocks.push({id: blockid, str: ret.xml});
 
     const code = document.createElement('div');
     code.classList.add('code');
