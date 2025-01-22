@@ -13,7 +13,17 @@ const _state = {
     changed: false
 };
 
-const saveThis = () => {
+const Preview = () => {
+    const ids = _state.changedBlocks.map(n => n.id);
+    updateChanged();
+    for(const id of ids) {
+        const block = document.getElementById(id);
+        block.classList.add('edited');
+    }
+    cancelPopup();
+};
+
+const updateChanged = () => {
     for(const block of _state.changedBlocks) {
         let curStandOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${block.id}"]`);
         if(!curStandOff) {
@@ -24,12 +34,17 @@ const saveThis = () => {
         }
         curStandOff.innerHTML = `\n${block.str}\n`;
     }
-    saveAs(Splitter.sharedState.filename, Splitter.sharedState.curDoc);
     _state.changedBlocks = [];
+};
+
+const saveThis = () => {
+    updateChanged();
+    saveAs(Splitter.sharedState.filename, Splitter.sharedState.curDoc);
 };
 
 const init = () => {
     document.getElementById('alignbutton').addEventListener('click',showSplits);
+    document.getElementById('previewbutton').addEventListener('click',Preview);
     document.getElementById('saveasbutton').addEventListener('click',saveThis);
     const popup = document.getElementById('splits-popup');
     popup.querySelector('.popup-output').addEventListener('click',listEdit.click);

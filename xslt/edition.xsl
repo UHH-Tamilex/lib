@@ -189,13 +189,14 @@
                         </div>
                         <div class="buttondiv">
                             <button type="button" id="alignbutton">Align</button>
+                            <button type="button" id="previewbutton">Preview</button>
                             <button type="button" class="important" id="saveasbutton">Save as...</button>
                         </div>
                         <div class="output-boxen">
                             <div class="popup-warnings"></div>
                             <div class="popup-output"></div>
                             <div class="switcher" id="previewswitcher">
-                                <div class="selected">Preview</div>
+                                <div class="selected">Table</div>
                                 <div>Code</div>
                             </div>
                         </div>
