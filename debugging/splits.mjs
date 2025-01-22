@@ -11,7 +11,8 @@ const _state = {
     tamlines: null,
     wordsplits: null,
     changedBlocks: [],
-    changed: false
+    changed: false,
+//    Transliterator: null
 };
 
 const Preview = async () => {
@@ -27,6 +28,7 @@ const Preview = async () => {
             document.querySelector('article').appendChild(standOff);
         const block = document.getElementById(id);
         block.classList.add('edited');
+        block.scrollIntoView({behavior: 'smooth',block: 'center'}); 
     }
     // keep clicking until the wordsplit appears... pretty hacky solution
     const wordsplitbutton = document.getElementById('wordsplitbutton');
@@ -58,7 +60,7 @@ const saveThis = () => {
     saveAs(Splitter.sharedState.filename, Splitter.sharedState.curDoc);
 };
 
-const init = () => {
+const init = (/*transliterator*/) => {
     document.getElementById('alignbutton').addEventListener('click',showSplits);
     document.getElementById('previewbutton').addEventListener('click',Preview);
     document.getElementById('saveasbutton').addEventListener('click',saveThis);
@@ -74,6 +76,8 @@ const init = () => {
 
     document.getElementById('previewswitcher').addEventListener('click',codePreview);
     document.getElementById('notesswitcher').addEventListener('click',notesView);
+
+    //_state.Transliterator = transliterator;
 };
 
 const addWordSplits = (id) => {
@@ -299,7 +303,6 @@ const showSplits = async () => {
     const xproc = new XSLTProcessor();
     const xslsheet = await loadDoc('lib/debugging/wordlist.xsl'); // TODO: this path is fixed
     xproc.importStylesheet(xslsheet);
-    //const res = xproc.transformToDocument(parser.parseFromString(`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit">${ret.xml}</standOff>`,'text/xml')).querySelector('table');
     const res = xproc.transformToDocument((new DOMParser()).parseFromString(standOff,'text/xml')).querySelector('table');
     if(document.getElementById('transbutton').lang === 'en')
         for(const th of res.querySelectorAll('[lang="ta-Latn"]')) {

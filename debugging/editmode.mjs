@@ -24,7 +24,7 @@ const startEditMode = async Transliterator => {
     
     document.getElementById('recordcontainer').addEventListener('click',docClick);
     Apparatuser.init(Transliterator);
-    Splitter.init(Transliterator);
+    Splitter.init(/*Transliterator*/);
 };
 
 const revealButtons = () => {

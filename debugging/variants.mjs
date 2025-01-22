@@ -56,7 +56,6 @@ const saveThis = () =>
     saveAs(Apparatuser.sharedState.filename, Apparatuser.sharedState.curDoc);
 
 const init = (transliterator) => {
-    // TODO: only add event listeners once
     document.getElementById('variantsswitcher').addEventListener('click',switchType);
     // evaStyle
     document.getElementById('addapparatus').addEventListener('click',generateApp);
