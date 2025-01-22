@@ -4,6 +4,7 @@ import makeAlignmentTable from './alignmenttable.mjs';
 import { init as cmWrapper } from './cmwrapper.mjs';
 import { serializeWordsplits, getEditionText } from './serializeStandOff.mjs';
 import { loadDoc, saveAs } from './fileops.mjs';
+import previewDoc from './preview.mjs';
 
 const _state = {
     noteCM: null,
@@ -13,10 +14,17 @@ const _state = {
     changed: false
 };
 
-const Preview = () => {
+const Preview = async () => {
     const ids = _state.changedBlocks.map(n => n.id);
     updateChanged();
+    const newDoc = await previewDoc(Splitter.sharedState.curDoc);
     for(const id of ids) {
+        const standOff = newDoc.querySelector(`.standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
+        const existingStandOff = document.querySelector(`.standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
+        if(existingStandOff)
+            existingStandOff.parentNode.replaceChild(standOff,existingStandOff);
+        else
+            document.querySelector('article').appendChild(standOff);
         const block = document.getElementById(id);
         block.classList.add('edited');
     }
