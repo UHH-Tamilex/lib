@@ -280,7 +280,6 @@ button.important {
     flex-direction: column;
     gap: 0.2rem;
     margin-left: -2rem;
-    margin-top: 1rem;
 }
 .editmenu button {
     height: 1.4rem;
@@ -289,6 +288,7 @@ button.important {
     border-color: rgb(240,202,121);
     border-radius: 0.3rem;
     padding: 0;
+    margin: 0;
 }
 .editmenu button svg {
     height: 0.7rem;
