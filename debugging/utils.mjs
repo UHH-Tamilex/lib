@@ -69,7 +69,7 @@ const addEditButton = blockel => {
     const wsbutton = document.createElement('button');
     wsbutton.className = 'mini_wordsplit';
     const wssvg = document.getElementById('wordsplitsvg').cloneNode(true);
-    wssvg.style.display = 'block';
+    wssvg.style.display = 'unset';
     wssvg.removeAttribute('id');
     wsbutton.appendChild(wssvg);
     wsbutton.dataset.anno = `Edit word splits for ${xmlid}`;
@@ -78,7 +78,7 @@ const addEditButton = blockel => {
     appbutton.className = 'mini_apparatus';
     const appsvg = document.getElementById('apparatussvg').cloneNode(true);
     appsvg.removeAttribute('id');
-    appsvg.style.display = 'block';
+    appsvg.style.display = 'unset';
     appbutton.appendChild(appsvg);
     appbutton.dataset.anno = `Edit apparatus for ${xmlid}`;
 

@@ -412,6 +412,7 @@ const removemarkup = (standoff) => {
     if(!target) return;
 
     const cached = cachedContent.get(target);
+    if(!cached) return;
     for(const [el,oldContent] of cached) {
         while(el.firstChild) 
             el.firstChild.remove();
