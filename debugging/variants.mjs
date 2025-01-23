@@ -61,7 +61,7 @@ const init = (transliterator) => {
     const popup = document.getElementById('variants-popup');
 
     const selector = popup.querySelector('select');
-    for(const lg of document.querySelectorAll('.teitext .lg[id] .teitext p[id]')) {
+    for(const lg of document.querySelectorAll('.teitext .lg[id], .teitext p[id]')) {
         const option = document.createElement('option');
         option.value = lg.id;
         option.append(lg.id);
