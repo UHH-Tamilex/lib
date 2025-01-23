@@ -253,6 +253,12 @@ const getFile = async (e) => {
         appbutton.click();
     }
 
+    // keep clicking until the wordsplit appears... pretty hacky solution
+    if(document.getElementById('wordsplit').style.display === 'none') {
+        const wsbutton = document.getElementById('wordsplitbutton');
+        wsbutton.click();
+        wsbutton.click();
+    }
 };
 
 const copyToClipboard = async (xml,popup) => {
