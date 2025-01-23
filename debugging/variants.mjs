@@ -31,21 +31,23 @@ const switchType = e => {
     }
 
 };
+
 const addVariants = (id) => {
     const blackout = document.getElementById('blackout');
     document.getElementById('splits-popup').style.display = 'none';
     const popup = document.getElementById('variants-popup');
-    const selector = popup.querySelector('select');
-    for(const lg of document.querySelectorAll('.lg')) {
-        if(!lg.id) continue;
-        const option = document.createElement('option');
-        option.value = lg.id;
-        option.append(lg.id);
-        if(id && lg.id === id)
-            option.selected = true;
-        selector.append(option);
-    }
-    
+    if(id) {
+        const options = popup.querySelectorAll('select option');
+        for(const option of options) {
+            if(option.value === id)
+                option.selected = true;
+            else
+                option.selected = false;
+        }
+    } 
+
+    else popup.querySelector('select option').selected = true;
+
     findAlignmentFile();
 
     popup.style.display = 'flex';
@@ -56,11 +58,19 @@ const saveThis = () =>
     saveAs(Apparatuser.sharedState.filename, Apparatuser.sharedState.curDoc);
 
 const init = (transliterator) => {
+    const popup = document.getElementById('variants-popup');
+
+    const selector = popup.querySelector('select');
+    for(const lg of document.querySelectorAll('.lg[id],p[id]')) {
+        const option = document.createElement('option');
+        option.value = lg.id;
+        option.append(lg.id);
+        selector.append(option);
+    }
     document.getElementById('variantsswitcher').addEventListener('click',switchType);
     // evaStyle
     document.getElementById('addapparatus').addEventListener('click',generateApp);
     document.getElementById('saveapparatus').addEventListener('click',saveThis);
-    const popup = document.getElementById('variants-popup');
     popup.querySelector('.closeicon svg').addEventListener('click',cancelPopup);
     popup.querySelector('input[name="teifile"]').addEventListener('change',getFile);
     popup.querySelector('select').addEventListener('change',findAlignmentFile);
@@ -139,7 +149,7 @@ const generateApp = async e => {
 const cancelPopup = (e) => {
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
-    blackout.querySelector('select').innerHTML = '';
+    //blackout.querySelector('select').innerHTML = '';
 
     const popup = document.getElementById('variants-popup');
     const outputboxen = popup.querySelector('.output-boxen');

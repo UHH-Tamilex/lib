@@ -62,10 +62,17 @@ const saveThis = () => {
 };
 
 const init = (/*transliterator*/) => {
+    const popup = document.getElementById('splits-popup');
+    const selector = popup.querySelector('select');
+    for(const lg of document.querySelectorAll('.lg[id],p[id]')) {
+        const option = document.createElement('option');
+        option.value = lg.id;
+        option.append(lg.id);
+        selector.append(option);
+    }
     document.getElementById('alignbutton').addEventListener('click',showSplits);
     document.getElementById('previewbutton').addEventListener('click',Preview);
     document.getElementById('saveasbutton').addEventListener('click',saveThis);
-    const popup = document.getElementById('splits-popup');
     popup.querySelector('.popup-output').addEventListener('click',listEdit.click);
     popup.querySelector('.popup-output').addEventListener('keydown',listEdit.keydown);
     popup.querySelector('.popup-output').addEventListener('focusin',listEdit.focusin);
@@ -85,16 +92,19 @@ const addWordSplits = (id) => {
     const blackout = document.getElementById('blackout');
     document.getElementById('variants-popup').style.display = 'none';
     const popup = document.getElementById('splits-popup');
-    const selector = popup.querySelector('select');
-    for(const lg of document.querySelectorAll('.lg')) {
-        if(!lg.id) continue;
-        const option = document.createElement('option');
-        option.value = lg.id;
-        option.append(lg.id);
-        if(id && lg.id === id)
-            option.selected = true;
-        selector.append(option);
-    }
+
+    if(id) {
+        const options = popup.querySelectorAll('select option');
+        for(const option of options) {
+            if(option.value === id)
+                option.selected = true;
+            else
+                option.selected = false;
+        }
+    } 
+    
+    else popup.querySelector('select option').selected = true;
+
     fillWordSplits({target: selector});
     
     blackout.style.display = 'flex';
@@ -224,7 +234,7 @@ const clearSplits = () => {
 const cancelPopup = (e) => {
     const blackout = document.getElementById('blackout');
     blackout.style.display = 'none';
-    blackout.querySelector('select').innerHTML = '';
+    //blackout.querySelector('select').innerHTML = '';
     for(const textarea of blackout.querySelectorAll('textarea'))
         textarea.value = '';
     resetOutput();
