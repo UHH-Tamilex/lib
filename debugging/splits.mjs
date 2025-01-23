@@ -93,8 +93,9 @@ const addWordSplits = (id) => {
     document.getElementById('variants-popup').style.display = 'none';
     const popup = document.getElementById('splits-popup');
 
+    const selector = popup.querySelector('select');
+    const options = selector.querySelectorAll('option');
     if(id) {
-        const options = popup.querySelectorAll('select option');
         for(const option of options) {
             if(option.value === id)
                 option.selected = true;
@@ -103,7 +104,7 @@ const addWordSplits = (id) => {
         }
     } 
     
-    else popup.querySelector('select option').selected = true;
+    else options[0].selected = true;
 
     fillWordSplits({target: selector});
     
