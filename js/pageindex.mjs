@@ -2,15 +2,15 @@ import { Transliterate } from './transliterate.mjs';
 
 const init = function() {
 
-    const params = new URLSearchParams(window.location.search);
+    const params = window.location.search;
 
     Transliterate.init(document.body);
-    if(params.get('script') === 'Taml') {
+    if(params) {
         const ul = document.querySelector('ul');
-        for(const a of ul.querySelectorAll('li > a'))
-            a.href = a.href + '?script=Taml';
+        for(const a of ul.querySelectorAll('li > a')) {
+            a.href = a.href + params;
+        }
     }
-
     document.body.addEventListener('copy',events.removeHyphens);
     
 };
