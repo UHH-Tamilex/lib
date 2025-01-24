@@ -234,8 +234,10 @@ const clearSplits = () => {
         textarea.value = '';
 };
 
-const fillTempSplits = id => {
-    const origtext = Splitter.sharedState.curDoc.querySelector(`[*|id="${id}"]`);
+const fillTempSplits = blockid => {
+    const textblock = Splitter.sharedState.curDoc.querySelector(`[*|id="${blockid}"]`);
+    const edition = textblock.querySelector('[type="edition"]');
+    const origtext = edition ? getEditionText(edition) : getEditionText(textblock);
     const lines = [...origtext.querySelectorAll('l')] || [origtext];
     const filler = lines.map(l => getEditionText(l).trim());
     const tamsplits = document.querySelector('#splits-popup textarea');
