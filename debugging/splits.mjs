@@ -203,6 +203,7 @@ const fillWordSplits = e => {
 
     if(!standOff) {
         clearSplits();
+        fillTempSplits(selected);
         return;
     }
 
@@ -210,6 +211,7 @@ const fillWordSplits = e => {
     
     const textareas = document.querySelectorAll('#splits-popup textarea');
     textareas[0].value = ret.tam;
+    unTemp({target: textareas[0]});
     textareas[1].value = ret.eng;
     textareas[2].value = ret.notes.join('\n\n');
 
@@ -231,6 +233,18 @@ const clearSplits = () => {
     for(const textarea of popup.querySelectorAll('textarea'))
         textarea.value = '';
 };
+
+const fillTempSplits = id => {
+    const origtext = Splitter.sharedState.curDoc.querySelector(`[*|id]="${selected}"]`);
+    const lines = [...origtext.querySelectorAll('l')] || [origtext];
+    const filler = lines.map(l => getEditionText(l).trim());
+    const tamsplits = document.querySelector('#splits-popup textarea');
+    tamsplits.value = filler.join('\n');
+    tamsplits.classList.add('tempsplits');
+    tamsplits.addEventListener('change',unTemp,{once: true});
+
+};
+const unTemp = e => e.target.classList.remove('tempsplits');
 
 const cancelPopup = (e) => {
     const blackout = document.getElementById('blackout');
