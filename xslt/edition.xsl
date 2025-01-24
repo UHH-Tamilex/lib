@@ -173,13 +173,13 @@
                         </div>
                         <div class="boxen">
                             <div>
-                                <label>Tamil wordsplit</label><textarea></textarea>
+                                <label>Tamil wordsplit</label><textarea spellcheck="false"></textarea>
                             </div>
                             <div>
                                 <label>Word-by-word translation</label>
                                 <div id="wbwbox">
-                                    <textarea id="engsplit"></textarea>
-                                    <textarea class="notes"></textarea>
+                                    <textarea id="engsplit" spellcheck="false"></textarea>
+                                    <textarea class="notes" spellcheck="false"></textarea>
                                     <div class="switcher" id="notesswitcher">
                                         <div class="selected">Splits</div>
                                         <div>Notes</div>
@@ -234,7 +234,7 @@
                             </div>
                             <div id="variantsinput">
                                 <label>Apparatus from text</label>
-                                <textarea rows="15"></textarea>
+                                <textarea rows="15" spellcheck="false"></textarea>
                                 <button type="button" id="addapparatus">Generate apparatus</button>
                             </div>
                             <div class="output-boxen">
