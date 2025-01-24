@@ -240,7 +240,7 @@ const fillTempSplits = blockid => {
     const origtext = edition || textblock;
     let lines = origtext.querySelectorAll('l');
     lines = lines.length > 0 ? [...lines] : [origtext];
-    const filler = lines.map(l => getEditionText(l).trim());
+    const filler = lines.map(l => getEditionText(l).trim().replaceAll(/\s+/g,' '));
     const tamsplits = document.querySelector('#splits-popup textarea');
     tamsplits.value = filler.join('\n');
     tamsplits.classList.add('tempsplits');
