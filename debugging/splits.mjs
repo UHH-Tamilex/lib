@@ -235,13 +235,13 @@ const clearSplits = () => {
 };
 
 const fillTempSplits = id => {
-    const origtext = Splitter.sharedState.curDoc.querySelector(`[*|id]="${selected}"]`);
+    const origtext = Splitter.sharedState.curDoc.querySelector(`[*|id="${id}"]`);
     const lines = [...origtext.querySelectorAll('l')] || [origtext];
     const filler = lines.map(l => getEditionText(l).trim());
     const tamsplits = document.querySelector('#splits-popup textarea');
     tamsplits.value = filler.join('\n');
     tamsplits.classList.add('tempsplits');
-    tamsplits.addEventListener('change',unTemp,{once: true});
+    tamsplits.addEventListener('focus',unTemp,{once: true});
 
 };
 const unTemp = e => e.target.classList.remove('tempsplits');
