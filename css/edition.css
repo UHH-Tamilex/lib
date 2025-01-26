@@ -300,33 +300,43 @@ span.invisible {
 .spinner {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   display: inline-block;
   margin: 1rem;
   position: relative;
+  /*border-radius: 50%;
   background: linear-gradient(0deg, rgb(240,202,121) 0%, rgb(50,50,50,0.3) 60%);
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
+  */
 }
 
 #blackout .spinner {
   width: 80px;
   height: 80px;
-  background: linear-gradient(0deg, rgb(240,202,121) 0%, rgba(50,50,50,0.3) 60%);
+  /*background: linear-gradient(0deg, rgb(240,202,121) 0%, rgba(50,50,50,0.3) 60%);*/
 }
 
-.spinner::after {
+.spinner::after, .spinner::before {
   content: '';  
   box-sizing: border-box;
   position: absolute;
+  border-radius: 50%;
+  inset: 0;
+  box-shadow: 0 0 10px 2px rgba(0,0,0,0.3) inset;
+  /*
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 35px;
   height: 35px;
-  border-radius: 50%;
   background: rgb(250,250,248);
+  */
 }
+.spinner::after {
+    box-shadow 0 2px rgb(240,202,121) inset;
+    animation: rotation 2s linear infinite;
+}
+/*
 #blackout .spinner::after {
     width: 75px;
     height: 75px;
@@ -335,7 +345,7 @@ span.invisible {
 #blackout .popup-output .spinner::after {
   background: white;
 }
-
+*/
 @keyframes rotation {
   0% { transform: rotate(0deg) }
   100% { transform: rotate(360deg)}
