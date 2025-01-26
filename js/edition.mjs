@@ -18,13 +18,14 @@ const lookup = async (e) => {
     const word = e.target.closest('.word:not(.nolookup)');
     if(!word) return;
     const blackout = document.getElementById('blackout');
-    blackout.style.display = 'flex';
-    blackout.innerHTML = '<div class="spinner"></div>';
-
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    blackout.appendChild(spinner);
+    
     const lookupwindow = document.createElement('div');
     lookupwindow.id = 'lookupwindow';
     lookupwindow.innerHTML = (await WordLookup(word)) || '<p lang="en">Word not found.</p>';
-    //blackout.removeChild(blackout.firstChild);
+    spinner.remove();
     blackout.appendChild(lookupwindow);
     Transliterate.refreshCache(lookupwindow);
     if(document.getElementById('transbutton').lang === 'en')
