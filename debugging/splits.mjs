@@ -16,6 +16,11 @@ const _state = {
 };
 
 const Preview = async () => {
+    document.getElementById('splits-popup').style.display = 'none';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    document.getElementById('blackout').appendChild(spinner);
+
     const ids = _state.changedBlocks.map(n => n.id);
     updateChanged();
     const newDoc = await previewDoc(Splitter.sharedState.curDoc);
@@ -36,6 +41,7 @@ const Preview = async () => {
     wordsplitbutton.click();
 
     cancelPopup();
+    spinner.remove();
 
     if(!document.querySelector('.word.split'))  {
         wordsplitbutton.click();
@@ -92,6 +98,7 @@ const addWordSplits = (id) => {
     const blackout = document.getElementById('blackout');
     document.getElementById('variants-popup').style.display = 'none';
     const popup = document.getElementById('splits-popup');
+    popup.style.display = 'flex';
 
     const selector = popup.querySelector('select');
     const options = selector.querySelectorAll('option');

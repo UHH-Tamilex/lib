@@ -236,6 +236,11 @@ const getFile = async (e) => {
         return;
     }
 
+    popup.style.display = 'none';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    document.getElementById('blackout').appendChild(spinner);
+
     addWitnesses(Apparatuser.sharedState.curDoc, app.listwit);
     addApparatus(Apparatuser.sharedState.curDoc, app.listapp, xml, blockid, e.name);
     const curStandOff = Apparatuser.sharedState.curDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
@@ -250,7 +255,10 @@ const getFile = async (e) => {
     oldblock.parentNode.replaceChild(newblock,oldblock);
     newblock.classList.add('edited');
     _state.Transliterator.refreshCache(newblock);
+
     cancelPopup();
+    spinner.remove();
+
     document.getElementById(blockid).scrollIntoView({behavior: 'smooth',block: 'center'}); 
     addEditButton(blockid);
 
