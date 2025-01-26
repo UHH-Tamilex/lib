@@ -18,6 +18,7 @@ const lookup = async (e) => {
     const word = e.target.closest('.word:not(.nolookup)');
     if(!word) return;
     const blackout = document.getElementById('blackout');
+    blackout.style.display = 'flex';
     const spinner = document.createElement('div');
     spinner.className = 'spinner';
     blackout.appendChild(spinner);
