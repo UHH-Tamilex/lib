@@ -125,7 +125,7 @@ details.dict details.dict[open] {
     font-size: 1.2rem;
 }
 
-
+/*
 .spinner {
   width: 40px;
   height: 40px;
@@ -153,3 +153,4 @@ details.dict details.dict[open] {
   0% { transform: rotate(0deg) }
   100% { transform: rotate(360deg)}
 } 
+*/

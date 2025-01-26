@@ -322,7 +322,6 @@ span.invisible {
   position: absolute;
   border-radius: 50%;
   inset: 0;
-  box-shadow: 0 0 10px 2px rgba(0,0,0,0.3) inset;
   /*
   left: 50%;
   top: 50%;
@@ -333,8 +332,12 @@ span.invisible {
   */
 }
 .spinner::after {
-    box-shadow 0 2px rgb(240,202,121) inset;
+    box-shadow: 0 2px rgb(240,202,121) inset;
     animation: rotation 2s linear infinite;
+}
+.spinner::before {
+  box-shadow: 0 3px 2px 0 rgba(0,0,0,0.3) inset;
+  animation: backrotate 1.5s ease-in infinite;
 }
 /*
 #blackout .spinner::after {
@@ -348,5 +351,9 @@ span.invisible {
 */
 @keyframes rotation {
   0% { transform: rotate(0deg) }
-  100% { transform: rotate(360deg)}
+  100% { transform: rotate(360deg) }
+}
+@keyframes backrotate {
+  0% { transform: rotate(360deg) }
+  1000% { transform: rotate(0deg) }
 } 
