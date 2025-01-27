@@ -65,7 +65,7 @@ const visibleText = (node) => {
     }
     return clone.textContent;
 };
-
+/*
 const apparatusswitch = (e) => {
     const blocks = document.querySelectorAll('.wide');
     const target = document.getElementById('apparatusbutton');
@@ -92,7 +92,7 @@ const apparatusswitch = (e) => {
         target.dataset.anno = 'apparatus of variants';
     }
 };
-
+*/
 const getEdition = standoff => {
     const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''));
     return target.querySelector('.edition') || target;

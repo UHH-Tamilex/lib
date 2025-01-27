@@ -428,6 +428,7 @@ const Events = {
            e.target.closest('.lem-inline'))
             unhighlight(e.target);
     },
+    /*
     docClick(e) {
         for(const tooltip of document.querySelectorAll('.coord-suggestion'))
             tooltip.remove();
@@ -445,6 +446,7 @@ const Events = {
         suggestLemmata(lemma,left);
 
     },
+    */
     toggleApparatus(e) {
         const button = document.getElementById('apparatusbutton');
         const apparatussvg = document.getElementById('apparatussvg');
@@ -481,11 +483,11 @@ const Events = {
 const init = () => {
     document.addEventListener('mouseover',Events.docMouseover);
     document.addEventListener('mouseout',Events.docMouseout);
-    if(Debugging) document.addEventListener('click',Events.docClick);
+    //if(Debugging) document.addEventListener('click',Events.docClick);
+    const apparatusbutton = document.getElementById('apparatusbutton');
+    apparatusbutton.addEventListener('click',Events.toggleApparatus);
     if(document.querySelector('.apparatus-block.hidden')) {
-        const apparatusbutton = document.getElementById('apparatusbutton');
         apparatusbutton.style.display = 'block';
-        apparatusbutton.addEventListener('click',Events.toggleApparatus);
     }
 };
 

@@ -266,8 +266,10 @@ const getFile = async (e) => {
     const appbutton = document.getElementById('apparatusbutton');
     if(!appbutton) return;
 
-    appbutton.click();
+    if(appbutton.style.display === 'block') appbutton.click();
+
     if(document.querySelector('.apparatus-block.hidden'))  {
+        apparatusbutton.style.display = 'block';
         appbutton.click();
     }
 
