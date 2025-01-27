@@ -138,8 +138,8 @@
                     <xsl:attribute name="class">
                         <xsl:text>text-block p edition</xsl:text>
                     </xsl:attribute>
-                    <xsl:apply-templates/>
                     <xsl:attribute name="id"><xsl:value-of select="$xmlid"/></xsl:attribute>
+                    <xsl:apply-templates/>
                 </div>
                 <xsl:call-template name="apparatus-standoff">
                     <xsl:with-param name="apparatus" select="$apparatus"/>
@@ -216,8 +216,8 @@
                     <xsl:attribute name="class">
                         <xsl:text>text-block lg edition</xsl:text>
                     </xsl:attribute>
-                    <xsl:apply-templates/>
                     <xsl:attribute name="id"><xsl:value-of select="$xmlid"/></xsl:attribute>
+                    <xsl:apply-templates/>
                 </div>
                 <xsl:call-template name="apparatus-standoff">
                     <xsl:with-param name="apparatus" select="$apparatus"/>
