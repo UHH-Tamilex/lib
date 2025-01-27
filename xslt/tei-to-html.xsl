@@ -124,11 +124,13 @@
                     </xsl:choose>
                     <xsl:element name="div">
                         <xsl:attribute name="id">topbar</xsl:attribute>
+                        <div id="buttoncontainer">
                         <xsl:element name="div">
                             <xsl:attribute name="id">transbutton</xsl:attribute>
-                            <xsl:attribute name="title">change script</xsl:attribute>
+                            <xsl:attribute name="data-anno">change script</xsl:attribute>
                             <xsl:text>A</xsl:text>
                         </xsl:element>
+                        </div>
                     </xsl:element>
                     <xsl:element name="article">
                         <xsl:apply-templates/>
