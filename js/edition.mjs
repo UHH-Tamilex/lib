@@ -573,10 +573,10 @@ const go = () => {
         },{once: true});
     }
 
-    if(document.querySelector('.app')) {
+    //if(document.querySelector('.app')) { // init in case of editmode
         ApparatusViewer.init();
         ApparatusViewer.setTransliterator(Transliterate);
-    }
+    //}
 
     GitHubFunctions.latestCommits();
     document.addEventListener('copy',removeHyphens);
