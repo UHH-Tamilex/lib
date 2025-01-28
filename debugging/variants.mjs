@@ -251,10 +251,16 @@ const getFile = async (e) => {
     //document.getElementById('saveapparatus').style.display = 'block';
     const newDoc = await previewDoc(Apparatuser.sharedState.curDoc);
     const newblock = newDoc.getElementById(blockid);
+    const newpar = idblock.closest('.wide');
+    const newwide = newpar || newblock; // TODO: this is ugly
+
     const oldblock = document.getElementById(blockid);
-    oldblock.parentNode.replaceChild(newblock,oldblock);
-    newblock.classList.add('edited');
-    _state.Transliterator.refreshCache(newblock);
+    const oldpar = oldblock.closest('.wide');
+    const oldwide = oldpar || oldblock;
+
+    oldwide.parentNode.replaceChild(newwide,oldwide);
+    newwide.classList.add('edited');
+    _state.Transliterator.refreshCache(newwide);
 
     cancelPopup();
     spinner.remove();
