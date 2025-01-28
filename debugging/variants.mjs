@@ -61,7 +61,7 @@ const init = (transliterator) => {
     const popup = document.getElementById('variants-popup');
 
     const selector = popup.querySelector('select');
-    for(const lg of document.querySelectorAll('.teitext .lg[id], .teitext p[id]')) {
+    for(const lg of document.querySelectorAll('.teitext .lg[id], .teitext p[id], .teitext div[id]')) {
         const option = document.createElement('option');
         option.value = lg.id;
         option.append(lg.id);
@@ -210,7 +210,6 @@ const getFile = async (e) => {
             }
         }
     }
-    console.log(blockid);
     const app = await makeApp(xml, Apparatuser.sharedState.curDoc, {
         base: Apparatuser.sharedState.curDoc.querySelector(`[*|id="${blockid}"]`).closest('text').getAttribute('corresp')?.replace(/^#/,'') || siglum,
         normlem: document.getElementById('normlem').checked, 
