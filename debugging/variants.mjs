@@ -251,7 +251,7 @@ const getFile = async (e) => {
     //document.getElementById('saveapparatus').style.display = 'block';
     const newDoc = await previewDoc(Apparatuser.sharedState.curDoc);
     const newblock = newDoc.getElementById(blockid);
-    const newpar = idblock.closest('.wide');
+    const newpar = newblock.closest('.wide');
     const newwide = newpar || newblock; // TODO: this is ugly
 
     const oldblock = document.getElementById(blockid);
