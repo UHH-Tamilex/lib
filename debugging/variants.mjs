@@ -61,10 +61,11 @@ const init = (transliterator) => {
     const popup = document.getElementById('variants-popup');
 
     const selector = popup.querySelector('select');
-    for(const lg of document.querySelectorAll('.teitext .lg[id], .teitext p[id], .teitext div[id]')) {
+    for(const block of Apparatuser.sharedState.curDoc.querySelectorAll('text lg[*|id], text p[*|id], text div[*|id]')) {
         const option = document.createElement('option');
-        option.value = lg.id;
-        option.append(lg.id);
+        const id = block.getAttribute('xml:id');
+        option.value = id;
+        option.append(id);
         selector.append(option);
     }
     document.getElementById('variantsswitcher').addEventListener('click',switchType);
