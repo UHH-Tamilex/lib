@@ -211,7 +211,7 @@ const getFile = async (e) => {
         }
     }
     const app = await makeApp(xml, Apparatuser.sharedState.curDoc, {
-        base: Apparatuser.sharedState.curDoc.querySelector(`[*|id='${blockid}']`).closest('text').getAttrbute('corresp')?.replace(/^#/,'') || siglum,
+        base: Apparatuser.sharedState.curDoc.querySelector(`[*|id="${blockid}"]`).closest('text')?.getAttrbute('corresp')?.replace(/^#/,'') || siglum,
         normlem: document.getElementById('normlem').checked, 
         mergerdgs: document.getElementById('mergerdgs').checked,
         blockid: blockid,
