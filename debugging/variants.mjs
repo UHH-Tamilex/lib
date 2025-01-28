@@ -189,6 +189,8 @@ const getFile = async (e) => {
             return parseString(text,file.name);
         })();
     
+    const siglum = Apparatuser.sharedState.curDoc.querySelector('idno[type="siglum"]')?.textContent || Apparatuser.sharedState.curDoc.documentElement.getAttribute('n');
+
     const cachedwitnesses = new Map();
     const cachedfiles = new Map();
     for(const wit of getWits(Apparatuser.sharedState.curDoc,xml)) {
@@ -209,7 +211,7 @@ const getFile = async (e) => {
         }
     }
     const app = await makeApp(xml, Apparatuser.sharedState.curDoc, {
-        base: document.querySelector('.text-siglum').textContent,
+        base: Apparatuser.sharedState.curDoc.querySelector(`[*|id='${blockid}']`).closest('text').getAttrbute('corresp')?.replace(/^#/,'') || siglum,
         normlem: document.getElementById('normlem').checked, 
         mergerdgs: document.getElementById('mergerdgs').checked,
         blockid: blockid,
