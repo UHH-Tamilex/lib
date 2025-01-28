@@ -530,8 +530,8 @@ const addApparatus = (doc, listappstr, alignxml, block, alignmentfn) => {
         collapseContent: true,
         lineSeparator: '\n'
     };
-    docstandoff.innerHTML = xmlFormat(`<interp type="normalization"><desc type="tagfilters">${tagfilters}</desc></interp>`,formatopts) +
-        xmlFormat(`<listApp>${listappstr}</listApp>`, formatopts);
+    const listappel = listappstr ? xmlFormat(`<listApp>${listappstr}</listApp>`,formatopts) : '';
+    docstandoff.innerHTML = xmlFormat(`<interp type="normalization"><desc type="tagfilters">${tagfilters}</desc></interp>`,formatopts) + listappel;
 };
 
 const getWits = (...args) => {
