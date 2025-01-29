@@ -25,7 +25,7 @@ const Preview = async () => {
     updateChanged();
     const newDoc = await previewDoc(Splitter.sharedState.curDoc);
     for(const id of ids) {
-        const standOff = newDoc.querySelector(`.standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
+        const standOff = newDoc.querySelector(`standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
         standOff.lang = 'en';
         const existingStandOff = document.querySelector(`.standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
         if(existingStandOff)
@@ -70,10 +70,11 @@ const saveThis = () => {
 const init = (/*transliterator*/) => {
     const popup = document.getElementById('splits-popup');
     const selector = popup.querySelector('select');
-    for(const lg of document.querySelectorAll('.teitext .lg[id], .teitext p[id]')) {
+    for(const block of Splitter.sharedState.curDoc.querySelectorAll('text lg[*|id], text p[*|id], text div[*|id]')) {
         const option = document.createElement('option');
-        option.value = lg.id;
-        option.append(lg.id);
+        const id = block.getAttribute('xml:id');
+        option.value = id;
+        option.append(id);
         selector.append(option);
     }
     document.getElementById('alignbutton').addEventListener('click',showSplits);
