@@ -46,16 +46,18 @@
                     </xsl:if>
                     <xsl:apply-templates select="$title"/>
                 </xsl:element>
-                <xsl:element name="td">
-                    <xsl:attribute name="class">text-siglum</xsl:attribute>
-                    <xsl:attribute name="lang">en</xsl:attribute>
-                    <xsl:variable name="cu" select="translate(@synch,'#','')"/>
-                    <xsl:value-of select="$cu"/>
-                    <xsl:if test="$cu and $textid">
-                        <xsl:text>, </xsl:text>
-                    </xsl:if>
-                    <xsl:value-of select="$textid"/>
-                </xsl:element>
+                <xsl:if test="not(@type='edition')">
+                    <xsl:element name="td">
+                        <xsl:attribute name="class">text-siglum</xsl:attribute>
+                        <xsl:attribute name="lang">en</xsl:attribute>
+                        <xsl:variable name="cu" select="translate(@synch,'#','')"/>
+                        <xsl:value-of select="$cu"/>
+                        <xsl:if test="$cu and $textid">
+                            <xsl:text>, </xsl:text>
+                        </xsl:if>
+                        <xsl:value-of select="$textid"/>
+                    </xsl:element>
+                </xsl:if>
             </xsl:element>
         </xsl:element>
         <xsl:apply-templates/>
@@ -814,7 +816,7 @@
 <xsl:template match="x:note[@place='foot']">
     <xsl:variable name="anchor" select="./x:c[@type='anchor']"/>
     <xsl:element name="span">
-        <xsl:attribute name="teiname">note</xsl:attribute>
+        <xsl:attribute name="data-teiname">note</xsl:attribute>
         <xsl:attribute name="data-anno"/>
         <xsl:attribute name="class">footnote<xsl:if test="not($anchor)"> numbered</xsl:if></xsl:attribute>
         <!--xsl:choose>
@@ -833,7 +835,7 @@
 <xsl:template match="x:note">
 <xsl:element name="span">
     <xsl:call-template name="lang"/>
-    <xsl:attribute name="teiname">note</xsl:attribute>
+    <xsl:attribute name="data-teiname">note</xsl:attribute>
     <xsl:attribute name="class">note
         <xsl:choose>
             <xsl:when test="@place='above' or @place='top-margin' or @place='left-margin'"> super</xsl:when>
