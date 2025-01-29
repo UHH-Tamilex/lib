@@ -184,6 +184,7 @@ const getWitOrder = el => {
 };
 
 const formatReading = str => {
+    if(!str) return ''; // if the whole reading is empty
     return str.replace(/‡+/g,(match) => `<gap reason="lost" quantity="${match.length}"/>`);
     // TODO: deal with akṣaras, lines, etc.
 };
@@ -410,6 +411,13 @@ const getXMLRdgs = (blockid, alignment, wit, idsel = '*|id') => {
             start = end;
         }
         node = walker.nextNode();
+    }
+    if(wordend > end) { // catch leftover readings (not sure why this works)
+        currange.setEndAfter(block.lastChild);
+        const clone = currange.cloneContents();
+        const temp = doc.createElement('temp');
+        temp.appendChild(clone);
+        ranges.push(temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim());
     }
     return ranges;
 };
