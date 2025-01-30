@@ -450,7 +450,7 @@ const makeApp = (doc, ed, opts) =>  {
     const words = doc.querySelector(`TEI[n="${opts.base}"]`).querySelectorAll('w');
 
 
-    const block = cleanBlock(opts.blockid,idsel,{wit: ed});
+    const block = cleanBlock(opts.blockid,idsel,{name: opts.base, xml: ed});
     if(!checkAlignment([...words],block))
         alert(`${opts.base} doesn't match alignment.`);
 
