@@ -352,6 +352,12 @@ const cleanBlock = (blockid,idsel,wit) => {
     block.normalize();
     return block;
 };
+const checkAlignment = (words, block) => {
+    const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'');
+    const blocktext = block.textContent.trim().replaceAll(/\s+/,' ');
+    if(aligntext === blocktext) return true;
+    return false;
+};
 
 const getXMLRdgs = (blockid, alignment, wit, idsel = '*|id') => {
     const block = cleanBlock(blockid,idsel,wit);
@@ -359,6 +365,10 @@ const getXMLRdgs = (blockid, alignment, wit, idsel = '*|id') => {
 
     const doc = wit.xml;
     const words = [...alignment.querySelectorAll('w')];
+
+    if(!checkAlignment(words,block))
+        alert(`${wit.name} doesn't match alignment.`);
+
     const ignoretags = ((par) => {
         const filters = par.querySelector('ab[type="tagfilters"]');
         if(!filters) return new Set();
