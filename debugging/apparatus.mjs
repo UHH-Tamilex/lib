@@ -448,6 +448,12 @@ const makeApp = (doc, ed, opts) =>  {
     //const curriedWitList = curry(getWitList)(doc)(witlistopts);
     
     const words = doc.querySelector(`TEI[n="${opts.base}"]`).querySelectorAll('w');
+
+
+    const block = cleanBlock(opts.blockid,idsel,{wit: ed});
+    if(!checkAlignment([...words],block))
+        alert(`${opts.base} doesn't match alignment.`);
+
     const otherdocs = doc.querySelectorAll(`TEI:not([n="${opts.base}"])`);
     const otherrdgs = opts.witnesses ? new Map(
         [...otherdocs].map(d => {
