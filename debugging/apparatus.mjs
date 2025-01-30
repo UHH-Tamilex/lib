@@ -354,7 +354,7 @@ const cleanBlock = (blockid,idsel,wit) => {
 };
 const checkAlignment = (words, block) => {
     const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'');
-    const blocktext = block.textContent.trim().replaceAll(/\s+/g,' ');
+    const blocktext = block.textContent.trim().replaceAll(/\s+/g,' ').replaceAll('‡','');
     if(aligntext === blocktext) return true;
     return false;
 };
