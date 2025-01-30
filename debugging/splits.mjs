@@ -25,7 +25,7 @@ const Preview = async () => {
     updateChanged();
     const newDoc = await previewDoc(Splitter.sharedState.curDoc);
     for(const id of ids) {
-        const standOff = newDoc.querySelector(`standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
+        const standOff = newDoc.querySelector(`.standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
         standOff.lang = 'en';
         const existingStandOff = document.querySelector(`.standOff[data-type="wordsplit"][data-corresp="#${id}"]`);
         if(existingStandOff)
