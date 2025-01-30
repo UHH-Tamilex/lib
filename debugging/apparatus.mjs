@@ -280,8 +280,7 @@ const removeContainer = el => {
 };
 
 const cleanBlock = (blockid,idsel,wit) => {
-    const text = wit.xml.querySelector(`text[corresp="#${wit.name}"]`) || wit.xml.querySelector('text');
-    const block = text.querySelector(`[corresp="#${blockid}"], [${idsel}="${blockid}"]`)?.cloneNode(true);
+    const block = wit.xml.querySelector(`text[corresp="#${wit.name}"] [corresp="#${blockid}"], text[corresp="#${wit.name}"] [${idsel}="${blockid}"], text [corresp="#${blockid}"], text [${idsel}="${blockid}"]`)?.cloneNode(true);
     if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
@@ -448,7 +447,6 @@ const makeApp = (doc, ed, opts) =>  {
     //const curriedWitList = curry(getWitList)(doc)(witlistopts);
     
     const words = doc.querySelector(`TEI[n="${opts.base}"]`).querySelectorAll('w');
-
 
     const block = cleanBlock(opts.blockid,idsel,{name: opts.base, xml: ed});
     if(!checkAlignment([...words],block))
