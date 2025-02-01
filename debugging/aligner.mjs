@@ -223,7 +223,7 @@ const updateMarks = obj => {
                 break;
             case '[m]':
                 nosandhi[n] = '<c type="inserted">m</c>';
-                sandhi[n] = '<c type="inserted">m</c>';
+                sandhi[n] = `<c type="inserted">${sandhi[n]}</c>`;
         }
     }
 };
