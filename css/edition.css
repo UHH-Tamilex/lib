@@ -136,7 +136,7 @@ div.lg div.l.indent9 {
     line-height: 3.5rem; 
     margin-right: 0.25rem;
 }
-.text-block.p, p { 
+.text-block.p, .text-block p { 
     line-height: 2rem; 
     text-indent: 2rem; 
     font-size: 1.2rem; 
