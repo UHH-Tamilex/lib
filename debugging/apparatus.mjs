@@ -274,6 +274,7 @@ const realNextSibling = walker => {
 };
 
 const removeContainer = el => {
+    if(!el) return;
     while(el.firstChild)
         el.parentNode.insertBefore(el.firstChild,el);
     el.remove();
@@ -309,7 +310,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         for(const app of apps) {
             for(const rdg of app.querySelectorAll('rdg'))
                 rdg.remove();
-            removeContainer(app.querySelector('lem'));
+            removeContainer(app.querySelector('lem')); // <app><note/></app> will have no <lem>
             removeContainer(app);
         }
     }
@@ -351,28 +352,26 @@ const cleanBlock = (blockid,idsel,wit) => {
     block.normalize();
     return block;
 };
-const checkAlignment = (words, block) => {
+const checkAlignment = (words, block, ignoretags = []) => {
     const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'').replaceAll('‡','');
-    const blocktext = block.textContent.replaceAll(/\s+/g,' ');
+    const blockclone = block.cloneNode(true);
+    if(ignoretags.size > 0)
+        for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
+            tag.remove();
+    const blocktext = blockclone.textContent.replaceAll(/\s+/g,' ');
     if(aligntext === blocktext) return true;
     return false;
 };
 
-const getXMLRdgs = (blockid, alignment, wit, idsel = '*|id') => {
-    const block = cleanBlock(blockid,idsel,wit);
+const getXMLRdgs = (block, alignment, witname, ignoretags) => {
     if(!block) return;
 
-    const doc = wit.xml;
+    const doc = block.ownerDocument;
     const words = [...alignment.querySelectorAll('w')];
 
-    if(!checkAlignment(words,block))
-        alert(`${wit.name} doesn't match alignment.`);
+    if(!checkAlignment(words,block,ignoretags))
+        _state.logger(`${witname} doesn't match alignment.`);
 
-    const ignoretags = ((par) => {
-        const filters = par.querySelector('ab[type="tagfilters"]');
-        if(!filters) return new Set();
-        return new Set([...filters.querySelectorAll('tag[subtype="ignore"]')].map(f => f.textContent.trim()));
-    })(alignment.parentNode);
     const ranges = [];
 
     let start = 0;
@@ -448,9 +447,15 @@ const makeApp = (doc, ed, opts) =>  {
     
     const words = doc.querySelector(`TEI[n="${opts.base}"]`).querySelectorAll('w');
 
+    const ignoretags = ((par) => {
+        const filters = par.querySelector('ab[type="tagfilters"]');
+        if(!filters) return new Set();
+        return new Set([...filters.querySelectorAll('tag[subtype="ignore"]')].map(f => f.textContent.trim()));
+    })(doc);
+
     const block = cleanBlock(opts.blockid,idsel,{name: opts.base, xml: ed});
-    if(!checkAlignment([...words],block))
-        alert(`${opts.base} doesn't match alignment.`);
+    if(!checkAlignment([...words],block,ignoretags))
+        _state.logger(`${opts.base} doesn't match alignment.`);
 
     const otherdocs = doc.querySelectorAll(`TEI:not([n="${opts.base}"])`);
     const otherrdgs = opts.witnesses ? new Map(
@@ -458,10 +463,11 @@ const makeApp = (doc, ed, opts) =>  {
             const docid = d.getAttribute('n');
             const witfile = opts.witnesses.get(docid);
             if(!witfile) {
-                alert(`can't find file for ${docid}.`);
+                _state.logger(`Can't find file for ${docid}.`);
                 return [docid,null];
             }
-            const rdgs = getXMLRdgs(opts.blockid,d,witfile,idsel);
+            const block = cleanBlock(opts.blockid,idsel,witfile);
+            const rdgs = getXMLRdgs(block,d,witfile.name,ignoretags);
             return [docid, rdgs];
         })) : null;
 
