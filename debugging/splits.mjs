@@ -218,7 +218,9 @@ const fillWordSplits = e => {
     const ret = serializeWordsplits(standOff);
     
     const textareas = document.querySelectorAll('#splits-popup textarea');
-    textareas[0].value = ret.tam;
+    textareas[0].value = document.getElementById('transbutton').lang === 'en' ? 
+        Sanscript.t(ret.tam,'iast','tamil') :
+        ret.tam;
     unTemp({target: textareas[0]});
     textareas[1].value = ret.eng;
     textareas[2].value = ret.notes.join('\n\n');
@@ -360,7 +362,7 @@ const showSplits = async () => {
     const switches = document.getElementById('previewswitcher').children;
     switches[0].classList.add('selected');
     switches[1].classList.remove('selected');
-
+    _state.changed = false;
     copyToClipboard(standOff,popup);
 };
 
