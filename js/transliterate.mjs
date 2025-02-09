@@ -500,9 +500,9 @@ transliterator.activate = (par = _state.parEl) => {
                 // non-HTML tags will have no .dataset (e.g. tagname typos)
                 if(curnode.parentElement.dataset?.hasOwnProperty('glyph'))
                     result = curnode.parentElement.dataset.glyph;
-                if(curnode.parentElement.classList.contains('originalscript'))
+                else if(curnode.parentElement.classList.contains('originalscript'))
                     result = cache.get(curnode);
-                if(scriptfunc)
+                else if(scriptfunc)
                     result = scriptfunc(curnode.data);
 
                 if(result !== undefined) curnode.data = result;
