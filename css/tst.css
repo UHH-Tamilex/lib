@@ -110,7 +110,13 @@ body {
 
 @media (max-width: 800px) {
     #buttoncontainer {
-        left: -12.5%;
+        left: -0.8rem;
+    }
+    #button_wordsplitbutton {
+        margin-left: 2rem;
+    }
+    #wordsplitbutton {
+        background: rgb(248,248,248);
     }
 }
 
