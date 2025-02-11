@@ -1,4 +1,5 @@
 import xmlFormat from './xml-formatter.mjs';
+import Sanscript from '../js/sanscript.mjs';
 
 const _state = {
     logger: e => alert(e)
@@ -395,7 +396,7 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
             }
         }
         if(node.nodeType === 3) {
-            node.data = node.data.replaceAll(/\s+/g,' ');
+            node.data = Sanscript.t(node.data.replaceAll(/\s+/g,' '),'tamil','iast');
             let nodecount = node.data.length;
             if(prevspace) {
                 if(node.data.startsWith(' ')) {
