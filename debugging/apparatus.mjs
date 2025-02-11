@@ -1,5 +1,5 @@
 import xmlFormat from './xml-formatter.mjs';
-import Sanscript from '../js/sanscript.mjs';
+import {Sanscript} from '../js/sanscript.mjs';
 
 const _state = {
     logger: e => alert(e)
