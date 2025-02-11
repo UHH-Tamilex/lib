@@ -1,5 +1,9 @@
 import xmlFormat from './xml-formatter.mjs';
 
+const _state = {
+    logger: e => alert(e)
+};
+
 const mergeGroups = (doc) => {
     const els = doc.querySelectorAll('cl');
     for(const el of els) {
