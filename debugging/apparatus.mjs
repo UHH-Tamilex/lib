@@ -363,7 +363,7 @@ const checkAlignment = (words, block, ignoretags = []) => {
     if(ignoretags.size > 0)
         for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
             tag.remove();
-    const blocktext = blockclone.textContent.replaceAll(/\s+/g,' ');
+    const blocktext = Sanscript.t(blockclone.textContent.replaceAll(/\s+/g,' '),'tamil','iast');
     if(aligntext === blocktext) return true;
     return false;
 };
