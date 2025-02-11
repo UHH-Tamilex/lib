@@ -1,5 +1,9 @@
 import { loadDoc } from './fileops.mjs';
 
+const _state = {
+    sheet: null
+};
+
 const getXSLTSheet = async doc => {
     for(const n of doc.childNodes) {
         if(n.nodeName === 'xml-stylesheet') {
@@ -52,8 +56,8 @@ const XSLTransform = async (xsltsheet, doc) => {
 };
 
 const previewDoc = async doc => {
-    const sheet = await getXSLTSheet(doc);
-    return await XSLTransform(sheet, doc);
+    if(!_state.sheet) _state.sheet = await getXSLTSheet(doc);
+    return await XSLTransform(_state.sheet, doc);
 };
 
 export default previewDoc;

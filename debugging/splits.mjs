@@ -10,6 +10,7 @@ const _state = {
     noteCM: null,
     tamlines: null,
     wordsplits: null,
+    wordlistsheet: null,
     changedBlocks: [],
     changed: false,
 //    Transliterator: null
@@ -340,8 +341,9 @@ const showSplits = async () => {
 
     const standOff =`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit" corresp="#${blockid}">\n${ret.xml}\n</standOff>`;
     const xproc = new XSLTProcessor();
-    const xslsheet = await loadDoc('lib/debugging/wordlist.xsl'); // TODO: this path is fixed
-    xproc.importStylesheet(xslsheet);
+    if(!_state.wordlistsheet)
+        _state.wordlistsheet = await loadDoc('lib/debugging/wordlist.xsl'); // TODO: this path is fixed
+    xproc.importStylesheet(_state.wordlistsheet);
     const res = xproc.transformToDocument((new DOMParser()).parseFromString(standOff,'text/xml')).querySelector('table');
     if(document.getElementById('transbutton').lang === 'en')
         for(const th of res.querySelectorAll('[lang="ta-Latn"]')) {
