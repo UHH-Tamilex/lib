@@ -39,6 +39,7 @@ const Preview = async () => {
     }
     // keep clicking until the wordsplit appears... pretty hacky solution
     const wordsplitbutton = document.getElementById('wordsplitbutton');
+    wordsplitbutton.style.display = 'block';
     wordsplitbutton.click();
 
     cancelPopup();

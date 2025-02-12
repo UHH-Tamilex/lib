@@ -506,9 +506,9 @@ const go = () => {
         transblock.addEventListener('mouseover',findCorrespLine);
     
     const wordsplitbutton = document.getElementById('wordsplitbutton');
+    wordsplitbutton.addEventListener('click',wordsplit); // start this for editmode
     if(document.querySelector('.standOff[data-type="wordsplit"]')) {
         wordsplitbutton.style.display = 'block';
-        wordsplitbutton.addEventListener('click',wordsplit);
         /*
         if(Debugging) {
             const splitedit = document.getElementById('wordspliteditbutton');
