@@ -195,6 +195,10 @@ const lineCounter = (el) => {
                 cur = realNextSibling(walker);
                 continue;
             }
+            if(cur.classList.contains('ignored')) {
+                cur = realNextSibling(walker);
+                continue;
+            }
             /*
             else if(cur.classList.contains('gap')) {
                 cur = realNextSibling(walker);
