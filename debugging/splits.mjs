@@ -11,7 +11,7 @@ const _state = {
     tamlines: null,
     wordsplits: null,
     wordlistsheet: null,
-    changedBlocks: [],
+    changedBlocks: new Map(),
     changed: false,
 //    Transliterator: null
 };
@@ -22,7 +22,7 @@ const Preview = async () => {
     spinner.className = 'spinner';
     document.getElementById('blackout').appendChild(spinner);
 
-    const ids = _state.changedBlocks.map(n => n.id);
+    const ids = _state.changedBlocks.keys();
     updateChanged();
     const newDoc = await previewDoc(Splitter.sharedState.curDoc);
     for(const id of ids) {
@@ -51,17 +51,17 @@ const Preview = async () => {
 };
 
 const updateChanged = () => {
-    for(const block of _state.changedBlocks) {
-        let curStandOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${block.id}"]`);
+    for(const [id, xmlstr] of _state.changedBlocks.entries()) {
+        let curStandOff = Splitter.sharedState.curDoc.querySelector(`standOff[type="wordsplit"][corresp="#${id}"]`);
         if(!curStandOff) {
             curStandOff = Splitter.sharedState.curDoc.createElementNS('http://www.tei-c.org/ns/1.0','standOff');
-            curStandOff.setAttribute('corresp',`#${block.id}`);
+            curStandOff.setAttribute('corresp',`#${id}`);
             curStandOff.setAttribute('type','wordsplit');
             Splitter.sharedState.curDoc.documentElement.appendChild(curStandOff);
         }
-        curStandOff.innerHTML = `\n${block.str}\n`;
+        curStandOff.innerHTML = `\n${xmlstr}\n`;
     }
-    _state.changedBlocks = [];
+    _state.changedBlocks = new Map();
 };
 
 const saveThis = () => {
@@ -354,7 +354,7 @@ const showSplits = async () => {
 
     output.innerHTML = '';
     output.appendChild(res);
-    _state.changedBlocks.push({id: blockid, str: ret.xml});
+    _state.changedBlocks.set(blockid, ret.xml);
 
     const code = document.createElement('div');
     code.classList.add('code');
@@ -503,7 +503,7 @@ listEdit.click = e => {
         
         e.target.addEventListener('blur',listEdit.blur,{once: true});
     }
-    else if(e.target.firstElementChild.spellcheck === true)
+    else if(e.target.firstElementChild?.spellcheck === true)
         e.target.firstElementChild.focus();
 };
 
