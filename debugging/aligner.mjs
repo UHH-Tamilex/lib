@@ -92,7 +92,7 @@ const revGramMap = new Map(gramAbbreviations.map(a => [a[1],a[0]]));
 
 const wordsplitscore = (a,b) => {
     const vowels = 'aāiīuūoōeē'.split('');
-    const punctuation = ['-','‘','’','“','”',',','.',';'];
+    const punctuation = ['-','‘','’','“','”',',','.',';','!'];
     if(a === ' ' || b === ' ') return -2;
     if(a === b) return 1;
     if(a === 'i' && b === '[i]') return 1;
