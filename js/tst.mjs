@@ -46,7 +46,7 @@ const init = function() {
     // start all texts in diplomatic view
     for(const l of recordcontainer.querySelectorAll('.line-view-icon')) {
         const teitext = l.closest('.teitext');
-        const lb = teitext?.querySelector('.lb, .pb');
+        const lb = !teitext.querySelector('.apparatus-block') && teitext?.querySelector('.lb, .pb');
         if(!lb)
             l.style.display = 'none';
         else {
@@ -63,10 +63,10 @@ const init = function() {
     // check for GitHub commit history
     GitHubFunctions.latestCommits();
 
-    if(document.querySelector('.app')) {
+    //if(document.querySelector('.app')) { // init in case of editmode
         ApparatusViewer.init();
         ApparatusViewer.setTransliterator(Transliterate);
-    }
+    //}
 
     recordcontainer.addEventListener('click',events.docClick);
     recordcontainer.addEventListener('copy',events.removeHyphens);
