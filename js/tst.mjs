@@ -28,7 +28,8 @@ const init = function() {
     if(viewer) {
         _state.manifest = viewer.dataset.manifest;
         const param = params.get('facs');
-        const page = facs || (param ? parseInt(param) - 1 : null) || viewer.dataset.start;
+        const page = facs !== undefined ? facs :
+            (param ? parseInt(param) - 1 : null) || viewer.dataset.start;
         if(_state.mirador)
             MiradorWrapper.refresh(_state.mirador,viewer.dataset.manifest, page);
         else
