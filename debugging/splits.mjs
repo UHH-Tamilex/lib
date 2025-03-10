@@ -479,7 +479,7 @@ listEdit.blur = e => {
     e.target.blur();
 };
 
-disableButtons = () => {
+const disableButtons = () => {
     const saveasbutton = document.getElementById('saveasbutton');
     saveasbutton.disabled = true;
     saveasbutton.title = 'Realign first';
