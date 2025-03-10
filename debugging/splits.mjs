@@ -473,10 +473,9 @@ listEdit.blur = e => {
     else
         listEdit.updateWord(e);
 
-    //listEdit.disableButtons();
-
     document.getElementById('engsplit').value = refreshTranslation(listEdit.state.tamlines,listEdit.state.wordlist);
     e.target.blur();
+    disableButtons();
 };
 
 const disableButtons = () => {
