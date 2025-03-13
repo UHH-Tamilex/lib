@@ -495,10 +495,10 @@ const findParticle = (word,translation) => {
     for(const [particle,regex] of particles) {
         //word = word.replaceAll(/[\[\]]/g,'');
         const wordmatch = word.match(regex);
-        const transmatch = translation.match(regex);
+        //const transmatch = translation.match(regex); // transmatch is deprecated
         if(wordmatch) {
+            /*
             if(transmatch)
-                // TODO: transmatch will be deprecated
                 return {
                     //translation: translation.slice(0,translation.length-transmatch[0].length),
                     translation: translation.replace(regex,''),
@@ -508,7 +508,7 @@ const findParticle = (word,translation) => {
                     //bare: cleanBare(word.slice(0,word.length-wordmatch[0].length))
                     bare: cleanBare(word.replace(regex,''))
                 };
-            else {
+            else { */
                 const hyphen = findHyphen(word,wordmatch.index,particle);
                 if(hyphen)
                     return {
@@ -518,7 +518,7 @@ const findParticle = (word,translation) => {
                         particletype: particle.endsWith('-') ? 'proclitic' : 'enclitic',
                         bare: cleanBare(word.replace(regex,''))
                     };
-            }
+            //}
         }
     }
     return null;
