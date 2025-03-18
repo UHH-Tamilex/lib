@@ -301,7 +301,7 @@ div.teitext {
     width: 87.5%;
 }
 
-table.texttitle {
+#record-fat section > table.texttitle, #record-thin section > table.texttitle {
     max-width: 100%;
     width: 100%;
     top: 0;
