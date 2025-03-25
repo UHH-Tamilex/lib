@@ -8,7 +8,8 @@ const go = () => {
     const dir = '../../';
     const files = Fs.readdirSync(dir);
     const flist = [];
-    const regex = new RegExp(`^${process.argv[2]}.*\\.xml$`);
+    const prefixes = Process.argv[2].split(',');
+    const regex = new RegExp(prefixes.map(p => `^${p}.*\\.xml$`).join('|'));
     files.forEach((f) => {
         if(regex.test(f))
             flist.push(f);

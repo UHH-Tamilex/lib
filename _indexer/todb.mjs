@@ -71,7 +71,8 @@ const go = () => {
         'line INTEGER, ' +
         'filename TEXT' +
         ')').run();
-    const regex = new RegExp(`^${Process.argv[2]}.*\\.xml$`);
+    const prefixes = Process.argv[2].split(',');
+    const regex = new RegExp(prefixes.map(p => `^${p}.*\\.xml$`).join('|'));
     Fs.readdir(dir,(err, files) => {
         if(err) return console.log(err);
         const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
