@@ -359,7 +359,9 @@ const cleanBlock = (blockid,idsel,wit) => {
     return block;
 };
 const checkAlignment = (words, block, ignoretags = []) => {
-    const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'').replaceAll('‡','');
+    const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'')
+                           .replaceAll('‡','')
+                           .replaceAll(/\s+/g,' '); // for spaces around gaps
     const blockclone = block.cloneNode(true);
     if(ignoretags.size > 0)
         for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
@@ -400,7 +402,8 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
             node.data = Sanscript.t(node.data.replaceAll(/\s+/g,' '),'tamil','iast');
             let nodecount = node.data.length;
             if(prevspace) {
-                if(node.data.startsWith(' ')) {
+                if(node.data !== ' ' && // don't double count if the node is just one space
+                   node.data.startsWith(' ')) {
                     start = start - 1;
                 }
                 prevspace = false;
