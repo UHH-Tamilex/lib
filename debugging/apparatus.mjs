@@ -1,9 +1,8 @@
 import xmlFormat from './xml-formatter.mjs';
 import {Sanscript} from '../js/sanscript.mjs';
 
-const _state = {
-    logger: e => alert(e)
-};
+const _state = {};
+_state.logger = !window.alert ? console.log : str => alert(str);
 
 const mergeGroups = (doc) => {
     const els = doc.querySelectorAll('cl');
@@ -402,13 +401,13 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
             node.data = Sanscript.t(node.data.replaceAll(/\s+/g,' '),'tamil','iast');
             let nodecount = node.data.length;
             if(prevspace) {
-                if(node.data !== ' ' && // don't double count if the node is just one space
-                   node.data.startsWith(' ')) {
+                if(node.data.startsWith(' ')) {
                     start = start - 1;
                 }
                 prevspace = false;
             }
-            if(node.data.endsWith(' '))
+            if(node.data.endsWith(' ') &&
+               node.data !== ' ') // don't double count if the node is just one space
                 prevspace = true;
 
             end = start + nodecount;
