@@ -93,7 +93,7 @@ body {
 #buttoncontainer {
     position: absolute;
     top: 0;
-    left: -3em;
+    left: -2.8em;
     font-size: 1em;
     display: flex;
     flex-direction: column;
@@ -150,6 +150,7 @@ body {
 }
 
 #transbutton:lang(sa-Deva) {
+    padding: 0.1em 0 0 0.4em;
     font-size: 1.4em;
 }
 
