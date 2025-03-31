@@ -118,6 +118,9 @@ body {
     #wordsplitbutton {
         background: rgb(248,248,248);
     }
+    html {
+        font-size: 12px;
+    }
 }
 
 #transbutton:lang(en) {
@@ -179,7 +182,7 @@ body {
 
 .line-view-icon {
     margin-right: 0.5rem;
-    cursor: default;
+    cursor: pointer;
 }
 
 .line-view-icon:hover svg {
@@ -390,6 +393,11 @@ a.uri {
 
 hr {
     width: 87.5%;
+}
+#record-thin hr {
+    width: unset;
+    margin-right: 2rem;
+    max-width: 800px;
 }
 
 @media (max-width: 800px) {
