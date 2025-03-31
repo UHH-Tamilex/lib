@@ -11,6 +11,15 @@ section div.wide {
     font-size: 1.4rem;
     position: sticky;
 }
+.text-block.nolemmata .lem-inline {
+    text-decoration: none;
+}
+
+.text-block.nolemmata .lem-inline:hover, 
+.text-block.nolemmata .lem-inline:hover * {
+    background: none;
+}
+
 .apparatus-block {
     top: 0;
     padding-top: 1rem;
@@ -71,18 +80,27 @@ section div.wide {
     content: ']';
 }
 
-.rdgs {
-    white-space: normal;
-}
 .rdg-text {
     white-space: normal;
 }
 
+.rdgs {
+    white-space: normal;
+}
+
 .rdg {
+    white-space: nowrap;
 }
 
 .rdg-alt {
     display: none;
+    font-variant: normal;
+    margin-left: 0.2rem;
+    white-space: normal;
+}
+
+.rdg-alt:before {
+    content: ': ';
 }
 
 .mshover {

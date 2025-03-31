@@ -368,15 +368,24 @@ const unpermalight = () => {
     }
 };
 
-const switchReading = (par, id) => {
-    par.querySelector('.rdg-text').style.display = 'none';
-    par.querySelector(`.rdg-alt[data-wit~="${id}"]`).style.display = 'inline';
+const switchReading = el => {
+    if(el.querySelector('.rdg-alt')) return;
+    const par = el.closest('.rdg') || el.closest('.app').querySelector('.lem');
+    const id = el.dataset.id;
+    //par.querySelector('.rdg-text').style.display = 'none';
+    //par.querySelector(`.rdg-alt[data-wit~="${id}"]`).style.display = 'block';
+    const rdgalt = par.querySelector(`.rdg-alt[data-wit~="${id}"]`).cloneNode(true);
+    rdgalt.style.display = 'inline';
+    el.appendChild(rdgalt);
 };
 
-const restoreReading = (par) => {
+const restoreReading = par => {
+    /*
     par.querySelector('.rdg-text').style.display = 'inline';
     for(const alt of par.querySelectorAll('.rdg-alt'))
         alt.style.display = 'none';
+    */
+    par.querySelector('.rdg-alt')?.remove();
 };
 
 const Events = { 
@@ -393,9 +402,8 @@ const Events = {
         }
         const msid = e.target.closest('.mshover');
         if(msid) {
-            const rdg = e.target.closest('.rdg');
-            switchReading(rdg,msid.dataset.id);
-            msid.addEventListener('mouseout',restoreReading.bind(null,rdg),{once: true});
+            switchReading(msid);
+            msid.addEventListener('mouseleave',restoreReading.bind(null,msid),{once: true});
         }
         const anchor = e.target.closest('.anchor');
         if(anchor) {
@@ -428,14 +436,14 @@ const Events = {
            e.target.closest('.lem-inline'))
             unhighlight(e.target);
     },
-    /*
     docClick(e) {
+        const msid = e.target.closest('.mshover');
+        if(msid) restoreReading.bind(msid);
+	/*
         for(const tooltip of document.querySelectorAll('.coord-suggestion'))
             tooltip.remove();
         unpermalight(); 
 
-        const msid = e.target.closest('.mshover');
-        if(msid) restoreReading.bind(msid.closest('.rdg'));
 
         const targ = e.target.closest('.lemmalookup');
         if(!targ) return;
@@ -444,9 +452,8 @@ const Events = {
         const left = par.parentElement.querySelector('.text-block');
         const lemma = targ.nextSibling;
         suggestLemmata(lemma,left);
-
+	*/
     },
-    */
     toggleApparatus(e) {
         const button = document.getElementById('apparatusbutton');
         const apparatussvg = document.getElementById('apparatussvg');
@@ -483,12 +490,12 @@ const Events = {
 const init = () => {
     document.addEventListener('mouseover',Events.docMouseover);
     document.addEventListener('mouseout',Events.docMouseout);
-    //if(Debugging) document.addEventListener('click',Events.docClick);
+    /*if(Debugging)*/ document.addEventListener('click',Events.docClick);
+
     const apparatusbutton = document.getElementById('apparatusbutton');
     apparatusbutton.addEventListener('click',Events.toggleApparatus);
-    if(document.querySelector('.apparatus-block.hidden')) {
+    if(document.querySelector('.apparatus-block.hidden'))
         apparatusbutton.style.display = 'block';
-    }
 };
 
 const ApparatusViewer = {
