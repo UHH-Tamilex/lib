@@ -192,7 +192,7 @@ span.invisible {
 #topbar {
     position: sticky;
     top: 1em;
-    margin-left: -3.5rem;
+    /*margin-left: -3.5rem;*/
     display: flex;
     flex-direction: column;
 }
@@ -211,7 +211,7 @@ span.invisible {
 }
 */
 #transbutton {
-    width: fit-content;
+    /*width: fit-content;*/
     position: relative;
     left: 0;
 }

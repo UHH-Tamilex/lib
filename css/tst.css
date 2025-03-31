@@ -41,8 +41,9 @@ body {
 
 #record-fat, .record-fat {
     position: relative;
-    padding-left: 12.5%;
-    width: 87.5%;
+    /*padding-left: 12.5%;
+    width: 87.5%;*/
+    padding-left: 3.5rem;
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -97,6 +98,11 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    backdrop-filter: blur(2px);
+}
+
+#buttoncontainer > div {
+    background: rgb(255,255,248);
 }
 
 #transbutton {
@@ -123,7 +129,6 @@ body {
         font-size: 12px;
     }
     #buttoncontainer {
-        left: -3em;
         font-size: 1.17rem;
     }
 }
