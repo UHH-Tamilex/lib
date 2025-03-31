@@ -34,7 +34,7 @@ body {
     position: relative;
     /*padding-left: 12.5%;*/
     /*width: 120%;*/
-    padding-left: 4.5rem;
+    padding-left: 3.5rem;
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -92,7 +92,7 @@ body {
 #buttoncontainer {
     position: absolute;
     top: 0;
-    left: -3.5em;
+    left: -3em;
     font-size: 1em;
     display: flex;
     flex-direction: column;
@@ -113,9 +113,6 @@ body {
 }
 
 @media (max-width: 800px) {
-    #buttoncontainer {
-        left: -0.8rem;
-    }
     #button_wordsplitbutton {
         margin-left: 2rem;
     }
