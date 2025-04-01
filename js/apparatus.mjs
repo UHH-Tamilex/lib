@@ -454,8 +454,7 @@ const Events = {
         suggestLemmata(lemma,left);
 	*/
     },
-    toggleApparatus(e) {
-        const button = document.getElementById('apparatusbutton');
+    toggleApparatus() {
         const apparatussvg = document.getElementById('apparatussvg');
         const translationsvg = document.getElementById('translationsvg');
         const apparati = document.querySelectorAll('.apparatus-block');

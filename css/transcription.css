@@ -63,15 +63,18 @@ p.diplo::after {
 }
 
 div.lg {
-            /*width: 100%;*/
-            font-size: 1.4rem;
-            line-height: 2rem;
-            padding-top: 0.5em;
-            padding-right: 0;
-            padding-bottom: 0.5em;
-            /*padding-left: 0.5em;*/
+    /*width: 100%;*/
+    font-size: 1.4rem;
+    line-height: 2rem;
+    padding-top: 0.5em;
+    padding-right: 0;
+    padding-bottom: 0.5em;
+    /*padding-left: 0.5em;*/
 }
 
+.text-block + .text-block {
+    padding-left: 0.5em;
+}
 
 #tooltip div.lg, .note div.lg {
     font-size: revert;
@@ -370,6 +373,10 @@ del {color: grey;
      text-decoration-color: #CC0000;
 }
 
+del .pb, del .lb {
+    text-decoration: none;
+}
+
 span.orig::before {
     content: '¡';
     color: #CC0000;
@@ -579,11 +586,7 @@ blockquote > span.milestone.diplo:first-child::before {
     content: "";
 }
 
-br.caesura.diplo {
-    display: none;
-}
-
-span.caesura.diplo {
+br.caesura.diplo, span.caesura.diplo, .app .caesura {
     display: none;
 }
 
