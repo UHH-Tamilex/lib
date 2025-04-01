@@ -193,18 +193,35 @@ const formatReading = str => {
     // TODO: deal with akṣaras, lines, etc.
 };
 
-const processReadings = (n,otherdocs,otherrdgs,lemma,opts,posapp,negapp) => {
+const processReadings = (n,otherdocs,otherrdgs,word,opts) => {
+    const lemmatrimmed = word.textContent.trim();
+    const lemma = opts.normlem ? 
+        (word.getAttribute('lemma') || lemmatrimmed) :
+        lemmatrimmed;
+
+    const posapp = {all: new Set(), minor: new Map()};
+    const negapp = new Map();
     for(const otherdoc of otherdocs) {
         const id = otherdoc.getAttribute('n');
         const otherword = otherdoc.querySelectorAll('w')[n];
         const trimmed = otherword.textContent.trim();
         const normword = otherword.getAttribute('lemma');
 
-        if(opts.normlem && (normword || trimmed) === lemma)
-            posapp.add(id);
+        const newstr = opts.normlem ? normword || trimmed : 
+                trimmed;
+
+        if(newstr === lemma) {
+            posapp.all.add(id);
+            const realrdg = opts.witnesses && otherrdgs.get(id) ? 
+                otherrdgs.get(id)[n] :
+                trimmed;
+            if(realrdg !== lemmatrimmed) {
+                const minorwits = posapp.minor.get(realrdg) || [];
+                minorwits.push(id);
+                posapp.minor.set(realrdg,minorwits);
+            }
+        }
         else {
-            const newstr = opts.normlem ? normword || trimmed : 
-                    trimmed;
             const realrdg = opts.witnesses && otherrdgs.get(id) ? 
                 otherrdgs.get(id)[n] :
                 trimmed;
@@ -215,6 +232,7 @@ const processReadings = (n,otherdocs,otherrdgs,lemma,opts,posapp,negapp) => {
             negapp.set(newstr,negwits);
         }
     }
+    return [posapp, negapp];
 };
 
 const formatMinorReadings = (arr,doc,witlistopts) => {
@@ -231,6 +249,28 @@ const formatMinorReadings = (arr,doc,witlistopts) => {
     return {wits: allwits, rdgstr: rdgstr};
 };
 
+const processLem = (word, posapp, doc, witlistopts) => {
+    const negapp = posapp.minor;
+    if(negapp.size === 0) {
+        const poswits = getWitList(doc,witlistopts,posapp.all);
+        return  `  <lem ${poswits}>${word.innerHTML.trim()}</lem>\n`;
+    }
+
+    const curriedWitList = curry(getWitList)(doc)(witlistopts);
+    const poswits = getWitList(doc,
+        {...witlistopts,
+             attr: 'select',
+        },posapp.all);
+    let app = `<rdgGrp type="lemma"${poswits}>\n<lem>${word.innerHTML.trim()}</lem>\n`;
+
+    for(const rdg of [...negapp]) {
+        const rdgarr = [...rdg];
+        const {wits: minorwits, rdgstr: minorrdgs} = formatMinorReadings([rdgarr],doc,witlistopts);
+            app = app + `  ${minorrdgs}\n`;
+    }
+    app = app + '<\/rdgGrp>';
+    return app;
+};
 const processNegApp = (negapp, doc, witlistopts) => {
     const curriedWitList = curry(getWitList)(doc)(witlistopts);
     let app = '';
@@ -484,14 +524,9 @@ const makeApp = (doc, ed, opts) =>  {
     for(let n=0; n<words.length;n++) {
         const word = words[n];
 
-        const lemma = opts.normlem ? 
-            (word.getAttribute('lemma') || word.textContent.trim()) :
-            word.textContent.trim();
         const end = start + word.textContent.replaceAll(/\s/g,'').length;
 
-        const posapp = new Set();
-        const negapp = new Map();
-        processReadings(n,otherdocs,otherrdgs,lemma,opts,posapp,negapp);
+        const [posapp, negapp] = processReadings(n,otherdocs,otherrdgs,word,opts);
 
         if(negapp.size === 0) {
             start = end;
@@ -500,9 +535,8 @@ const makeApp = (doc, ed, opts) =>  {
 
         let app = `<app corresp="${start},${end}">\n`;
 
-        const poswits = getWitList(doc,witlistopts,posapp);
-        app = app + `  <lem ${poswits}>${word.innerHTML.trim()}</lem>\n`;
-        
+        app = app + processLem(word,posapp,doc,witlistopts);
+
         app = app + processNegApp(negapp,doc,witlistopts);
 
         app = app + '</app>\n';    
