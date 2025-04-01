@@ -49,8 +49,9 @@
                 <xsl:value-of select="$msstring"/>
                 <xsl:text> </xsl:text>
              </xsl:variable>
+             <xsl:variable name="par" select="x:rdgGrp | ."/>
              <xsl:choose>
-                 <xsl:when test="./x:rdg[not(@type='main')][contains(concat(' ', normalize-space(@wit), ' '),$spacestring)]">
+                 <xsl:when test="$par/x:rdg[not(@type='main')][contains(concat(' ', normalize-space(@wit), ' '),$spacestring)]">
                     <xsl:attribute name="class">msid mshover</xsl:attribute>
                  </xsl:when>
                  <xsl:otherwise>
@@ -376,7 +377,7 @@
     <xsl:element name="span">
         <xsl:attribute name="class">app</xsl:attribute>
         <xsl:choose>
-            <xsl:when test="x:lem">
+            <xsl:when test="x:lem | x:rdgGrp[@type='lemma']">
                 <xsl:call-template name="lemma">
                     <xsl:with-param name="corresp" select="$corresp"/>
                 </xsl:call-template>
@@ -385,9 +386,9 @@
                 <span class="lem lem-anchor">*</span>
             </xsl:otherwise>
         </xsl:choose>
-        <xsl:if test="x:rdg | x:rdgGrp">
+        <xsl:if test="x:rdg | x:rdgGrp[not(@type='lemma')]">
             <span class="rdgs">
-                <xsl:for-each select="./x:rdg | ./x:rdgGrp">
+                <xsl:for-each select="./x:rdg | ./x:rdgGrp[not(@type='lemma')]">
                     <xsl:call-template name="reading">
                         <xsl:with-param name="corresp" select="$corresp"/>
                     </xsl:call-template>
@@ -408,14 +409,24 @@
     <xsl:element name="span">
         <xsl:attribute name="class">lem</xsl:attribute>
         <xsl:attribute name="data-corresp"><xsl:value-of select="@corresp"/></xsl:attribute>
-        <xsl:attribute name="data-text"><xsl:value-of select="x:lem/text()"/></xsl:attribute>
-        <xsl:apply-templates select="x:lem/node()"/>
-    </xsl:element>
-    <xsl:if test="x:lem/@wit">
+        <!--xsl:attribute name="data-text"><xsl:value-of select="./x:lem/text() | ./x:rdgGrp[@type='lemma']/x:lem/text()"/></xsl:attribute-->
+        <span class="rdg-text">
+            <xsl:apply-templates select="./x:lem/node() | ./x:rdgGrp[@type='lemma']/x:lem/node()"/>
+        </span>
+        <xsl:for-each select="./x:rdgGrp/x:rdg[@type='minor']">
+            <span class="rdg-alt">
+                <xsl:attribute name="data-wit">
+                    <xsl:value-of select="translate(@wit,'#','')"/>
+                </xsl:attribute>
+                <xsl:apply-templates select="./node()"/>
+            </span>
+        </xsl:for-each>
+    </xsl:element> 
+    <xsl:if test="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select">
         <span>
             <xsl:attribute name="class">lem-wit</xsl:attribute>
             <xsl:call-template name="splitwit">
-                <xsl:with-param name="mss" select="x:lem/@wit"/>
+                <xsl:with-param name="mss" select="x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
                 <xsl:with-param name="corresp" select="$corresp"/>
             </xsl:call-template>
         </span>
