@@ -274,8 +274,8 @@ const countpos = (str, pos) => {
     return str.length;
 };
 
-const exportFile = async () => {
-    const outdoc = await exportLaTeX(_state.curDoc);
+const exportFile = async (curDoc) => {
+    const outdoc = await exportLaTeX(curDoc);
     const thisFilename = window.location.pathname.split('/').pop();
     const basename = thisFilename.substring(0,thisFilename.lastIndexOf('.'));
     const fileHandle = await showSaveFilePicker({

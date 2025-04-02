@@ -21,7 +21,7 @@ const startEditMode = async Transliterator => {
     addEditButtons(blocks);
     document.getElementById('button_wordsplitbutton').addEventListener('click',Splitter.addWordSplits);
     document.getElementById('button_editbutton').addEventListener('click',Apparatuser.addVariants);
-    document.getElementById('button_exportbutton').addEventListener('click',exportFile);
+    document.getElementById('button_exportbutton').addEventListener('click',exportFile.bind(null,_state.curDoc));
     document.getElementById('button_savebutton').addEventListener('click',saveAs.bind(null,_state.filename, _state.curDoc));
     
     document.getElementById('recordcontainer').addEventListener('click',docClick);
