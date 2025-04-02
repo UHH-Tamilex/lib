@@ -330,6 +330,19 @@ const cleanBlock = (blockid,idsel,wit) => {
     if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
+    let gapid = 0;
+    for(const gap of [...block.querySelectorAll('gap')]) {
+        const quantity = parseInt(gap.getAttribute('quantity')) || 1;
+        for(let n=1;n<quantity + 1;n++) {
+            const newgap = gap.cloneNode(true);
+            newgap.setAttribute('quantity',1);
+            newgap.setAttribute('_gapid',gapid);
+            newgap.textContent = '‡';
+            gap.parentNode.insertBefore(newgap,gap);
+        }
+        gapid = gapid + 1;
+        gap.remove();
+    }
 
     const pbunit = wit.xml.querySelector('supportDesc extent measure')?.getAttribute('unit');
     if(pbunit) {
@@ -398,9 +411,9 @@ const cleanBlock = (blockid,idsel,wit) => {
     return block;
 };
 const checkAlignment = (words, block, ignoretags = []) => {
-    const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'')
-                           .replaceAll('‡','')
-                           .replaceAll(/\s+/g,' '); // for spaces around gaps
+    const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'');
+                           //.replaceAll('‡','')
+                           //.replaceAll(/\s+/g,' '); // for spaces around gaps
     const blockclone = block.cloneNode(true);
     if(ignoretags.size > 0)
         for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
@@ -425,7 +438,7 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
     let end = 0;
     let prevspace = false;
     let curword = words.shift();
-    let wordend = curword.textContent.replaceAll('‡','').length;
+    let wordend = curword.textContent.length;//.replaceAll('‡','').length;
     let currange = doc.createRange();
     const walker = doc.createTreeWalker(block,0xFFFFFFFF);
     let node = walker.nextNode();
@@ -453,16 +466,18 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
             end = start + nodecount;
             while(wordend <= end) {
                 currange.setEnd(node,wordend - start);
+                ranges.push(serializeRange(doc, currange));
+                /*
                 const clone = currange.cloneContents();
                 const temp = doc.createElement('temp');
                 temp.appendChild(clone);
                 ranges.push(temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim());
-
+                */
                 currange = doc.createRange();
                 currange.setStart(node,wordend - start);
                 curword = words.shift();
                 if(!curword) break mainLoop;
-                wordend = curword.textContent.replaceAll('‡','').length + wordend;
+                wordend = curword.textContent/*.replaceAll('‡','')*/.length + wordend;
             }
             start = end;
         }
@@ -470,12 +485,36 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
     }
     if(wordend > end) { // catch leftover readings (not sure why this works)
         currange.setEndAfter(block.lastChild);
+        ranges.push(serializeRange(doc, currange));
+        /*
         const clone = currange.cloneContents();
         const temp = doc.createElement('temp');
         temp.appendChild(clone);
         ranges.push(temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim());
+        */
     }
     return ranges;
+};
+
+const serializeRange = (doc, range) => {
+    const clone = range.cloneContents();
+    const temp = doc.createElement('temp');
+    temp.appendChild(clone);
+    //TODO: concat gaps here
+    for(const gap of temp.querySelectorAll('gap')) {
+        const gapid = gap.getAttribute('_gapid');
+        gap.removeAttribute('_gapid');
+        let quantity = 1;
+        while(gap.nextSibling && 
+              gap.nextSibling.nodeName === 'gap' && 
+              gap.nextSibling.getAttribute('_gapid') === gapid) {
+            quantity = quantity + 1;
+            gap.nextSibling.remove();
+        }
+        gap.setAttribute('quantity',quantity);
+        gap.textContent = '';
+    }
+    return temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim();
 };
 
 const makeApp = (doc, ed, opts) =>  {
