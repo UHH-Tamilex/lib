@@ -125,7 +125,7 @@
     <xsl:text>
 \stanza[\smallskip]
 
-</xsl:text><xsl:apply-templates/>
+</xsl:text><xsl:apply-templates select="x:l | x:trailer"/>
 <xsl:if test="./@xml:lang='ta'"><xsl:text>\end{tamil}</xsl:text></xsl:if>
 <xsl:text>
 
