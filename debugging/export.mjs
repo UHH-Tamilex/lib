@@ -91,11 +91,26 @@ const normalizeLg = lg => {
             }
         }
     }
-    const walker = document.createTreeWalker(lg,NodeFilter.SHOW_TEXT);
-    let cur = walker.nextNode();
-    while(cur) {
-        cur.data = cur.data.replaceAll('_','\\_');
-        cur = walker.nextNode();
+    addLangAttr(lg);
+};
+
+const addLangAttr = el => {
+    const walker = document.createTreeWalker(el,NodeFilter.SHOW_ALL);
+    let curnode = walker.currentNode;
+    const parlang = el.closest('*|lang').getAttrbute('xml:lang');
+    el.setAttribute('xml:lang',parlang);
+
+    while(curnode) {
+        if(curnode.nodeType === 1) {
+            const curlang = curnode.getAttribute('xml:lang');
+            if(!curlang) {
+                curnode.setAttribute('xml:lang',curnode.parentNode.getAttribute('xml:lang'));
+            }
+        }
+        else if(cur.nodeType === 3)
+            cur.data = cur.data.replaceAll('_','\\_');
+
+        curnode = walker.nextNode();
     }
 };
 /*
