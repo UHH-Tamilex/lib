@@ -149,11 +149,11 @@
 <xsl:text>(From </xsl:text><xsl:value-of select="$no"/><xsl:text>)</xsl:text>
 </xsl:template>
 
-<xsl:template match="x:hi[rend='subscript']">
+<xsl:template match="x:hi[@rend='subscript']">
 <xsl:text>\textsubscript{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
 </xsl:template>
 
-<xsl:template match="x:hi[rend='superscript']">
+<xsl:template match="x:hi[@rend='superscript']">
 <xsl:text>\textsuperscript{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
 </xsl:template>
 
