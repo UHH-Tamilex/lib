@@ -66,6 +66,7 @@
 \usepackage[normalem]{ulem}
 \usepackage[noend,noeledsec,noledgroup]{reledmac}
 \usepackage[margin=1in]{geometry}
+\usepackage{setspace}
 
 \arrangementX[A]{paragraph}
 \arrangementX[B]{paragraph}
