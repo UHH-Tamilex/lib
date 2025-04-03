@@ -61,7 +61,7 @@
 </xsl:template>
 
 <xsl:template match="x:TEI">
-    <xsl:text>\documentclass[14pt]{extarticle}
+    <xsl:text>\documentclass[12pt]{extarticle}
 \usepackage{polyglossia,fontspec,xunicode}
 \usepackage[normalem]{ulem}
 \usepackage[noend,noeledsec,noledgroup]{reledmac}
@@ -77,13 +77,16 @@
 \Xnotenumfont[A]{\bfseries}
 \Xlemmafont[A]{\bfseries}
 
-\setdefaultlanguage{sanskrit}
-\setotherlanguage{english}
-\newfontfamily\devanagarifont{Brill}
+\setdefaultlanguage{english}
+\setmainfont{Brill}
+\setotherlanguage{tamil}
+\newfontfamily\tamilfont{Noto Serif Tamil Slanted Light}[Script=Tamil]
+\tamilfont\fontdimen2\font=0.8em
+\tamilfont\large\fontdimen2\font=0.5em
+\setlength{\parskip}{12pt}
+\setstanzaindents{1,0,0}
 
 \begin{document}
-    \raggedright
-\input{sanskrit-hyphenations}
 
 \lineation{page}
 \begingroup
@@ -102,20 +105,29 @@
 
 <xsl:template match="x:p">
 <xsl:text>
-\pstart
+\pstart</xsl:text>
+<xsl:if test="./@xml:lang='ta'"><xsl:text>\begin{tamil}</xsl:text></xsl:if>
+<xsl:text>
 </xsl:text>
 <xsl:apply-templates/><xsl:text>
-\pend
+</xsl:text>
+<xsl:if test="./@xml:lang='ta'"><xsl:text>\end{tamil}</xsl:text></xsl:if>
+<xsl:text>\pend
 
 </xsl:text>
 </xsl:template>
 
 <xsl:template match="x:lg">
-<xsl:text>
-\setstanzaindents{2,2,2,2,2}
+<xsl:if test="./@xml:lang='ta'">
+    <xsl:text>
+\begin{tamil}</xsl:text>
+</xsl:if>
+    <xsl:text>
 \stanza[\smallskip]
 
-</xsl:text><xsl:apply-templates/><xsl:text>
+</xsl:text><xsl:apply-templates/>
+<xsl:if test="./@xml:lang='ta'"><xsl:text>\end{tamil}</xsl:text></xsl:if>
+<xsl:text>
 
 </xsl:text>
 </xsl:template>
@@ -198,7 +210,7 @@
 </xsl:template>
 
 <xsl:template match="x:lb">
-    <xsl:text>\textbf{⸤}</xsl:text>
+    <xsl:text>\textenglish{\textbf{⸤}}</xsl:text>
     <!--
         <xsl:text>\textsc{(</xsl:text>
         <xsl:choose>
@@ -214,7 +226,7 @@
 </xsl:template>
 
 <xsl:template match="x:pb">
-    <xsl:text>\textbf{⎡}</xsl:text>
+    <xsl:text>\textenglish{\textbf{⎡}}</xsl:text>
     <!--
         <xsl:text>\textsc{(</xsl:text>
         <xsl:choose>
@@ -251,6 +263,7 @@
 </xsl:template>
 
 <xsl:template match="x:gap">
+    <xsl:text>\textenglish{</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -267,6 +280,7 @@
         <xsl:with-param name="output" select="$gapchar"/>
         <xsl:with-param name="count" select="$quantity"/>
     </xsl:call-template>
+    <xsl:text>}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:space">
@@ -293,7 +307,16 @@
 <xsl:template match="x:app//x:caesura"/>
 
 <xsl:template match="x:note">
+    <xsl:if test="@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:if>
     <xsl:text>\emph{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
+    <xsl:if test="@xml:lang='en'"><xsl:text>}</xsl:text></xsl:if>
+</xsl:template>
+<xsl:template match="x:note[@place='foot']">
+    <xsl:text>\footnoteA{</xsl:text>
+    <xsl:if test="@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:if>
+    <xsl:apply-templates/>
+    <xsl:if test="@xml:lang='en'"><xsl:text>}</xsl:text></xsl:if>
+    <xsl:text>}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:head[@type='sub']">
@@ -344,19 +367,23 @@
     <xsl:text>\lemma{</xsl:text>
     <xsl:apply-templates select=".//x:lem/node()"/>
     <xsl:text>}\Afootnote{</xsl:text>
+    <xsl:text>\textenglish{</xsl:text>
     <xsl:call-template name="splitwit">
         <xsl:with-param name="mss" select="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
     </xsl:call-template>
-    <xsl:text>; </xsl:text>
+    <xsl:text>}</xsl:text>
+    <xsl:text>; \texttamil{</xsl:text>
     <xsl:apply-templates select="./x:rdg | ./x:rdgGrp"/>
-    <xsl:text>}}</xsl:text>
+    <xsl:text>}}}</xsl:text>
 </xsl:template>
 <xsl:template match="x:lem"/>
 <xsl:template match="x:rdgGrp[@type='lemma']"/>
 <xsl:template match="x:rdg">
     <xsl:apply-templates/>
     <xsl:text> </xsl:text>
+    <xsl:text>\textenglish{</xsl:text>
     <xsl:call-template name="splitwit"/>
+    <xsl:text>}</xsl:text>
     <xsl:choose>
         <xsl:when test="position()=last()"> 
             <xsl:text>.</xsl:text>
@@ -369,7 +396,10 @@
 <xsl:template match="x:rdgGrp">
     <xsl:apply-templates select="x:rdg[@type='main']/node()"/>
     <xsl:text> </xsl:text>
+    <xsl:text>\textenglish{</xsl:text>
     <xsl:call-template name="splitwit"/>
+    <xsl:text>}</xsl:text>
+
     <xsl:choose>
         <xsl:when test="position()=last()"> 
             <xsl:text>.</xsl:text>

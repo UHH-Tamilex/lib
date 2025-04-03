@@ -1,5 +1,6 @@
 import { loadDoc } from './fileops.mjs';
 import { showSaveFilePicker } from './native-file-system-adapter/es6.js';
+import { Sanscript } from '../js/sanscript.mjs';
 
 const _NodeFilter = {
     SHOW_ALL: 4294967295,
@@ -91,26 +92,31 @@ const normalizeLg = lg => {
             }
         }
     }
-    addLangAttr(lg);
+    toTamil(lg);
 };
 
-const addLangAttr = el => {
+const toTamil = el => {
+    const xmlns = 'http://www.w3.org/XML/1998/namespace';
     const walker = document.createTreeWalker(el,NodeFilter.SHOW_ALL);
-    let curnode = walker.currentNode;
-    const parlang = el.closest('*|lang').getAttrbute('xml:lang');
-    el.setAttribute('xml:lang',parlang);
-
-    while(curnode) {
-        if(curnode.nodeType === 1) {
-            const curlang = curnode.getAttribute('xml:lang');
+    const parlang = el.closest('[*|lang]').getAttribute('xml:lang');
+    el.setAttributeNS(xmlns,'lang',parlang);
+    let cur = walker.nextNode();
+    while(cur) {
+        if(cur.nodeType === 1 && cur.hasChildNodes()) {
+            const curlang = cur.getAttributeNS(xmlns,'lang');
             if(!curlang) {
-                curnode.setAttribute('xml:lang',curnode.parentNode.getAttribute('xml:lang'));
+                cur.setAttributeNS(xmlns,'lang',cur.parentNode.getAttributeNS(xmlns,'lang'));
             }
         }
-        else if(cur.nodeType === 3)
+        else if(cur.nodeType === 3) {
+            if(cur.parentNode.getAttributeNS(xmlns,'lang') === 'ta') {
+                const clean = cur.data.toLowerCase()
+                                      .replaceAll(/(\S)·/g,'$1\u200C');
+                cur.data = Sanscript.t(clean,'iast','tamil');
+            }
             cur.data = cur.data.replaceAll('_','\\_');
-
-        curnode = walker.nextNode();
+        }
+        cur = walker.nextNode();
     }
 };
 /*
