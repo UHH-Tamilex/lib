@@ -52,7 +52,7 @@ const exportLaTeX = async (indoc,libRoot) => {
     }
     const xproc = new XSLTProcessor();
     if(!_state.xsltsheet)
-        _state.xsltsheet = await loadDoc(`${libroot}debugging/latex.xsl`);
+        _state.xsltsheet = await loadDoc(`${libRoot}debugging/latex.xsl`);
     xproc.importStylesheet(_state.xsltsheet);
     const res = xproc.transformToDocument(doc);
     return res.firstChild.textContent;

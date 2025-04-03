@@ -13,7 +13,6 @@ const _state = {
     wordlistsheet: null,
     changedBlocks: new Map(),
     changed: false,
-    libRoot: ''
 //    Transliterator: null
 };
 
@@ -347,7 +346,7 @@ const showSplits = async () => {
     const standOff =`<standOff xmlns="http://www.tei-c.org/ns/1.0" type="wordsplit" corresp="#${blockid}">\n${ret.xml}\n</standOff>`;
     const xproc = new XSLTProcessor();
     if(!_state.wordlistsheet)
-        _state.wordlistsheet = await loadDoc(`${_state.libRoot}debugging/wordlist.xsl`);
+        _state.wordlistsheet = await loadDoc(`${Splitter.sharedState.libRoot}debugging/wordlist.xsl`);
     xproc.importStylesheet(_state.wordlistsheet);
     const res = xproc.transformToDocument((new DOMParser()).parseFromString(standOff,'text/xml')).querySelector('table');
     if(document.getElementById('transbutton').lang === 'en')
