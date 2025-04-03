@@ -80,14 +80,16 @@
 \setdefaultlanguage{english}
 \setmainfont{Brill}
 \setotherlanguage{tamil}
-\newfontfamily\tamilfont{Noto Serif Tamil Slanted Light}[Script=Tamil]
+\newfontfamily\tamilfont{Lohit Tamil}[Script=Tamil]
 \tamilfont\fontdimen2\font=0.8em
 \tamilfont\large\fontdimen2\font=0.5em
 \setlength{\parskip}{12pt}
 \setstanzaindents{1,0,0}
+\setcounter{stanzaindentsrepetition}{2}
 
 \begin{document}
 
+\onehalfspacing
 \lineation{page}
 \begingroup
 \beginnumbering
