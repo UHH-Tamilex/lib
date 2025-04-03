@@ -65,7 +65,7 @@ div.edition div.l::before {
     font-size: 65%;
 }
 
-div.edition div.l:nth-child(5n)::before {
+div.edition div.l:nth-of-type(5n)::before {
     opacity: 1;
 }
 
