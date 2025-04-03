@@ -89,6 +89,7 @@
             <xsl:attribute name="type">module</xsl:attribute>
             <xsl:attribute name="src"><xsl:value-of select="$root"/>js/edition.mjs</xsl:attribute>
             <xsl:attribute name="id">editionscript</xsl:attribute>
+            <xsl:attribute name="data-root"><xsl:value-of select="$root"/></xsl:attribute>
         </xsl:element>
     </xsl:element>
 </xsl:template>

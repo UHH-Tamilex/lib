@@ -14,7 +14,7 @@ const newElement = (doc, name) => {
     return doc.createElementNS('http://www.tei-c.org/ns/1.0',name);
 };
 
-const exportLaTeX = async indoc => {
+const exportLaTeX = async (indoc,libRoot) => {
     const doc = indoc.cloneNode(true);
     for(const standOff of [...doc.querySelectorAll('standOff[type="apparatus"]')]) {
         const corresp = standOff.getAttribute('corresp').replace(/^#/,'');
@@ -52,7 +52,7 @@ const exportLaTeX = async indoc => {
     }
     const xproc = new XSLTProcessor();
     if(!_state.xsltsheet)
-        _state.xsltsheet = await loadDoc('lib/debugging/latex.xsl'); // TODO: this path is fixed
+        _state.xsltsheet = await loadDoc(`${libroot}debugging/latex.xsl`);
     xproc.importStylesheet(_state.xsltsheet);
     const res = xproc.transformToDocument(doc);
     return res.firstChild.textContent;
@@ -275,8 +275,8 @@ const countpos = (str, pos) => {
     return str.length;
 };
 
-const exportFile = async (curDoc) => {
-    const outdoc = await exportLaTeX(curDoc);
+const exportFile = async (curDoc,libRoot) => {
+    const outdoc = await exportLaTeX(curDoc,libRoot);
     const thisFilename = window.location.pathname.split('/').pop();
     const basename = thisFilename.substring(0,thisFilename.lastIndexOf('.'));
     const fileHandle = await showSaveFilePicker({
