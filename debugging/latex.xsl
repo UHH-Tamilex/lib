@@ -80,11 +80,16 @@
 
 \setdefaultlanguage{english}
 \setmainfont{Brill}
+
 \setotherlanguage{tamil}
-\newfontfamily\tamilfont{Lohit Tamil}[Script=Tamil]
+\newfontfamily\tamilfont{TSTTamil.otf}[Script=Tamil,Ligatures=Historic,BoldFont={NotoSerifTamil-Bold.ttf}]
+\newICUfeature{AllAlternates}{1}{+aalt}
+\newcommand{\vowelsign}{\tamilfont\addfontfeature{AllAlternates=1}}
 \tamilfont\fontdimen2\font=0.8em
 \tamilfont\large\fontdimen2\font=0.5em
+
 \setlength{\parskip}{12pt}
+
 \setstanzaindents{1,0,0}
 \setcounter{stanzaindentsrepetition}{2}
 
@@ -246,6 +251,9 @@
 
 <xsl:template match="x:g">
     <xsl:text>\uwave{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>           
+</xsl:template>
+<xsl:template match="x:g[@rend='vowel-sign']">
+    <xsl:text>\vowelsign{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>           
 </xsl:template>
 
 <xsl:template match="x:supplied">
