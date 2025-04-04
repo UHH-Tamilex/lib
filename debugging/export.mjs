@@ -45,12 +45,17 @@ const exportLaTeX = async (indoc,libRoot) => {
             range.collapse(false);
             app.setAttribute('corresp',appid);
             range.insertNode(app);
-            //ed.normalize();
             appnum = appnum + 1;
         }
         standOff.remove();
-        normalizeLg(ed);
     }
+    
+    for(const par of doc.querySelectorAll('text div[rend="parallel"]'))
+        concatParallel(par);
+    
+    for(const lg of doc.querySelectorAll('text lg, text p'))
+        normalizeLg(lg);
+
     const xproc = new XSLTProcessor();
     if(!_state.xsltsheet)
         _state.xsltsheet = await loadDoc(`${libRoot}debugging/latex.xsl`);
@@ -58,6 +63,7 @@ const exportLaTeX = async (indoc,libRoot) => {
     const res = xproc.transformToDocument(doc);
     return res.firstChild.textContent;
 };
+
 const normalizeLg = lg => {
     lg.normalize();
     if(lg.firstChild.nodeType === 3) {
@@ -117,6 +123,19 @@ const toTamil = el => {
             cur.data = cur.data.replaceAll('_','\\_');
         }
         cur = walker.nextNode();
+    }
+};
+
+const concatParallel = par => {
+    if(par.children.length < 2) return;
+    par.children[0].setAttribute('type','edition');
+    par.children[1].setAttribute('type','translation');
+    while(par.nextElementSibling && par.nextElementSibling.getAttribute('rend') === 'parallel') {
+        par.nextElementSibling.children[0].setAttribute('type','edition');
+        par.nextElementSibling.children[1].setAttribute('type','translation');
+        while(par.nextElementSibling.firstElementChild)
+            par.appendChild(par.nextElementSibling.firstElementChild);
+        par.nextElementSibling.remove();
     }
 };
 /*

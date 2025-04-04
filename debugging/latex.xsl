@@ -65,8 +65,11 @@
 \usepackage{polyglossia,fontspec,xunicode}
 \usepackage[normalem]{ulem}
 \usepackage[noend,noeledsec,noledgroup]{reledmac}
-\usepackage[margin=1in]{geometry}
+\usepackage{reledpar}
+\usepackage[top=1in, bottom=1.5in,right=1in,left=1in]{geometry}
 \usepackage{setspace}
+\usepackage{xcolor}
+\usepackage[colorlinks,linkcolor=olive]{hyperref}
 
 \arrangementX[A]{paragraph}
 \arrangementX[B]{paragraph}
@@ -97,13 +100,9 @@
 
 \onehalfspacing
 \lineation{page}
-\begingroup
-\beginnumbering
     </xsl:text>
     <xsl:apply-templates select="x:text"/>
     <xsl:text>
-\endnumbering
-\endgroup
 \end{document}</xsl:text>
 </xsl:template>
 
@@ -111,6 +110,27 @@
     <xsl:apply-templates/>
 </xsl:template>
 
+<xsl:template match="x:div[@rend='parallel']">
+    <xsl:text>
+\begin{pages}
+\begin{Leftside}
+\beginnumbering
+</xsl:text>
+    <xsl:apply-templates select="./*[@type='edition']"/>
+    <xsl:text>
+\endnumbering
+\end{Leftside}
+\begin{Rightside}
+\beginnumbering
+</xsl:text>
+    <xsl:apply-templates select="./*[@type='translation']"/>
+    <xsl:text>
+\endnumbering
+\end{Rightside}
+\end{pages}
+\Pages
+</xsl:text>
+</xsl:template>
 <xsl:template match="x:p">
 <xsl:text>
 \pstart</xsl:text>
@@ -170,7 +190,7 @@
 </xsl:template>
 
 <xsl:template match="x:unclear">
-<xsl:text>\uwave{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
+<xsl:text>{\color{lightgray}(}</xsl:text><xsl:apply-templates/><xsl:text>{\color{lightgray})}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:subst">
@@ -197,7 +217,7 @@
 </xsl:template>
 
 <xsl:template match="x:sic">
-        <xsl:text>\uwave{</xsl:text><xsl:apply-templates /><xsl:text>}</xsl:text>
+    <xsl:text>{\color{lightgray}¿}</xsl:text><xsl:apply-templates/><xsl:text>{\color{lightgray}?}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:surplus">
@@ -274,7 +294,7 @@
 </xsl:template>
 
 <xsl:template match="x:gap">
-    <xsl:text>\textenglish{</xsl:text>
+    <xsl:text>\textenglish{[</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -291,7 +311,7 @@
         <xsl:with-param name="output" select="$gapchar"/>
         <xsl:with-param name="count" select="$quantity"/>
     </xsl:call-template>
-    <xsl:text>}</xsl:text>
+    <xsl:text>]}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:space">
@@ -310,7 +330,7 @@
 <xsl:template match="x:caesura">
 <xsl:variable name="pretext" select="preceding::text()[1]"/>
 <xsl:if test="normalize-space(substring($pretext,string-length($pretext))) != ''">
-    <xsl:text>\-</xsl:text>
+    <xsl:text>-</xsl:text>
 </xsl:if>
     <xsl:text>&amp;
 </xsl:text>
