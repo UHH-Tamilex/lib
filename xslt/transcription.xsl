@@ -24,42 +24,44 @@
         </xsl:attribute>
     </xsl:element>
     <xsl:element name="section">
-        <xsl:attribute name="class">
-            <xsl:text>teitext</xsl:text>
-            <xsl:if test="@type='edition'">
-                <xsl:text> edition</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
-        <xsl:attribute name="data-synch"><xsl:value-of select="@synch"/></xsl:attribute>
-        <xsl:attribute name="data-corresp"><xsl:value-of select="$textid"/></xsl:attribute>
         <xsl:call-template name="lang"/>
-        <xsl:element name="table">
-            <xsl:attribute name="class">texttitle</xsl:attribute>
-            <xsl:element name="tr">
-                <xsl:element name="td">
-                    <xsl:variable name="title" select="ancestor::x:TEI/x:teiHeader/x:fileDesc/x:sourceDesc/x:msDesc/x:msContents/x:msItem[@xml:id=$textid]/x:title"/>
-                    <xsl:attribute name="lang"><xsl:value-of select="$title/@xml:lang"/></xsl:attribute>
-                    <xsl:if test="not(@type='edition')">
-                        <span class="line-view-icon" title="diplomatic display">
-                            <svg height='25px' width='25px' fill="#000000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 512 512"><g id="#hamburger"><g><g><path d="M486,493H26c-3.866,0-7-3.134-7-7V26c0-3.866,3.134-7,7-7h460c3.866,0,7,3.134,7,7v460C493,489.866,489.866,493,486,493z      M33,479h446V33H33V479z"></path></g><g><path d="M436,133H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,133,436,133z"></path></g><g><path d="M436,263H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,263,436,263z"></path></g><g><path d="M436,393H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,393,436,393z"></path></g></g></g></svg>
-                        </span>
-                    </xsl:if>
-                    <xsl:apply-templates select="$title"/>
-                </xsl:element>
-                <xsl:if test="not(@type='edition')">
-                    <xsl:element name="td">
-                        <xsl:attribute name="class">text-siglum</xsl:attribute>
-                        <xsl:attribute name="lang">en</xsl:attribute>
-                        <xsl:variable name="cu" select="translate(@synch,'#','')"/>
-                        <xsl:value-of select="$cu"/>
-                        <xsl:if test="$cu and $textid">
-                            <xsl:text>, </xsl:text>
-                        </xsl:if>
-                        <xsl:value-of select="$textid"/>
+        <xsl:choose>
+            <xsl:when test="@type='edition'">
+            <xsl:attribute name="class">
+                <xsl:text>teitext edition</xsl:text>
+            </xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:attribute name="class">
+                    <xsl:text>teitext</xsl:text>
+                </xsl:attribute>
+                <xsl:attribute name="data-synch"><xsl:value-of select="@synch"/></xsl:attribute>
+                <xsl:attribute name="data-corresp"><xsl:value-of select="$textid"/></xsl:attribute>
+                <xsl:element name="table">
+                    <xsl:attribute name="class">texttitle</xsl:attribute>
+                    <xsl:element name="tr">
+                        <xsl:element name="td">
+                            <xsl:variable name="title" select="ancestor::x:TEI/x:teiHeader/x:fileDesc/x:sourceDesc/x:msDesc/x:msContents/x:msItem[@xml:id=$textid]/x:title"/>
+                            <xsl:attribute name="lang"><xsl:value-of select="$title/@xml:lang"/></xsl:attribute>
+                            <span class="line-view-icon" title="diplomatic display">
+                                <svg height='25px' width='25px' fill="#000000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 512 512"><g id="#hamburger"><g><g><path d="M486,493H26c-3.866,0-7-3.134-7-7V26c0-3.866,3.134-7,7-7h460c3.866,0,7,3.134,7,7v460C493,489.866,489.866,493,486,493z      M33,479h446V33H33V479z"></path></g><g><path d="M436,133H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,133,436,133z"></path></g><g><path d="M436,263H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,263,436,263z"></path></g><g><path d="M436,393H86c-3.866,0-7-3.134-7-7s3.134-7,7-7h350c3.866,0,7,3.134,7,7S439.866,393,436,393z"></path></g></g></g></svg>
+                            </span>
+                            <xsl:apply-templates select="$title"/>
+                        </xsl:element>
+                        <xsl:element name="td">
+                            <xsl:attribute name="class">text-siglum</xsl:attribute>
+                            <xsl:attribute name="lang">en</xsl:attribute>
+                            <xsl:variable name="cu" select="translate(@synch,'#','')"/>
+                            <xsl:value-of select="$cu"/>
+                            <xsl:if test="$cu and $textid">
+                                <xsl:text>, </xsl:text>
+                            </xsl:if>
+                            <xsl:value-of select="$textid"/>
+                        </xsl:element>
                     </xsl:element>
-                </xsl:if>
-            </xsl:element>
-        </xsl:element>
+                </xsl:element>
+            </xsl:otherwise>
+        </xsl:choose>
         <xsl:apply-templates/>
     </xsl:element>
 </xsl:template>
