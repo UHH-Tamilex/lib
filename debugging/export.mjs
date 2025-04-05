@@ -115,7 +115,8 @@ const toTamil = el => {
             }
         }
         else if(cur.nodeType === 3) {
-            if(cur.parentNode.getAttributeNS(xmlns,'lang') === 'ta') {
+            if(cur.parentNode.getAttributeNS(xmlns,'lang') === 'ta' &&
+                !cur.parentNode.closest('[type="translation"]')) {
                 const clean = cur.data.toLowerCase()
                                       .replaceAll(/(\S)·/g,'$1\u200C');
                 cur.data = Sanscript.t(clean,'iast','tamil');
