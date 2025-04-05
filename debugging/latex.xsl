@@ -18,6 +18,12 @@
     </xsl:if>
 </xsl:template>
 
+<xsl:template name="langstart">
+    <xsl:if test="./@xml:lang='ta'"><xsl:text>\texttamil{</xsl:text></xsl:if>
+</xsl:template>
+<xsl:template name="langend">
+    <xsl:if test="./@xml:lang='ta'"><xsl:text>}</xsl:text></xsl:if>
+</xsl:template>
 <xsl:template name="splitwit">
     <xsl:param name="mss" select="@wit | @select"/>
     <xsl:variable name="msstring" select="substring-before(
@@ -122,6 +128,7 @@
 \end{Leftside}
 \begin{Rightside}
 \beginnumbering
+\numberlinefalse
 </xsl:text>
     <xsl:apply-templates select="./*[@type='translation']"/>
     <xsl:text>
@@ -134,27 +141,22 @@
 <xsl:template match="x:p">
 <xsl:text>
 \pstart</xsl:text>
-<xsl:if test="./@xml:lang='ta'"><xsl:text>\begin{tamil}</xsl:text></xsl:if>
+<xsl:call-template name="langstart"/>
 <xsl:text>
 </xsl:text>
 <xsl:apply-templates/><xsl:text>
 </xsl:text>
-<xsl:if test="./@xml:lang='ta'"><xsl:text>\end{tamil}</xsl:text></xsl:if>
+<xsl:call-template name="langend"/>
 <xsl:text>\pend
 
 </xsl:text>
 </xsl:template>
 
 <xsl:template match="x:lg">
-<xsl:if test="./@xml:lang='ta'">
-    <xsl:text>
-\begin{tamil}</xsl:text>
-</xsl:if>
     <xsl:text>
 \stanza[\smallskip]
 
 </xsl:text><xsl:apply-templates select="x:l | x:trailer"/>
-<xsl:if test="./@xml:lang='ta'"><xsl:text>\end{tamil}</xsl:text></xsl:if>
 <xsl:text>
 
 </xsl:text>
@@ -162,13 +164,19 @@
 
 <xsl:template match="x:lg/x:l">
 <!--xsl:text>\large </xsl:text-->
-<xsl:apply-templates/><xsl:text>&amp;
+<xsl:call-template name="langstart"/>
+<xsl:apply-templates/>
+<xsl:call-template name="langend"/>
+<xsl:text>&amp;
 </xsl:text>
 </xsl:template>
 
 <xsl:template match="x:lg/x:l[position()=last()]">
 <!--xsl:text>\large </xsl:text-->
-<xsl:apply-templates/><xsl:text>\&amp;
+<xsl:call-template name="langstart"/>
+<xsl:apply-templates/>
+<xsl:call-template name="langend"/>
+<xsl:text>\&amp;
 </xsl:text>
 </xsl:template>
 
@@ -183,6 +191,15 @@
 
 <xsl:template match="x:hi[@rend='superscript']">
 <xsl:text>\textsuperscript{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
+</xsl:template>
+
+<xsl:template match="x:hi[@rend='italic']">
+<xsl:text>\emph{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
+</xsl:template>
+<xsl:template match="x:term">
+    <xsl:call-template name="langstart"/>
+    <xsl:apply-templates/>
+    <xsl:call-template name="langend"/>
 </xsl:template>
 
 <xsl:template match="x:label">
@@ -217,7 +234,7 @@
 </xsl:template>
 
 <xsl:template match="x:sic">
-    <xsl:text>{\color{lightgray}¿}</xsl:text><xsl:apply-templates/><xsl:text>{\color{lightgray}?}</xsl:text>
+    <xsl:text>\textenglish{\color{lightgray}¿}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{lightgray}?}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:surplus">
