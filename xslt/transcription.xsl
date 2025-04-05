@@ -437,6 +437,7 @@
 <xsl:template match="x:g">
         <xsl:variable name="ref" select="@ref"/>
         <xsl:variable name="rend" select="@rend"/>
+        <xsl:variable name="entityrend" select="$TST//tst:entityrend/tst:entry[@key=$rend]"/>
         <xsl:variable name="cname" select="$TST//tst:entityclasses/tst:entry[@key=$ref]"/>
         <xsl:variable name="ename" select="$TST//tst:entitynames/tst:entry[@key=$ref]"/>
         <xsl:variable name="rname" select="$TST//tst:rendnames/tst:entry[@key=$rend]"/>
@@ -445,9 +446,9 @@
             <xsl:call-template name="lang"/>
             <xsl:attribute name="class">
                 <xsl:text>gaiji</xsl:text>
-                <xsl:if test="$rend">
+                <xsl:if test="$entityrend">
                     <xsl:text> </xsl:text>
-                    <xsl:value-of select="$TST//tst:entityrend/tst:entry[@key=$rend]"/>
+                    <xsl:value-of select="$entityrend"/>
                 </xsl:if>
                 <xsl:if test="$cname">
                     <xsl:text> </xsl:text><xsl:value-of select="$cname"/>
@@ -462,7 +463,12 @@
                         </xsl:if>
                     </xsl:when>
                     <xsl:when test="$rend">
-                        <xsl:value-of select="$rname"/>
+                        <xsl:choose>
+                            <xsl:when test="$rname">
+                                <xsl:value-of select="$rname"/>
+                            </xsl:when>
+                            <xsl:otherwise><xsl:value-of select="$rend"/></xsl:otherwise>
+                        </xsl:choose>
                     </xsl:when>
                     <xsl:otherwise/>
                 </xsl:choose>
@@ -764,6 +770,18 @@
             <xsl:value-of select="@rend"/>
         </xsl:attribute>
         <xsl:apply-templates />
+    </xsl:element>
+</xsl:template>
+
+<xsl:template match="x:mod">
+    <xsl:element name="span">
+        <xsl:attribute name="class">unclear</xsl:attribute>
+        <xsl:attribute name="data-anno">
+            <xsl:text>modified</xsl:text>
+            <xsl:if test="@rend">
+                <xsl:text> (</xsl:text><xsl:value-of select="@rend"/><xsl:text>)</xsl:text>
+            </xsl:if>
+        </xsl:attribute>
     </xsl:element>
 </xsl:template>
 
