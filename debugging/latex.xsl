@@ -416,9 +416,19 @@
     <xsl:apply-templates select=".//x:lem/node()"/>
     <xsl:text>}\Afootnote{</xsl:text>
     <xsl:text>\textenglish{</xsl:text>
-    <xsl:call-template name="splitwit">
-        <xsl:with-param name="mss" select="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
-    </xsl:call-template>
+    <xsl:variable name="mss" select="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
+    <xsl:choose>
+        <xsl:when test="$mss">
+            <xsl:call-template name="splitwit">
+                <xsl:with-param name="mss" select="$mss"/>
+            </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:if test="//x:text[@type='edition']">
+                <xsl:text>\textsc{em.}</xsl:text>
+            </xsl:if>
+        </xsl:otherwise>
+    </xsl:choose>
     <xsl:text>}</xsl:text>
     <xsl:text>; \texttamil{</xsl:text>
     <xsl:apply-templates select="./x:rdg | ./x:rdgGrp"/>
@@ -427,7 +437,12 @@
 <xsl:template match="x:lem"/>
 <xsl:template match="x:rdgGrp[@type='lemma']"/>
 <xsl:template match="x:rdg">
-    <xsl:apply-templates/>
+    <xsl:choose>
+        <xsl:when test="./node()">
+            <xsl:apply-templates select="./node()"/>
+        </xsl:when>
+        <xsl:otherwise><xsl:text>\textsc{om.}</xsl:text></xsl:otherwise>
+    </xsl:choose>
     <xsl:text> </xsl:text>
     <xsl:text>\textenglish{</xsl:text>
     <xsl:call-template name="splitwit"/>
@@ -442,7 +457,12 @@
     </xsl:choose>
 </xsl:template>
 <xsl:template match="x:rdgGrp">
-    <xsl:apply-templates select="x:rdg[@type='main']/node()"/>
+    <xsl:choose>
+        <xsl:when test="x:rdg[@type='main']/node()">
+            <xsl:apply-templates select="x:rdg[@type='main']/node()"/>
+        </xsl:when>
+        <xsl:otherwise><xsl:text>\textenglish{\textsc{om.}}</xsl:text></xsl:otherwise>
+    </xsl:choose>
     <xsl:text> </xsl:text>
     <xsl:text>\textenglish{</xsl:text>
     <xsl:call-template name="splitwit"/>
