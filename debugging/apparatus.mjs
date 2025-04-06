@@ -271,10 +271,24 @@ const processLem = (word, posapp, doc, witlistopts) => {
     app = app + '<\/rdgGrp>';
     return app;
 };
-const processNegApp = (negapp, doc, witlistopts) => {
+
+const cleanReading = (doc,str,ignoretags) => {
+    const temp = doc.createElement('temp');
+    temp.innerHTML = str;
+    if(ignoretags.size > 0) {
+        for(const tag of temp.querySelectorAll([...ignoretags].join(',')))
+            tag.remove();
+    }
+    const reg = new RegExp('[()\\[\\],:;?!|¦_"“”‘’·\\-–—―=+\\d.\\/]+','g');
+    return temp.textContent.replaceAll(reg,'');
+    //TODO: get puncuation regex from normalize.mjs
+};
+
+const processNegApp = (negapp, doc, witlistopts, ignoretags) => {
     const curriedWitList = curry(getWitList)(doc)(witlistopts);
     let app = '';
-    for(const [mainrdg, rdg] of [...negapp]) {
+    //for(const [mainrdg, rdg] of [...negapp]) {
+    for(const rdg of negapp.values()) {
         /*
         const newrdgs = getTEIRdgs(rdg,opts.blockid,witdocs,doc,dataN);
         const rdgstr = newrdgs.keys().next().value;
@@ -282,7 +296,7 @@ const processNegApp = (negapp, doc, witlistopts) => {
         const allwits = [...newrdgs];
         */
         const rdgarr = [...rdg];
-        //const mainrdg = rdgarr[0];
+        const mainrdg = cleanReading(doc,rdgarr[0][0],ignoretags);
         const rdgstr = formatReading(mainrdg);
         
         if(rdgarr.length === 1) {
@@ -461,8 +475,8 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
                 }
                 prevspace = false;
             }
-            if(node.data.endsWith(' ') &&
-               node.data !== ' ') // don't double count if the node is just one space
+            if(node.data.endsWith(' ')/* &&
+               node.data !== ' '*/) // don't double count if the node is just one space
                 prevspace = true;
 
             end = start + nodecount;
@@ -578,7 +592,7 @@ const makeApp = (doc, ed, opts) =>  {
 
         app = app + processLem(word,posapp,doc,witlistopts);
 
-        app = app + processNegApp(negapp,doc,witlistopts);
+        app = app + processNegApp(negapp,doc,witlistopts,ignoretags);
 
         app = app + '</app>\n';    
 
