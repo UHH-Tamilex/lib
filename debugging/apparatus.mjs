@@ -274,7 +274,7 @@ const processLem = (word, posapp, doc, witlistopts) => {
 const processNegApp = (negapp, doc, witlistopts) => {
     const curriedWitList = curry(getWitList)(doc)(witlistopts);
     let app = '';
-    for(const rdg of negapp.values()) {
+    for(const [mainrdg, rdg] of [...negapp]) {
         /*
         const newrdgs = getTEIRdgs(rdg,opts.blockid,witdocs,doc,dataN);
         const rdgstr = newrdgs.keys().next().value;
@@ -282,15 +282,16 @@ const processNegApp = (negapp, doc, witlistopts) => {
         const allwits = [...newrdgs];
         */
         const rdgarr = [...rdg];
-        const mainrdg = rdgarr[0];
-        const rdgstr = formatReading(mainrdg[0]);
+        //const mainrdg = rdgarr[0];
+        const rdgstr = formatReading(mainrdg);
         
         if(rdgarr.length === 1) {
-            const negwits = curriedWitList(mainrdg[1].flat());
+            const negwits = curriedWitList(rdgarr[0][1].flat());
             app = app + `  <rdg ${negwits}>${rdgstr}</rdg>\n`;
         }
         else {
-            const remainingrdgs = rdgarr.slice(1);
+            //const remainingrdgs = rdgarr.slice(1);
+            const remainingrdgs = rdgarr.filter(e => e[0] !==  mainrdg);
             const {wits: minorwits, rdgstr: minorrdgs} = formatMinorReadings(remainingrdgs,doc,witlistopts);
             
             const negwits = getWitList(doc,
@@ -415,9 +416,10 @@ const checkAlignment = (words, block, ignoretags = []) => {
                            //.replaceAll('‡','')
                            //.replaceAll(/\s+/g,' '); // for spaces around gaps
     const blockclone = block.cloneNode(true);
-    if(ignoretags.size > 0)
+    if(ignoretags.size > 0) {
         for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
             tag.remove();
+    }
     const blocktext = Sanscript.t(blockclone.textContent.replaceAll(/\s+/g,' '),'tamil','iast');
     if(aligntext === blocktext) return true;
     return false;
