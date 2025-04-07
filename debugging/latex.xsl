@@ -207,7 +207,7 @@
 </xsl:template>
 
 <xsl:template match="x:unclear">
-<xsl:text>{\color{lightgray}(}</xsl:text><xsl:apply-templates/><xsl:text>{\color{lightgray})}</xsl:text>
+<xsl:text>\textenglish{\color{lightgray}(}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{lightgray})}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:subst">
@@ -311,7 +311,7 @@
 </xsl:template>
 
 <xsl:template match="x:gap">
-    <xsl:text>\textenglish{[</xsl:text>
+    <xsl:text>\textenglish{{\color{gray}[}</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -328,10 +328,11 @@
         <xsl:with-param name="output" select="$gapchar"/>
         <xsl:with-param name="count" select="$quantity"/>
     </xsl:call-template>
-    <xsl:text>]}</xsl:text>
+    <xsl:text>{\color{gray}]}}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:space">
+    <xsl:text>\textenglish{{\color{gray}[}</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -342,6 +343,7 @@
         <xsl:with-param name="output">\_</xsl:with-param>
         <xsl:with-param name="count" select="$quantity"/>
     </xsl:call-template>
+    <xsl:text>{\color{gray}]}}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:caesura">
