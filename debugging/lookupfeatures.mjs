@@ -16,7 +16,7 @@ const lookupCitations = async (str) => {
     const cached = _state.cache.get(str);
     if(cached) return cached;
     
-    const res = (await _state.fullindex.db('exec',{sql: `SELECT def, ${importantKeys.join(', ')} FROM [citations] WHERE form = $form`,bind: {$form: str}, rowMode: 'object'})).result.resultRows;
+    const res = (await _state.fullindex('exec',{sql: `SELECT def, ${importantKeys.join(', ')} FROM [citations] WHERE form = $form`,bind: {$form: str}, rowMode: 'object'})).result.resultRows;
 
     if(res.length === 0) return null;
 
@@ -39,7 +39,7 @@ const lookupCitationDefs = async (str,grammar) => {
     
     grammar.$form = str;
 
-    const res = (await _state.fullindex.db('exec',{sql: `SELECT def FROM [citations] WHERE form = $form AND ${grammar.search}`, bind: grammar, rowMode: 'object'})).result.resultRows;
+    const res = (await _state.fullindex('exec',{sql: `SELECT def FROM [citations] WHERE form = $form AND ${grammar.search}`, bind: grammar, rowMode: 'object'})).result.resultRows;
 
     if(res.length === 0) return null;
     return mostPopular3(res.map(r => r.def));
@@ -52,7 +52,7 @@ const lookupLemmata = async str => {
     const cached = _state.cache.get(str);
     if(cached) return cached;
 
-    const res = (await _state.lemmaindex.db('exec',{sql: `SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = $word`, bind: {$word: str}, rowMode: 'object'})).result.resultRows;
+    const res = (await _state.lemmaindex('exec',{sql: `SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = $word`, bind: {$word: str}, rowMode: 'object'})).result.resultRows;
 
     if(res.length === 0) return null;
 
