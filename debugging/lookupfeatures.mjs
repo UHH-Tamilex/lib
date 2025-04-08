@@ -47,7 +47,7 @@ const lookupCitationDefs = async (str,grammar) => {
 
 const lookupLemmata = async str => {
     if(!_state.lemmaindex) 
-        _state.lemmaindex = await openDb('../debugging/index.db');
+        _state.lemmaindex = await openDb('../../../debugging/index.db');
 
     const cached = _state.cache.get(str);
     if(cached) return cached;
