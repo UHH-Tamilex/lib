@@ -66,13 +66,13 @@ const exportLaTeX = async (indoc,libRoot) => {
 
 const normalizeLg = lg => {
     lg.normalize();
-    if(lg.firstChild.nodeType === 3) {
+    if(lg.firstChild?.nodeType === 3) {
         if(lg.firstChild.data.trim() === '')
             lg.firstChild.remove();
         else
             lg.firstChild.data = lg.firstChild.data.slice(lg.firstChild.data.search(/\S/));
     }
-    if(lg.lastChild.nodeType === 3) {
+    if(lg.lastChild?.nodeType === 3) {
         if(lg.lastChild.data.trim() === '')
             lg.lastChild.remove();
         else {
