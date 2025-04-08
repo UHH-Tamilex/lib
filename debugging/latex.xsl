@@ -154,11 +154,11 @@
 
 <xsl:template match="x:lg">
     <xsl:text>
-\stanza[\smallskip]
+\begin{astanza}[\smallskip]
 
 </xsl:text><xsl:apply-templates select="x:l | x:trailer"/>
 <xsl:text>
-
+\end{astanza}
 </xsl:text>
 </xsl:template>
 
