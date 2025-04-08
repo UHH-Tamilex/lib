@@ -81,6 +81,8 @@ const go = () => {
                 addToDb(dir + '/' + f,db);
         }
     });
+    db.prepare('CREATE INDEX form ON citations(form)').run();
+    db.prepare('CREATE INDEX formsort ON citations(formsort)').run();
 };
 
 const cleanForm = (el,remove=['elided','geminated','glide']) => {
