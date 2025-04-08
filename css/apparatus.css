@@ -230,6 +230,10 @@ a.alignment-pointer:link, a.alignment-pointer:active {
     cursor: default;
 }
 
+.apparatus-block .anchored-note {
+    display: inline-block;
+}
+
 .anchor.highlit::after {
     background: rgba(255,255,128,1);
 }
