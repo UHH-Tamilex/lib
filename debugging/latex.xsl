@@ -400,7 +400,7 @@
 <xsl:template match="x:item/x:quote/x:lg/x:l">
     <xsl:apply-templates/>
 </xsl:template>
--->
+
 <xsl:template match="x:item/x:title">
     <xsl:text>\emph{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
 </xsl:template>
