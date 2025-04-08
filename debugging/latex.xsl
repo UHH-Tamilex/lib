@@ -443,7 +443,7 @@
         <xsl:when test="./node()">
             <xsl:apply-templates select="./node()"/>
         </xsl:when>
-        <xsl:otherwise><xsl:text>\textsc{om.}</xsl:text></xsl:otherwise>
+        <xsl:otherwise><xsl:text>\textenglish{\textsc{om.}}</xsl:text></xsl:otherwise>
     </xsl:choose>
     <xsl:text> </xsl:text>
     <xsl:text>\textenglish{</xsl:text>
