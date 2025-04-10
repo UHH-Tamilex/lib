@@ -279,9 +279,18 @@ const cleanReading = (doc,str,ignoretags) => {
         for(const tag of temp.querySelectorAll([...ignoretags].join(',')))
             tag.remove();
     }
+    /*
+    const walker = doc.createTreeWalker(temp,4);
+    let node = walker.nextNode();
+    const reg = new RegExp('[()\\[\\],:;?!|¦_"“”‘’·\\-–—―=+\\d.\\/]+','g');
+    while(node) {
+        node.data = node.data.replaceAll(reg);
+        node = walker.nextNode();
+    }
     return temp.innerHTML;
-    //const reg = new RegExp('[()\\[\\],:;?!|¦_"“”‘’·\\-–—―=+\\d.\\/]+','g');
-    //return temp.textContent.replaceAll(reg,'');
+    */
+    const reg = new RegExp('[()\\[\\],:;?!|¦_"“”‘’·\\-–—―=+\\d.\\/]+','g');
+    return temp.textContent.replaceAll(reg,'');
     //TODO: get puncuation regex from normalize.mjs
 };
 
