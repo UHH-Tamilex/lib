@@ -300,7 +300,7 @@ const processNegApp = (negapp, doc, witlistopts, ignoretags) => {
         
         if(rdgarr.length === 1) {
             const negwits = curriedWitList(rdgarr[0][1].flat());
-            app = app + `  <rdg ${negwits}>${rdgarr[0][0].innerHTML}</rdg>\n`;
+            app = app + `  <rdg ${negwits}>${rdgarr[0][0]}</rdg>\n`;
         }
         else {
             const mainrdg = cleanReading(doc,rdgarr[0][0],ignoretags);
