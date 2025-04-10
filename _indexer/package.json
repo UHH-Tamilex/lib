@@ -13,5 +13,8 @@
     "todb": "node todb.mjs",
     "dbtohtml": "node dbtohtml.mjs",
     "pageindex": "node pageindex.mjs"
+  },
+  "dependencies": {
+    "tar-fs": "^3.0.8"
   }
 }
