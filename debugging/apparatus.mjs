@@ -279,8 +279,9 @@ const cleanReading = (doc,str,ignoretags) => {
         for(const tag of temp.querySelectorAll([...ignoretags].join(',')))
             tag.remove();
     }
-    const reg = new RegExp('[()\\[\\],:;?!|¦_"“”‘’·\\-–—―=+\\d.\\/]+','g');
-    return temp.textContent.replaceAll(reg,'');
+    return temp.innerHTML;
+    //const reg = new RegExp('[()\\[\\],:;?!|¦_"“”‘’·\\-–—―=+\\d.\\/]+','g');
+    //return temp.textContent.replaceAll(reg,'');
     //TODO: get puncuation regex from normalize.mjs
 };
 
@@ -296,14 +297,14 @@ const processNegApp = (negapp, doc, witlistopts, ignoretags) => {
         const allwits = [...newrdgs];
         */
         const rdgarr = [...rdg];
-        const mainrdg = cleanReading(doc,rdgarr[0][0],ignoretags);
-        const rdgstr = formatReading(mainrdg);
         
         if(rdgarr.length === 1) {
             const negwits = curriedWitList(rdgarr[0][1].flat());
-            app = app + `  <rdg ${negwits}>${rdgstr}</rdg>\n`;
+            app = app + `  <rdg ${negwits}>${rdgarr[0][0].innerHTML}</rdg>\n`;
         }
         else {
+            const mainrdg = cleanReading(doc,rdgarr[0][0],ignoretags);
+            //const rdgstr = formatReading(mainrdg);
             //const remainingrdgs = rdgarr.slice(1);
             const remainingrdgs = rdgarr.filter(e => e[0] !==  mainrdg);
             const {wits: minorwits, rdgstr: minorrdgs} = formatMinorReadings(remainingrdgs,doc,witlistopts);
@@ -316,7 +317,7 @@ const processNegApp = (negapp, doc, witlistopts, ignoretags) => {
                 },
                 [...rdg.values()].flat()
             );
-            app = app + `  <rdgGrp ${negwits}><rdg type="main">${rdgstr}</rdg>${minorrdgs}</rdgGrp>\n`;
+            app = app + `  <rdgGrp ${negwits}><rdg type="main">${mainrdg}</rdg>${minorrdgs}</rdgGrp>\n`;
         }
     }
     return app;
@@ -530,7 +531,7 @@ const serializeRange = (doc, range) => {
         gap.setAttribute('quantity',quantity);
         gap.textContent = '';
     }
-    return temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim();
+    return temp.innerHTML/*.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','')*/.replaceAll(/\s+/g,' ').trim();
 };
 
 const makeApp = (doc, ed, opts) =>  {
