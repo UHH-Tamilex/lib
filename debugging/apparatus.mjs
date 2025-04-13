@@ -598,7 +598,7 @@ const makeApp = (doc, ed, opts) =>  {
             continue;
         }
 
-        let app = `<app corresp="${start},${end}">\n`;
+        let app = `<app loc="${start},${end}">\n`;
 
         app = app + processLem(word,posapp,doc,witlistopts);
 

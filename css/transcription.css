@@ -534,7 +534,7 @@ span.locus {
     color: #A85110;
 }
 
-[data-loc] {
+[data-loc]:not(.lem) {
     cursor: pointer;
     text-decoration: underline;
 }

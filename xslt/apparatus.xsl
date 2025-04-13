@@ -420,7 +420,7 @@
     <!--xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/-->
     <xsl:element name="span">
         <xsl:attribute name="class">lem</xsl:attribute>
-        <xsl:attribute name="data-corresp"><xsl:value-of select="@corresp"/></xsl:attribute>
+        <xsl:attribute name="data-loc"><xsl:value-of select="@loc"/></xsl:attribute>
         <!--xsl:attribute name="data-text"><xsl:value-of select="./x:lem/text() | ./x:rdgGrp[@type='lemma']/x:lem/text()"/></xsl:attribute-->
         <span class="rdg-text">
             <xsl:apply-templates select="./x:lem/node() | ./x:rdgGrp[@type='lemma']/x:lem/node()"/>

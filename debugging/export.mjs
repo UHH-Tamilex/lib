@@ -31,7 +31,7 @@ const exportLaTeX = async (indoc,libRoot) => {
         if(!listApp) continue;
         for(const app of [...listApp.querySelectorAll(':scope > app')].reverse()) {
             const range = rangeFromCoords(
-                app.getAttribute('corresp').split(','),
+                app.getAttribute('loc').split(','),
                 ed,
                 new Set(tagFilters)
                 );
@@ -61,7 +61,7 @@ const exportLaTeX = async (indoc,libRoot) => {
         _state.xsltsheet = await loadDoc(`${libRoot}debugging/latex.xsl`);
     xproc.importStylesheet(_state.xsltsheet);
     const res = xproc.transformToDocument(doc);
-    return res.firstChild.textContent;
+    return res.querySelector('pre')?.textContent || res.firstChild.textContent;
 };
 
 const normalizeLg = lg => {
