@@ -370,21 +370,14 @@ const unpermalight = () => {
 
 const switchReading = el => {
     if(el.querySelector('.rdg-alt')) return;
-    const par = el.closest('.rdg') || el.closest('.app').querySelector('.lem');
+    const par = el.closest('.lem') || el.closest('.rdg');
     const id = el.dataset.id;
-    //par.querySelector('.rdg-text').style.display = 'none';
-    //par.querySelector(`.rdg-alt[data-wit~="${id}"]`).style.display = 'block';
     const rdgalt = par.querySelector(`.rdg-alt[data-wit~="${id}"]`).cloneNode(true);
     rdgalt.style.display = 'inline';
     el.appendChild(rdgalt);
 };
 
 const restoreReading = par => {
-    /*
-    par.querySelector('.rdg-text').style.display = 'inline';
-    for(const alt of par.querySelectorAll('.rdg-alt'))
-        alt.style.display = 'none';
-    */
     par.querySelector('.rdg-alt')?.remove();
 };
 
@@ -395,15 +388,15 @@ const Events = {
             highlight.inline(lem_inline);
             return;
         }
-        const lem = e.target.closest('.lem');
-        if(lem) {
-            highlight.apparatus(lem);
-            return;
-        }
         const msid = e.target.closest('.mshover');
         if(msid) {
             switchReading(msid);
             msid.addEventListener('mouseleave',restoreReading.bind(null,msid),{once: true});
+        }
+        const lem = e.target.closest('.lem');
+        if(lem) {
+            highlight.apparatus(lem);
+            return;
         }
         const anchor = e.target.closest('.anchor');
         if(anchor) {
