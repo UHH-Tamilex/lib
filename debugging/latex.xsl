@@ -207,7 +207,7 @@
 </xsl:template>
 
 <xsl:template match="x:unclear">
-<xsl:text>\textenglish{\color{lightgray}(}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{lightgray})}</xsl:text>
+<xsl:text>\textenglish{\color{gray}(}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{gray})}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:subst">
@@ -234,7 +234,7 @@
 </xsl:template>
 
 <xsl:template match="x:sic">
-    <xsl:text>\textenglish{\color{lightgray}¿}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{lightgray}?}</xsl:text>
+    <xsl:text>\textenglish{\color{gray}¿}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{gray}?}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:surplus">
