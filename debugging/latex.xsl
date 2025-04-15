@@ -255,7 +255,7 @@
 </xsl:template>
 
 <xsl:template match="x:lb">
-    <xsl:text>\textenglish{\textbf{⸤}}</xsl:text>
+    <xsl:text>\textenglish{\color{gray}⸤}</xsl:text>
     <!--
         <xsl:text>\textsc{(</xsl:text>
         <xsl:choose>
@@ -270,21 +270,10 @@
     -->
 </xsl:template>
 
-<xsl:template match="x:pb">
-    <xsl:text>\textenglish{\textbf{⎡}}</xsl:text>
-    <!--
-        <xsl:text>\textsc{(</xsl:text>
-        <xsl:choose>
-            <xsl:when test="@n">
-                <xsl:text>f. </xsl:text><xsl:value-of select="@n"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text>page break</xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-        <xsl:text>)}</xsl:text>
-    -->
-</xsl:template>
+<!--xsl:template match="x:pb">
+    <xsl:text>\textenglish{\color{gray}⎡}</xsl:text>
+</xsl:template-->
+<xsl:template match="x:pb"/>
 
 <xsl:template match="x:g">
     <xsl:text>\uwave{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>           

@@ -20,7 +20,9 @@ const exportLaTeX = async (indoc,libRoot) => {
     for(const standOff of [...doc.querySelectorAll('standOff[type="apparatus"]')]) {
         const corresp = standOff.getAttribute('corresp').replace(/^#/,'');
         const div = doc.querySelector(`[*|id="${corresp}"]`);
+        if(!div) continue;
         const ed = div.querySelector('[type="edition"]') || div;
+        if(!ed) continue;
         //addSpacesInL(ed);
         //removeSpaceNodes(ed);
         
@@ -44,6 +46,7 @@ const exportLaTeX = async (indoc,libRoot) => {
             range.insertNode(startanchor);
             range.collapse(false);
             app.setAttribute('corresp',appid);
+            normalizeApp(app);
             range.insertNode(app);
             appnum = appnum + 1;
         }
@@ -62,6 +65,15 @@ const exportLaTeX = async (indoc,libRoot) => {
     xproc.importStylesheet(_state.xsltsheet);
     const res = xproc.transformToDocument(doc);
     return res.querySelector('pre')?.textContent || res.firstChild.textContent;
+};
+
+const normalizeApp = app => {
+    const walker = document.createTreeWalker(app,NodeFilter.SHOW_TEXT);
+    let cur = walker.nextNode();
+    while(cur) {
+        cur.data = cur.data.replaceAll(/\s+/g,' ');
+        cur = walker.nextNode();
+    }
 };
 
 const normalizeLg = lg => {
