@@ -79,9 +79,11 @@
 
 \arrangementX[A]{paragraph}
 \arrangementX[B]{paragraph}
-\renewcommand*{\thefootnoteB}{\Roman{footnoteB}}
+\renewcommand*{\thefootnoteB}{\alph{footnoteB}}
 \arrangementX[C]{paragraph}
-\renewcommand*{\thefootnoteC}{\roman{footnoteC}}
+\renewcommand*{\thefootnoteC}{\Roman{footnoteC}}
+\arrangementX[D]{paragraph}
+\renewcommand*{\thefootnoteD}{\roman{footnoteD}}
 
 \Xarrangement[A]{paragraph}
 \Xnotenumfont[A]{\bfseries}
