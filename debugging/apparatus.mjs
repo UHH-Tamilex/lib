@@ -540,7 +540,8 @@ const serializeRange = (doc, range) => {
         gap.setAttribute('quantity',quantity);
         gap.textContent = '';
     }
-    return temp.innerHTML/*.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','')*/.replaceAll(/\s+/g,' ').trim();
+    //TODO: stripping namespaces like this is very hacky
+    return temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim();
 };
 
 const makeApp = (doc, ed, opts) =>  {
