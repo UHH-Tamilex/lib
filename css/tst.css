@@ -406,6 +406,45 @@ a.uri {
 hr {
     width: 87.5%;
 }
+#togglers {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#togglers > div {
+    background-color: #ddd;
+    color: rgba(1,1,1,0.4);
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-family: et-book;
+    cursor: pointer;
+    padding-right: 2px;
+    -webkit-text-stroke: 1px rgba(1,1,1,0.2);
+    text-stroke: 1px rgba(1,1,1,0.2);
+}
+
+.toggle {
+    display: flex;
+    flex-grow: 1;
+    border-radius: 0 0.3rem 0.3rem 0;
+}
+
+#rotator {
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+    border-radius: 0 0.3rem 0.3rem 0;
+    padding: 0.2rem;
+}
+#togglers > div:hover {
+    color: #ddd;
+    background: #ff9900;
+    text-shadow: 2px 2px 1px rgba(0,0,0,0.3);
+    -webkit-text-stroke: unset;
+    text-stroke: unset;
+}
+
 #record-thin hr {
     width: unset;
     margin-right: 2rem;
