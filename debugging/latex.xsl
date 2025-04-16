@@ -19,10 +19,18 @@
 </xsl:template>
 
 <xsl:template name="langstart">
-    <xsl:if test="./@xml:lang='ta'"><xsl:text>\texttamil{</xsl:text></xsl:if>
+    <xsl:choose>
+        <xsl:when test="./@xml:lang='ta'"><xsl:text>\texttamil{</xsl:text></xsl:when>
+        <xsl:when test="./@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:when>
+        <xsl:otherwise/>
+    </xsl:choose>
 </xsl:template>
 <xsl:template name="langend">
-    <xsl:if test="./@xml:lang='ta'"><xsl:text>}</xsl:text></xsl:if>
+    <xsl:choose>
+        <xsl:when test="./@xml:lang='ta'"><xsl:text>}</xsl:text></xsl:when>
+        <xsl:when test="./@xml:lang='en'"><xsl:text>}</xsl:text></xsl:when>
+        <xsl:otherwise/>
+    </xsl:choose>
 </xsl:template>
 <xsl:template name="splitwit">
     <xsl:param name="mss" select="@wit | @select"/>
@@ -355,15 +363,15 @@
 <xsl:template match="x:app//x:caesura"/>
 
 <xsl:template match="x:note">
-    <xsl:if test="@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:if>
-    <xsl:text>\emph{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
-    <xsl:if test="@xml:lang='en'"><xsl:text>}</xsl:text></xsl:if>
+    <xsl:call-template name="langstart"/>
+    <xsl:apply-templates/>
+    <xsl:call-template name="langend"/>
 </xsl:template>
 <xsl:template match="x:note[@place='foot']">
     <xsl:text>\footnoteA{</xsl:text>
-    <xsl:if test="@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:if>
+    <xsl:call-template name="langstart"/>
     <xsl:apply-templates/>
-    <xsl:if test="@xml:lang='en'"><xsl:text>}</xsl:text></xsl:if>
+    <xsl:call-template name="langend"/>
     <xsl:text>}</xsl:text>
 </xsl:template>
 
@@ -410,27 +418,27 @@
 </xsl:template>
 <xsl:template match="x:anchor">
     <xsl:variable name="noteid" select="concat('#',@xml:id)"/>
-    <xsl:variable name="note" select="//x:note[@target='$noteid']"/>
+    <xsl:variable name="note" select="//x:note[@target=$noteid]"/>
     <xsl:variable name="type" select="$note/ancestor::x:standOff/@type"/>
     <xsl:choose>
-        <xsl:when test="$type = 'note1'">
-            <xsl:text>\Afootnote{</xsl:text>
-            <xsl:apply-templates/>
+        <xsl:when test="$type = 'notes1'">
+            <xsl:text>\footnoteA{</xsl:text>
+            <xsl:apply-templates select="$note"/>
             <xsl:text>}</xsl:text>
         </xsl:when>
-        <xsl:when test="$type = 'note2'">
-            <xsl:text>\Cfootnote{</xsl:text>
-            <xsl:apply-templates/>
+        <xsl:when test="$type = 'notes2'">
+            <xsl:text>\footnoteB{</xsl:text>
+            <xsl:apply-templates select="$note"/>
             <xsl:text>}</xsl:text>
         </xsl:when>
-        <xsl:when test="$type = 'note3'">
-            <xsl:text>\Dfootnote{</xsl:text>
-            <xsl:apply-templates/>
+        <xsl:when test="$type = 'notes3'">
+            <xsl:text>\footnoteC{</xsl:text>
+            <xsl:apply-templates select="$note"/>
             <xsl:text>}</xsl:text>
         </xsl:when>
-        <xsl:when test="$type = 'note4'">
-            <xsl:text>\Efootnote{</xsl:text>
-            <xsl:apply-templates/>
+        <xsl:when test="$type = 'notes4'">
+            <xsl:text>\footnoteD{</xsl:text>
+            <xsl:apply-templates select="$note"/>
             <xsl:text>}</xsl:text>
         </xsl:when>
     </xsl:choose>

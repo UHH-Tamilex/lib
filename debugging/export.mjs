@@ -59,6 +59,12 @@ const exportLaTeX = async (indoc,libRoot) => {
     for(const lg of doc.querySelectorAll('text lg, text p'))
         normalizeLg(lg);
 
+    for(const noteblock of doc.querySelectorAll('standOff[type="notes1"], standOff[type="notes2"], standOff[type="notes3"], standOff[type="notes4"]')) {
+            const xmlns = 'http://www.w3.org/XML/1998/namespace';
+            noteblock.setAttributeNS(xmlns,'lang','en');
+            toTamil(noteblock);
+    }
+
     const xproc = new XSLTProcessor();
     if(!_state.xsltsheet)
         _state.xsltsheet = await loadDoc(`${libRoot}debugging/latex.xsl`);
@@ -125,10 +131,14 @@ const toTamil = el => {
             if(!curlang) {
                 cur.setAttributeNS(xmlns,'lang',cur.parentNode.getAttributeNS(xmlns,'lang'));
             }
+            if(cur.getAttributeNS(xmlns,'lang') === 'ta') {
+                if(cur.closest('[type="translation"]') ||
+                  cur.closest('note')?.getAttributeNS(xmlns,'lang') === 'en')
+                    cur.setAttributeNS(xmlns,'lang','ta-Latn');
+            }
         }
         else if(cur.nodeType === 3) {
-            if(cur.parentNode.getAttributeNS(xmlns,'lang') === 'ta' &&
-                !cur.parentNode.closest('[type="translation"]') && !cur.parentNode.closest('note')) {
+            if(cur.parentNode.getAttributeNS(xmlns,'lang') === 'ta') {
                 const clean = cur.data.toLowerCase()
                                       .replaceAll(/(\S)·/g,'$1\u200C');
                 cur.data = Sanscript.t(clean,'iast','tamil');
