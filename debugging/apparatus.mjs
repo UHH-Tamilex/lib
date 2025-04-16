@@ -524,9 +524,9 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
 
 const serializeRange = (doc, range) => {
     const clone = range.cloneContents();
-    const temp = doc.createElement('temp');
+    const nURI = doc.documentElement.namespaceURI;
+    const temp = doc.createElementNS(nURI, 'ab');
     temp.appendChild(clone);
-    //TODO: concat gaps here
     for(const gap of temp.querySelectorAll('gap')) {
         const gapid = gap.getAttribute('_gapid');
         gap.removeAttribute('_gapid');
