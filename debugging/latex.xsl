@@ -410,7 +410,7 @@
 </xsl:template>
 <xsl:template match="x:anchor">
     <xsl:variable name="noteid" select="concat('#',@xml:id)"/>
-    <xsl:variable name="note" select="note[@target='$noteid']"/>
+    <xsl:variable name="note" select="//x:note[@target='$noteid']"/>
     <xsl:variable name="type" select="$note/ancestor::x:standOff/@type"/>
     <xsl:choose>
         <xsl:when test="$type = 'note1'">
