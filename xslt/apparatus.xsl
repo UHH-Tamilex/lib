@@ -146,8 +146,8 @@
                     <xsl:apply-templates/>
                 </div>
                 <xsl:call-template name="apparatus-standoff">
-                    <xsl:with-param name="apparatus" select="$apparatus"/>
                     <xsl:with-param name="notes1" select="$notes1"/>
+                    <xsl:with-param name="apparatus" select="$apparatus"/>
                     <xsl:with-param name="notes2" select="$notes2"/>
                     <xsl:with-param name="notes3" select="$notes3"/>
                     <xsl:with-param name="notes4" select="$notes4"/>
@@ -230,8 +230,8 @@
                     <xsl:apply-templates/>
                 </div>
                 <xsl:call-template name="apparatus-standoff">
-                    <xsl:with-param name="apparatus" select="$apparatus"/>
                     <xsl:with-param name="notes1" select="$notes1"/>
+                    <xsl:with-param name="apparatus" select="$apparatus"/>
                     <xsl:with-param name="notes2" select="$notes2"/>
                     <xsl:with-param name="notes3" select="$notes3"/>
                     <xsl:with-param name="notes4" select="$notes4"/>
@@ -563,8 +563,8 @@
     </xsl:element>
 </xsl:template>
 <xsl:template name="apparatus-standoff">
-    <xsl:param name="apparatus"/>
     <xsl:param name="notes1"/>
+    <xsl:param name="apparatus"/>
     <xsl:param name="notes2"/>
     <xsl:param name="notes3"/>
     <xsl:param name="notes4"/>

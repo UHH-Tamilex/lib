@@ -399,13 +399,41 @@
     <xsl:value-of select="@n"/>
     <xsl:text>}</xsl:text>
 </xsl:template>
+<xsl:template match="x:anchor">
+    <xsl:variable name="noteid" select="concat('#',@xml:id)"/>
+    <xsl:variable name="note" select="note[@target=$noteid]"/>
+    <xsl:variable name="type" select="$note/ancestor::x:standOff/@type"/>
+    <xsl:choose>
+        <xsl:when test="$type = 'note1'">
+            <xsl:text>\Afootnote{</xsl:text>
+            <xsl:apply-templates/>
+            <xsl:text>}</xsl:text>
+        </xsl:when>
+        <xsl:when test="$type = 'note2'">
+            <xsl:text>\Cfootnote{</xsl:text>
+            <xsl:apply-templates/>
+            <xsl:text>}</xsl:text>
+        </xsl:when>
+        <xsl:when test="$type = 'note3'">
+            <xsl:text>\Dfootnote{</xsl:text>
+            <xsl:apply-templates/>
+            <xsl:text>}</xsl:text>
+        </xsl:when>
+        <xsl:when test="$type = 'note4'">
+            <xsl:text>\Efootnote{</xsl:text>
+            <xsl:apply-templates/>
+            <xsl:text>}</xsl:text>
+        </xsl:when>
+    </xsl:choose>
+</xsl:template>
+
 <xsl:template match="x:app[x:rdg or x:rdgGrp]">
     <xsl:text>\edtext{}{\linenum{|\xlineref{</xsl:text>
     <xsl:value-of select="@corresp"/>
     <xsl:text>}}</xsl:text>
     <xsl:text>\lemma{</xsl:text>
     <xsl:apply-templates select=".//x:lem/node()"/>
-    <xsl:text>}\Afootnote{</xsl:text>
+    <xsl:text>}\Bfootnote{</xsl:text>
     <xsl:text>\textenglish{</xsl:text>
     <xsl:variable name="mss" select="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
     <xsl:choose>
