@@ -203,6 +203,13 @@
     <xsl:apply-templates/>
     <xsl:call-template name="langend"/>
 </xsl:template>
+<xsl:template match="x:q | x:quote">
+    <xsl:text>“</xsl:text>
+    <xsl:call-template name="langstart"/>
+    <xsl:apply-templates/>
+    <xsl:call-template name="langend"/>
+    <xsl:text>”</xsl:text>
+</xsl:template>
 
 <xsl:template match="x:label">
 <xsl:text>\textsc{[</xsl:text><xsl:apply-templates /><xsl:text>]}</xsl:text>
