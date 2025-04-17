@@ -112,6 +112,19 @@
 \setstanzaindents{1,0,0}
 \setcounter{stanzaindentsrepetition}{2}
 
+\fnpos{%
+    {A}{familiar},
+    {A}{critical},%
+    {B}{critical},%
+    {C}{critical},%
+    {D}{critical},%
+    {E}{critical},%
+    {B}{familiar},%
+    {C}{familiar},%
+    {D}{familiar},%
+    {E}{familiar}%
+}
+
 \begin{document}
 
 \onehalfspacing
@@ -163,13 +176,34 @@
 </xsl:template>
 
 <xsl:template match="x:lg">
-    <xsl:text>
+    <xsl:choose>
+        <xsl:when test="ancestor::x:div[@rend='parallel']">
+<xsl:text>
 \begin{astanza}[\smallskip]
 
-</xsl:text><xsl:apply-templates select="x:l | x:trailer"/>
+</xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+<xsl:text>
+\stanza[\smallskip]
+
+</xsl:text>
+        </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates select="x:l | x:trailer"/>
+    <xsl:choose>
+        <xsl:when test="ancestor::x:div[@rend='parallel']">
 <xsl:text>
 \end{astanza}
+
 </xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+<xsl:text>
+
+</xsl:text>
+        </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
 
 <xsl:template match="x:lg/x:l">
