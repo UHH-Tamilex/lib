@@ -143,15 +143,15 @@
     font-feature-settings: "trad" 1;
 }
 
-:lang(sa-Gran) {
+[lang^="sa-Gran"] {
     line-height: 2;
 }
 
-:lang(sa-Shrd) {
+[lang^="sa-Shrd"] {
     font-feature-settings: "ss01" 1;
 }
 
-:lang(ta-Taml) {
+[lang^="ta-Taml"] {
     word-spacing: 150%;
 }
 
@@ -169,7 +169,7 @@ body {
     hyphens: auto;
 }
 
-p:lang(bo), p:lang(bod) {
+p[lang^="bo"], p[lang^="bod"] {
     line-height: 3rem;
 }
 /*
