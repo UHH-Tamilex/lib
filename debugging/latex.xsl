@@ -484,7 +484,7 @@
     <xsl:text>}}</xsl:text>
     <xsl:text>\lemma{</xsl:text>
     <xsl:apply-templates select=".//x:lem/node()"/>
-    <xsl:text>}\Bfootnote{</xsl:text>
+    <xsl:text>}\Afootnote{</xsl:text>
     <xsl:text>\textenglish{</xsl:text>
     <xsl:variable name="mss" select="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
     <xsl:choose>
