@@ -152,7 +152,7 @@
 }
 
 [lang^="ta-Taml"] {
-    word-spacing: 150%;
+    word-spacing: 0.5em;
 }
 
 :lang(en) {
