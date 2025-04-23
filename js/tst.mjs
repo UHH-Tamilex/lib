@@ -264,6 +264,8 @@ const rotatePage = e => {
         togglers.style.width = '100vw';
         const viewertoggle = document.getElementById('viewertoggle');
         viewertoggle.style.borderRadius = '0.3rem 0 0 0.3rem';
+        const rec = document.querySelector('.record.thin');
+        if(rec) rec.className = 'record fat';
     }
     else {
         document.body.style.flexDirection = 'row-reverse';
@@ -277,13 +279,14 @@ const rotatePage = e => {
         togglers.style.width = 'auto';
         const viewertoggle = document.getElementById('viewertoggle');
         viewertoggle.style.borderRadius = '0 0.3rem 0.3rem 0';
+        const rec = document.querySelector('.record.fat');
+        if(rec) rec.className = 'record thin';
     }
 };
 
 const hideViewer = () => {
     const viewer = document.getElementById('viewer');
     viewer.style.display = 'none';
-    document.querySelector('.record.thin').className = 'record fat';
     //_state.curImage = TSTViewer.getMiradorCanvasId(_state.mirador);
     //TSTViewer.killMirador();
     const toggle = document.getElementById('viewertoggle');
@@ -293,13 +296,14 @@ const hideViewer = () => {
     toggle.title = 'show images';
     othertoggle.style.display = 'none';
     rotator.style.display = 'none';
+    const rec = document.querySelector('.record.thin');
+    if(rec) rec.className = 'record fat';
     //TSTViewer.refreshMirador();   
 };
 
 const showViewer = () => {
     const viewer = document.getElementById('viewer');
     viewer.style.display = 'block';
-    document.querySelector('.record.fat').className = 'record thin';
     //TSTViewer.refreshMirador(_state.mirador,_state.manifest, _state.curImage);
     const toggle = document.getElementById('viewertoggle');
     const othertoggle = document.getElementById('recordtoggle');
@@ -310,6 +314,8 @@ const showViewer = () => {
     othertoggle.title = 'hide text';
     othertoggle.style.display = 'flex';
     rotator.style.display = 'flex';
+    const rec = document.querySelector('.record.fat');
+    if(rec) rec.className = 'record thin';
 };
 
 const hideRecord = () => {
