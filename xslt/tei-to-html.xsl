@@ -141,7 +141,7 @@
             <xsl:if test="$manifest">
                 <div id="togglers">
                     <div id="recordtoggle" class="toggle" title="hide text">&gt;</div>
-                    <div id="rotator" title="rotate">⟳</div>
+                    <div id="rotator" title="rotate">↺</div>
                     <div id="viewertoggle" class="toggle" title="hide images">&lt;</div>
                 </div>  
                 <xsl:element name="div">

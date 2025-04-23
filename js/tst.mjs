@@ -252,9 +252,9 @@ const toggleRecord = e => {
 };
 
 const rotatePage = e => {
-    if(e.target.textContent === '⟳') {
+    if(e.target.textContent === '↺') {
         document.body.style.flexDirection = 'column';
-        e.target.textContent = '↺';
+        e.target.textContent = '⟳';
         e.target.style.margin = '0 0.2rem 0 0.2rem';
         e.target.style.borderRadius = '0 0 0.3rem 0.3rem';
         const togglers = document.getElementById('togglers');
@@ -269,7 +269,7 @@ const rotatePage = e => {
     }
     else {
         document.body.style.flexDirection = 'row-reverse';
-        e.target.textContent = '⟳';
+        e.target.textContent = '↺';
         e.target.style.margin = '0.2rem 0 0.2rem 0';
         e.target.style.borderRadius = '0 0.3rem 0.3rem 0';
         const togglers = document.getElementById('togglers');
