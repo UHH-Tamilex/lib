@@ -314,8 +314,10 @@ const showViewer = () => {
     othertoggle.title = 'hide text';
     othertoggle.style.display = 'flex';
     rotator.style.display = 'flex';
-    const rec = document.querySelector('.record.fat');
-    if(rec) rec.className = 'record thin';
+    if(document.body.style.flexDirection === 'row-reverse') {
+        const rec = document.querySelector('.record.fat');
+        if(rec) rec.className = 'record thin';
+    }
 };
 
 const hideRecord = () => {
