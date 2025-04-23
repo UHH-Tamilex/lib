@@ -283,7 +283,7 @@ const rotatePage = e => {
 const hideViewer = () => {
     const viewer = document.getElementById('viewer');
     viewer.style.display = 'none';
-    // TODO: go from record-thin to record-fat
+    document.querySelector('.record.thin').className = 'record fat';
     //_state.curImage = TSTViewer.getMiradorCanvasId(_state.mirador);
     //TSTViewer.killMirador();
     const toggle = document.getElementById('viewertoggle');
@@ -299,6 +299,7 @@ const hideViewer = () => {
 const showViewer = () => {
     const viewer = document.getElementById('viewer');
     viewer.style.display = 'block';
+    document.querySelector('.record.fat').className = 'record thin';
     //TSTViewer.refreshMirador(_state.mirador,_state.manifest, _state.curImage);
     const toggle = document.getElementById('viewertoggle');
     const othertoggle = document.getElementById('recordtoggle');
