@@ -1,3 +1,5 @@
+import initSqlJs from './sql-wasm.js';
+/*
 import {createSQLiteThread, createHttpBackend} from './sqlite-wasm-http/index.mjs';
 
 const openDb = async dburl => {
@@ -12,5 +14,16 @@ const openDb = async dburl => {
     await db('open', {filename: 'file:' + encodeURI(dburl),vfs: 'http'});
     return db;
 };
+*/
+
+const openDb = async dburl => {
+    const sqlPromise = initSqlJs({
+        locateFile: file => `./lib/js/${file}`
+    });
+    const dataPromise = fetch(dburl).then(r => r.arrayBuffer());
+    const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
+    return (new SQL.Database(new Uint8Array(buf)));
+};
+
 
 export default openDb;
