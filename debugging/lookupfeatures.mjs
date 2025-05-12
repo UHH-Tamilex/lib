@@ -11,7 +11,7 @@ const importantKeys = ['pos','number','gender','nouncase','person','aspect','voi
 
 const lookupCitations = async (str) => {
     if(!_state.fullindex)
-        _state.fullindex = await openDb('https://uhh-tamilex.github.io/lexicon/wordindex.db');
+        _state.fullindex = await openDb('https://uhh-tamilex.github.io/lexicon/lookupindex.db');
     
     const cached = _state.cache.get(str);
     if(cached) return cached;
@@ -32,7 +32,7 @@ const lookupCitations = async (str) => {
 
 const lookupCitationDefs = async (str,grammar) => {
     if(!_state.fullindex)
-        _state.fullindex = await openDb('https://uhh-tamilex.github.io/lexicon/wordindex.db');
+        _state.fullindex = await openDb('https://uhh-tamilex.github.io/lexicon/lookupindex.db');
     
     const cached = _state.cache.get(str);
     if(cached) return cached;
