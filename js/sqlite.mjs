@@ -2,7 +2,7 @@ import {createSQLiteThread, createHttpBackend} from './sqlite-wasm-http/index.mj
 
 const openDb = async dburl => {
     const httpBackend = createHttpBackend({
-        maxPageSize: /*4096*/ 64 * 1024,
+        maxPageSize: 4096,
         timeout: 60000,
         cacheSize: 50 * 1024 * 1024, // 50 MB should cache the whole db
         backendType: 'sync'
