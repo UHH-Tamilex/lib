@@ -95,12 +95,13 @@
 \renewcommand{\headrulewidth}{0pt}
 
 \arrangementX[A]{paragraph}
+\renewcommand*{\thefootnoteA}{\textenglish{\arabic{footnoteA}}}
 \arrangementX[B]{paragraph}
-\renewcommand*{\thefootnoteB}{\alph{footnoteB}}
+\renewcommand*{\thefootnoteB}{\textenglish{\Roman{footnoteB}}}
 \arrangementX[C]{paragraph}
-\renewcommand*{\thefootnoteC}{\Roman{footnoteC}}
+\renewcommand*{\thefootnoteC}{\textenglish{\alph{footnoteC}}}
 \arrangementX[D]{paragraph}
-\renewcommand*{\thefootnoteD}{\roman{footnoteD}}
+\renewcommand*{\thefootnoteD}{\textenglish{\roman{footnoteD}}}
 
 \Xarrangement[A]{paragraph}
 \Xnotenumfont[A]{\bfseries}
