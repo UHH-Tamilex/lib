@@ -408,6 +408,7 @@
 <xsl:template match="x:note">
     <xsl:call-template name="langstart"/>
     <xsl:apply-templates/>
+    <xsl:text> </xsl:text>
     <xsl:call-template name="langend"/>
 </xsl:template>
 <xsl:template match="x:note[@place='foot']">
