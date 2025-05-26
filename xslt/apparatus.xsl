@@ -233,9 +233,12 @@
                             <xsl:value-of select="@n - 1"/>
                             <xsl:text>;</xsl:text>
                         </xsl:attribute>
-                        <xsl:attribute name="data-offset">
-                            <xsl:value-of select="@n mod 5"/>
-                        </xsl:attribute>
+                        <xsl:variable name="offset" select="@n mod 5"/>
+                        <xsl:if test="$offset != 0">
+                            <xsl:attribute name="data-offset">
+                                <xsl:value-of select="@n mod 5"/>
+                            </xsl:attribute>
+                        </xsl:if>
                     </xsl:if>
                     <xsl:apply-templates/>
                 </div>
@@ -575,9 +578,12 @@
                     <xsl:value-of select="@n - 1"/>
                     <xsl:text>;</xsl:text>
                 </xsl:attribute>
-                <xsl:attribute name="data-offset">
-                    <xsl:value-of select="@n mod 5"/>
-                </xsl:attribute>
+                <xsl:variable name="offset" select="@n mod 5"/>
+                <xsl:if test="$offset != 0">
+                    <xsl:attribute name="data-offset">
+                        <xsl:value-of select="@n mod 5"/>
+                    </xsl:attribute>
+                </xsl:if>
             </xsl:if>
         <xsl:apply-templates/>
     </xsl:element>
