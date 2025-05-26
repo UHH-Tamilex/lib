@@ -130,6 +130,7 @@
                 <xsl:value-of select="@xml:id"/>
             </xsl:attribute>
         </xsl:if>
+<<<<<<< HEAD
         <xsl:if test="@n">
             <xsl:attribute name="style">
                 <xsl:text>counter-reset: line-numb </xsl:text>
@@ -143,6 +144,8 @@
                 </xsl:attribute>
             </xsl:if>
         </xsl:if>
+=======
+>>>>>>> parent of 421fc09 (better support for line numbers)
         <xsl:if test="@corresp">
             <xsl:attribute name="data-corresp">
                 <xsl:value-of select="translate(@corresp,'#','')"/>

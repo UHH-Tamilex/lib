@@ -62,7 +62,6 @@ const addEditButtons = blocks => {for(const block of blocks) addEditButton(block
 const addEditButton = blockel => {
     const xmlid = typeof blockel === 'string' ? blockel : blockel.getAttribute('xml:id');
     const block = document.getElementById(xmlid);
-    const wideblock = block.closest('.wide');
     const editmenu = document.createElement('div');
     editmenu.className = 'editmenu ignored';
     editmenu.lang = 'en';
@@ -84,7 +83,7 @@ const addEditButton = blockel => {
     appbutton.dataset.anno = `Edit apparatus for ${xmlid}`;
 
     editmenu.append(wsbutton, appbutton);
-    (wideblock || block).prepend(editmenu);
+    block.prepend(editmenu);
 };
 
 export {decodeRLE, matchCounts, countLines, addEditButtons, addEditButton};
