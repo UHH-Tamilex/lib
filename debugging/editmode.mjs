@@ -37,7 +37,7 @@ const annotateMode = e => {
         return t.querySelector('.edition') || t;
     };
 
-    if(e.textContent === 'Annotated view') {
+    if(e.target.textContent === 'Annotated view') {
         const wsbutton = document.getElementById('wordsplitbutton');
         if(wsbutton.dataset.anno === 'word-spliy text')
             wsbutton.click();
@@ -47,7 +47,7 @@ const annotateMode = e => {
             const edition = getEdition(standoff);
             edition.classList.add('annotated');
         }
-        e.textContent = 'Unannotated view';
+        e.target.textContent = 'Unannotated view';
     }
     else {
         const standoffs = document.querySelectorAll('.standOff[data-type="wordsplit"]');
@@ -55,7 +55,7 @@ const annotateMode = e => {
             const edition = getEdition(standoff);
             editon.classList.remove('annotated');
         }
-        e.textContent = 'Annotated view';
+        e.target.textContent = 'Annotated view';
     }
 };
 
