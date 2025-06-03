@@ -45,7 +45,7 @@ const annotateMode = e => {
         const standoffs = document.querySelectorAll('.standOff[data-type="wordsplit"]');
         for(const standoff of standoffs) {
             const edition = getEdition(standoff);
-            editon.classList.add('annotated');
+            edition.classList.add('annotated');
         }
         e.textContent = 'Unannotated view';
     }
