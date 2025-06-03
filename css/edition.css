@@ -202,6 +202,16 @@ span.invisible {
     color: rgba(17,17,17,0.5);
 }
 
+.annotated .role_absolutive {
+    background: #deebf7;
+}
+.annotated .role_infinitive {
+    background: #9ecae1;
+}
+.annotated .role_peyareccam {
+    background: #3182bd;
+}
+
 #topbar {
     position: sticky;
     top: 1em;

@@ -23,11 +23,40 @@ const startEditMode = async (Transliterator,libRoot) => {
     document.getElementById('button_wordsplitbutton').addEventListener('click',Splitter.addWordSplits);
     document.getElementById('button_editbutton').addEventListener('click',Apparatuser.addVariants);
     document.getElementById('button_exportbutton').addEventListener('click',exportFile.bind(null,_state.curDoc,libRoot));
+    document.getElementById('button_annotatebutton').addEventListener('click',annotateMode);
     document.getElementById('button_savebutton').addEventListener('click',saveAs.bind(null,_state.filename, _state.curDoc));
     
     document.getElementById('recordcontainer').addEventListener('click',docClick);
     Apparatuser.init(Transliterator);
     Splitter.init(/*Transliterator*/);
+};
+
+const annotateMode = e => {
+    const getEdition = s => {
+        const t = document.getElementById(s.dataset.corresp.replace(/^#/,''));
+        return t.querySelector('.edition') || t;
+    };
+
+    if(e.textContent === 'Annotated view') {
+        const wsbutton = document.getElementById('wordsplitbutton');
+        if(wsbutton.dataset.anno === 'word-spliy text')
+            wsbutton.click();
+
+        const standoffs = document.querySelectorAll('.standOff[data-type="wordsplit"]');
+        for(const standoff of standoffs) {
+            const edition = getEdition(standoff);
+            editon.classList.add('annotated');
+        }
+        e.textContent = 'Unannotated view';
+    }
+    else {
+        const standoffs = document.querySelectorAll('.standOff[data-type="wordsplit"]');
+        for(const standoff of standoffs) {
+            const edition = getEdition(standoff);
+            editon.classList.remove('annotated');
+        }
+        e.textContent = 'Annotated view';
+    }
 };
 
 const revealButtons = () => {
