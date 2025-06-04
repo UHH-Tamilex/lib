@@ -267,7 +267,7 @@ const makeWord = (entry) => {
         if(roles.length > 0) {
             annohtml = annohtml + ` (${[...roles].map(r => r.textContent).join(' ')})`;
             for(const role of roles)
-                span.classList.add('role_' + role.textContent.replaceAll(/s+/g,'_'));
+                span.classList.add('role_' + role.textContent.replaceAll(/\s+/g,'_'));
         }
         if(affix) {
             const affixrole = affix.querySelector('[data-name="role"]')?.textContent || 'suffix';
