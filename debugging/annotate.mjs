@@ -212,10 +212,13 @@ Annotator.showOptions = e => {
     document.getElementById('optionsbox').style.display = 'block';
 };
 Annotator.hideTimeout = null;
-Annotator.cancelTimeout = () => clearTimeout(Annotator.hideTimeout);
+Annotator.cancelTimeout = () => {
+    clearTimeout(Annotator.hideTimeout);
+    Annotator.hideTimeout = null;
+};
 Annotator.hideOptions = () => {
-    if(Annotator.hideTimeout) return;
-
+    if(Annotator.hideTimeout)
+        Annotator.cancelTimeout();
     Annotator.hideTimeout = setTimeout(() => {
         document.getElementById('optionsbox').style.display = 'none';
     },100);
