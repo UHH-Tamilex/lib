@@ -217,9 +217,6 @@ const injectCSS = () => {
     filter: invert(54%) sepia(18%) saturate(865%) hue-rotate(174deg) brightness(95%) contrast(88%);
 }
 
-#wordsplitbutton:has(#optionssvg:hover) {
-    background: rgb(255,255,248);
-}
 #optionssvg:hover {
     filter: invert(50%) sepia(69%) saturate(3929%);
 }
