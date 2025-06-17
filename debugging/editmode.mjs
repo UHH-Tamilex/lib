@@ -21,11 +21,11 @@ const startEditMode = async (Transliterator,libRoot) => {
     _state.libRoot = libRoot;
     const blocks = _state.curDoc.querySelectorAll('lg[*|id],p[*|id],div[*|id],div[*|id]');
     addEditButtons(blocks);
-    document.getElementById('button_wordsplitbutton').addEventListener('click',Splitter.addWordSplits);
-    document.getElementById('button_editbutton').addEventListener('click',Apparatuser.addVariants);
-    document.getElementById('button_exportbutton').addEventListener('click',exportFile.bind(null,_state.curDoc,libRoot));
+    document.getElementById('button_wordsplitbutton')?.addEventListener('click',Splitter.addWordSplits);
+    document.getElementById('button_editbutton')?.addEventListener('click',Apparatuser.addVariants);
+    document.getElementById('button_exportbutton')?.addEventListener('click',exportFile.bind(null,_state.curDoc,libRoot));
     //document.getElementById('button_annotatebutton').addEventListener('click',annotateMode);
-    document.getElementById('button_savebutton').addEventListener('click',saveAs.bind(null,_state.filename, _state.curDoc));
+    document.getElementById('button_savebutton')?.addEventListener('click',saveAs.bind(null,_state.filename, _state.curDoc));
    
     Annotator.init();
     document.getElementById('recordcontainer').addEventListener('click',docClick);

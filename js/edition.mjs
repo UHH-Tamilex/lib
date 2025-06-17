@@ -518,61 +518,12 @@ const go = () => {
         transblock.addEventListener('mouseover',findCorrespLine);
     
     const wordsplitbutton = document.getElementById('wordsplitbutton');
-    wordsplitbutton.addEventListener('click',wordsplit); // start this for editmode
-    if(document.querySelector('.standOff[data-type="wordsplit"]')) {
-        wordsplitbutton.style.display = 'block';
-        /*
-        if(Debugging) {
-            const splitedit = document.getElementById('wordspliteditbutton');
-            splitedit.style.display = 'block';
-            splitedit.addEventListener('click',Splitter.addWordSplits);
-        } */
+    if(wordsplitbutton) {
+        wordsplitbutton.addEventListener('click',wordsplit); // start this for editmode
+        if(document.querySelector('.standOff[data-type="wordsplit"]'))
+            wordsplitbutton.style.display = 'block';
     }
-    /* 
-    else if(Debugging) {
-        wordsplitbutton.style.display = 'block';
-        wordsplitbutton.style.border = '1px dashed grey';
-        wordsplitbutton.dataset.anno = 'add word splits';
-        wordsplitbutton.querySelector('svg').style.stroke = 'grey';
-        wordsplitbutton.addEventListener('click',Splitter.addWordSplits);
-    }*/
 
-    if(document.querySelector('.translation')) {
-        const apparatusbutton = document.getElementById('apparatusbutton');
-        if(document.querySelector('div.apparatus-block span.app')) {
-            /*
-            if(Debugging) {
-                const appedit = document.getElementById('apparatuseditbutton');
-                appedit.style.display = 'block';
-                appedit.addEventListener('click',addVariants);
-            }
-            */
-        }
-        /*
-        else if(Debugging) {
-            apparatusbutton.style.display = 'block';
-            apparatusbutton.style.border = '1px dashed grey';
-            apparatusbutton.dataset.anno = 'add variants';
-            apparatusbutton.querySelector('svg').style.stroke = 'grey';
-            apparatusbutton.addEventListener('click',addVariants);
-        }
-        */
-    }
-    else {
-        /*
-        if(Debugging) {
-            const apparatusbutton = document.getElementById('apparatusbutton');
-            apparatusbutton.style.display = 'block';
-            apparatusbutton.classList.add('disabled');
-            const appedit = document.getElementById('apparatuseditbutton');
-            appedit.style.display = 'block';
-            appedit.addEventListener('click',addVariants);
-        }
-        */
-    }
-    //wordsplit({target: analyzebutton});
-    //cleanup(document);
-   
     const highlight = searchparams.get('highlight');
     if(highlight) {
         const found = document.querySelector(highlight);
