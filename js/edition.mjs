@@ -2,7 +2,7 @@ import { Transliterate } from './transliterate.mjs';
 import { GitHubFunctions } from './githubfunctions.mjs';
 import { ApparatusViewer } from './apparatus.mjs';
 import { AlignmentViewer } from './alignment.mjs';
-import WordLookup from './wordlookup.mjs';
+//import WordLookup from './wordlookup.mjs';
 import './tooltip.mjs';
 import startEditMode from '../debugging/editmode.mjs';
 
@@ -15,6 +15,7 @@ const lookup = async (e) => {
         AlignmentViewer.viewer(apointer.href);
         return;
     }
+    /*
     const word = e.target.closest('.word:not(.nolookup)');
     if(!word) return;
     const blackout = document.getElementById('blackout');
@@ -32,6 +33,7 @@ const lookup = async (e) => {
     if(document.getElementById('transbutton').lang === 'en')
             Transliterate.activate(lookupwindow);
     blackout.addEventListener('click',cancelBlackout);
+    */
 };
 
 const cancelBlackout = e => {
