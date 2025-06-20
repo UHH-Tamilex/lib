@@ -176,6 +176,9 @@ rt:hover, span.word:not(.nolookup):hover { background-color: yellow; /*cursor: p
 span.word.split {
     margin-right: 0.5rem;
 }
+span.word.split:last-child {
+    margin-right: 0;
+}
 
 .animation span.word.split {
     animation-duration: 0.5s;
