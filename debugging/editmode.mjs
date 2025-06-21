@@ -1,6 +1,7 @@
 import Splitter from './splits.mjs';
 import Apparatuser from './variants.mjs';
 import Annotator from './annotate.mjs';
+import Citer from './cite.mjs';
 import { addEditButtons } from './utils.mjs';
 import { loadDoc, saveAs } from './fileops.mjs';
 import { exportFile } from './export.mjs';
@@ -29,7 +30,9 @@ const startEditMode = async (Transliterator,libRoot) => {
    
     Annotator.init();
     document.getElementById('recordcontainer').addEventListener('click',docClick);
+    //document.getElementById('recordcontainer').addEventListener('mouseup',Citer.docSelect);
     Apparatuser.init(Transliterator);
+    Citer.init(_state.curDoc);
     Splitter.init(/*Transliterator*/);
 };
 
@@ -50,6 +53,7 @@ const docClick = e => {
         Apparatuser.addVariants(e.target.closest('[id]').id);
     }
 };
+
 
 const injectCSS = (add = '') => {
     const style = document.createElement('style');
