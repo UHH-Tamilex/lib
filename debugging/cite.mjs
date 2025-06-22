@@ -106,10 +106,13 @@ Citer.docSelect = e => {
     const q = Citer.makeCitation(Citer.thisDoc, id, nums);
 
     const qserial = (new XMLSerializer()).serializeToString(q.documentElement);
-    const out = `<cit source="${window.location.href}?id=${id}&w=${nums.join(',')}">
+    const url = new URL(window.location);
+    const base = url.origin + url.pathname;
+    const out = `<cit source="${base}?id=${id}&w=${nums.join(',')}">
     ${qserial}
-    <ref target="${window.location.href}">${id}</ref>
+    <ref target="${base}">${id}</ref>
 </cit>`;
+    //TODO: find line numbers
 
     document.getElementById('blackout').style.display = 'flex';
     const popup = document.getElementById('citation-popup');
