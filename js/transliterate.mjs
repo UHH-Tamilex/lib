@@ -43,6 +43,8 @@ const _state = Object.seal({
         ['te-Gran-t-te-Latn','te-Latn-t-te-Gran'],
         ['ml-Mlym-t-ml-Latn','ml-Latn-t-ml-Mlym'],
         ['ml-Latn-t-ml-Mlym','ml-Mlym-t-ml-Latn'],
+        ['te-Telu-t-te-Latn','te-Latn-t-te-Telu'],
+        ['te-Latn-t-te-Telu','te-Telu-t-te-Latn'],
         ['pi-Sinh-t-pi-Latn','pi-Latn-t-pi-Sinh'],
         ['pi-Latn-t-pi-Sinh','pi-Sinh-t-pi-Latn'],
     ]),
