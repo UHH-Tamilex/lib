@@ -108,7 +108,7 @@ Citer.docSelect = e => {
     const qserial = (new XMLSerializer()).serializeToString(q.documentElement);
     const url = new URL(window.location);
     const base = url.origin + url.pathname;
-    const out = `<cit source="${base}?id=${id}&w=${nums.join(',')}">
+    const out = `<cit source="${base}?id=${id}&amp;w=${nums.join(',')}">
     ${qserial}
     <ref target="${base}">${id}</ref>
 </cit>`;
