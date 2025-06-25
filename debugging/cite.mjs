@@ -11,7 +11,10 @@ const Sheet = (new DOMParser()).parseFromString(`<xsl:stylesheet version="1.0" x
   </xsl:template>
     
   <xsl:template match="tei:choice">
-    <choice><xsl:apply-templates/></choice>
+    <choice>
+        <xsl:copy-of select="@*"/>
+        <xsl:apply-templates/>
+    </choice>
   </xsl:template>
   <xsl:template match="tei:seg">
     <seg><xsl:apply-templates/></seg>
@@ -92,6 +95,7 @@ Citer.makeCitation = (doc, id, nums) => {
                 const choice = document.createElementNS(ns,'choice');
                 const type = word.getAttribute('type');
                 if(type) choice.setAttribute('type',type);
+
                 for(const entry of word.querySelectorAll(':scope > entry')) {
                     const seg = par.createElementNS(ns,'seg');
                     for(const wword of entry.querySelectorAll('entry')) {
