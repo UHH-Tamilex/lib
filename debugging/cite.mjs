@@ -24,12 +24,13 @@ const Sheet = (new DOMParser()).parseFromString(`<xsl:stylesheet version="1.0" x
 `,'text/xml');
 
 const getWords = (par, range) => {
-    const start = range.startContainer.parentNode.closest('.choice, .word');
-    const end = range.endContainer.parentNode.closest('.choice, .word');
+    const start = range.startContainer.parentNode.closest('.choice') || range.startContainer.parentNode.closest('.word');
+    const end = range.endContainer.parentNode.closest('.choice') || range.endContainer.parentNode.closest('.word');
     if(!start || !end) return;
     
     const ret = [];
-    for(const [n, word] of [...par.querySelectorAll(':scope > .word, :scope > .choice')].entries()) {
+    for(const [n, word] of [...par.querySelectorAll('.word, .choice')].entries()) {
+        if(word.parentNode.closest('.choice')) continue;
         if(word === start || word === end) {
             ret.push(n);
             if(start === end) {
@@ -92,7 +93,7 @@ Citer.makeCitation = (doc, id, nums) => {
                 for(const entry of word.querySelectorAll(':scope > entry')) {
                     const seg = par.createElementNS(ns,'seg');
                     for(const wword of entry.querySelectorAll('entry')) {
-                        const clone = wword.importNode(seg.querySelector('form'),true);
+                        const clone = par.importNode(wword.querySelector('form'),true);
                         seg.appendChild(clone);
                     }
                     choice.appendChild(seg);
