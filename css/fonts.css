@@ -171,6 +171,10 @@
     font-size-adjust: ex-height 0.55;
 }
 
+[lang^="si-Sinh"], [lang^="pi-Sinh"] {
+    font-size-adjust: ex-height 0.5;
+}
+
 :lang(en) {
     word-spacing: normal;
 }
