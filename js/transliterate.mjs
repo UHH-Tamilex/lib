@@ -63,7 +63,7 @@ const _state = Object.seal({
     button: null
 });
 
-_state.availlangs = Object.freeze(['sa','ta','kn','ml','pi','te','bo',..._state.hindic]);
+_state.availlangs = Object.freeze(['sa','ta','kn','ml','pi','te','si','bo',..._state.hindic]);
 
 _state.hindic.forEach(code => {
     _state.hyphenator[`${code}-Latn`] = _state.hyphenator['sa-Latn'];
