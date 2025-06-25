@@ -90,6 +90,8 @@ Citer.makeCitation = (doc, id, nums) => {
         if(i >= nums[0]) {
             if(word.nodeName === 'superEntry') {
                 const choice = document.createElementNS(ns,'choice');
+                const type = word.getAttribute('type');
+                if(type) choice.setAttribute('type',type);
                 for(const entry of word.querySelectorAll(':scope > entry')) {
                     const seg = par.createElementNS(ns,'seg');
                     for(const wword of entry.querySelectorAll('entry')) {
