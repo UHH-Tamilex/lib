@@ -47,7 +47,7 @@ const _state = Object.seal({
         ['ml-Latn-t-ml-Mlym','ml-Mlym-t-ml-Latn'],
         ['te-Telu-t-te-Latn','te-Latn-t-te-Telu'],
         ['te-Latn-t-te-Telu','te-Telu-t-te-Latn'],
-	['kn-Knda-t-kn-Latn','kn-Latn-t-kn-Knda'],
+        ['kn-Knda-t-kn-Latn','kn-Latn-t-kn-Knda'],
         ['kn-Latn-t-kn-Knda','kn-Knda-t-kn-Latn'],
         ['pi-Sinh-t-pi-Latn','pi-Latn-t-pi-Sinh'],
         ['pi-Latn-t-pi-Sinh','pi-Sinh-t-pi-Latn'],
@@ -63,7 +63,7 @@ const _state = Object.seal({
     button: null
 });
 
-_state.availlangs = Object.freeze(['sa','ta','ml','pi','te','bo',..._state.hindic]);
+_state.availlangs = Object.freeze(['sa','ta','kn','ml','pi','te','bo',..._state.hindic]);
 
 _state.hindic.forEach(code => {
     _state.hyphenator[`${code}-Latn`] = _state.hyphenator['sa-Latn'];
