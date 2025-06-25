@@ -9,6 +9,13 @@ const Sheet = (new DOMParser()).parseFromString(`<xsl:stylesheet version="1.0" x
       <xsl:apply-templates/>
     </xsl:element>
   </xsl:template>
+    
+  <xsl:template match="tei:choice">
+    <choice><xsl:apply-templates/></choice>
+  </xsl:template>
+  <xsl:template match="tei:seg">
+    <seg><xsl:apply-templates/></seg>
+  </xsl:template>
 
   <xsl:template match="tei:form">
     <w><xsl:apply-templates/></w>
@@ -17,12 +24,12 @@ const Sheet = (new DOMParser()).parseFromString(`<xsl:stylesheet version="1.0" x
 `,'text/xml');
 
 const getWords = (par, range) => {
-    const start = range.startContainer.parentNode.closest('.word');
-    const end = range.endContainer.parentNode.closest('.word');
+    const start = range.startContainer.parentNode.closest('.choice, .word');
+    const end = range.endContainer.parentNode.closest('.choice, .word');
     if(!start || !end) return;
     
     const ret = [];
-    for(const [n, word] of [...par.querySelectorAll('.word')].entries()) {
+    for(const [n, word] of [...par.querySelectorAll(':scope > .word, :scope > .choice')].entries()) {
         if(word === start || word === end) {
             ret.push(n);
             if(start === end) {
@@ -73,14 +80,29 @@ const copyToClipboard = (xml, par) => {
 };
 
 Citer.makeCitation = (doc, id, nums) => {
+    const ns = 'http://www.tei-c.org/ns/1.0' ;
     const standOff = doc.querySelector(`standOff[type="wordsplit"][corresp="#${id}"]`);
-    const par = document.implementation.createDocument('http://www.tei-c.org/ns/1.0','q');
+    const par = document.implementation.createDocument(ns,'q');
     let i = 0;
-    for(const word of standOff.querySelectorAll(':scope > entry')) {
+    for(const word of standOff.querySelectorAll(':scope > entry, :scope > superEntry')) {
         if(i > nums[1]) break;
         if(i >= nums[0]) {
-            const clone = par.importNode(word.querySelector('form'),true);
-            par.documentElement.appendChild(clone);
+            if(word.nodeName === 'superEntry') {
+                const choice = document.createElementNS(ns,'choice');
+                for(const entry of word.querySelectorAll(':scope > entry')) {
+                    const seg = par.createElementNS(ns,'seg');
+                    for(const wword of entry.querySelectorAll('entry')) {
+                        const clone = wword.importNode(seg.querySelector('form'),true);
+                        seg.appendChild(clone);
+                    }
+                    choice.appendChild(seg);
+                }
+                par.documentElement.appendChild(choice);
+            }
+            else {
+                const clone = par.importNode(word.querySelector('form'),true);
+                par.documentElement.appendChild(clone);
+            }
             if(i < nums[1])
                 par.documentElement.append(' ');
         }
