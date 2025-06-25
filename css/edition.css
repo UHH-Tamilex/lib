@@ -179,6 +179,9 @@ span.word.split {
 span.word.split:last-child {
     margin-right: 0;
 }
+.choiceseg span.word.split:last-child {
+    margin-right: 0.5rem;
+}
 
 .animation span.word.split {
     animation-duration: 0.5s;

@@ -45,8 +45,14 @@ const _state = Object.seal({
         ['ml-Latn-t-ml-Mlym','ml-Mlym-t-ml-Latn'],
         ['te-Telu-t-te-Latn','te-Latn-t-te-Telu'],
         ['te-Latn-t-te-Telu','te-Telu-t-te-Latn'],
+	['kn-Knda-t-kn-Latn','kn-Latn-t-kn-Knda'],
+        ['kn-Latn-t-kn-Knda','kn-Knda-t-kn-Latn'],
         ['pi-Sinh-t-pi-Latn','pi-Latn-t-pi-Sinh'],
         ['pi-Latn-t-pi-Sinh','pi-Sinh-t-pi-Latn'],
+        ['si-Sinh-t-si-Latn','si-Latn-t-si-Sinh'],
+        ['si-Latn-t-si-Sinh','si-Sinh-t-si-Latn'],
+        ['bo-Latn-t-bo-Tibt','bo-Tibt-t-bo-Latn'],
+        ['bo-Tibt-t-bo-Latn','bo-Latn-t-bo-Tibt']
     ]),
     isoToScript: new Map(),
     availlangs: null,
@@ -55,7 +61,7 @@ const _state = Object.seal({
     button: null
 });
 
-_state.availlangs = Object.freeze(['sa','ta','ml','pi','te',..._state.hindic]);
+_state.availlangs = Object.freeze(['sa','ta','ml','pi','te','bo',..._state.hindic]);
 
 _state.hindic.forEach(code => {
     _state.hyphenator[`${code}-Latn`] = _state.hyphenator['sa-Latn'];
@@ -188,6 +194,10 @@ const cache = {
             }
             else return hyphenated;
         }
+        if(shortlang === 'bo-Tibt') {
+            _state.cachedtext.set(txtnode,txt);
+            return to.ewts(txt);
+        }
         else {
             _state.cachedtext.set(txtnode,txt);
             return txt;
@@ -291,8 +301,16 @@ const prepTextWalker = (walker,scriptcode) => {
                     }
                     // Tamil in other scripts?
                 }
-
-                else if(curlang === 'sa' || _state.hindic.indexOf(curlang) !== -1) {
+                else if(curlang === 'bo') {
+                    curnode.lang = 'bo-Latn-t-bo-Tibt';
+                    if(curscript === 'Tibt')
+                        curnode.classList.add('originalscript');
+                }
+                else if(curlang === 'sa' || 
+                        curlang === 'pi' ||
+                        curlang === 'ml' ||
+                        // TODO: add Telugu, etc.
+                        _state.hindic.indexOf(curlang) !== -1) {
                     // case 1: sa-XXXX
                     // case 2: sa
                     // case 3: sa-Latn[-t-sa-XXXX]
@@ -411,7 +429,10 @@ transliterator.revert = (par = _state.parEl) => {
         if(curnode.parentNode.classList.contains('originalscript')) {
             //TODO: also do for sa-Beng, sa-Deva, etc.
             const fromcode = _state.isoToScript.get(parlang[4]);
-            return to.iast(cached,fromcode);
+            if(parlang[0] === 'bo')
+                return to.ewts(cached,fromcode);
+            else
+                return to.iast(cached,fromcode);
         }
         else
             return cached;
@@ -515,7 +536,7 @@ transliterator.activate = (par = _state.parEl) => {
 };
 
 transliterator.jiggle = node => {
-    if(node.firstChild.nodeType !== 3 && node.lastChild.nodeType !== 3) 
+    if(node.firstChild.nodeType !== 3 && node.lastChild.nodeType !== 3 && !node.firstChild.classList.contains('gap'))
         return;
     
     transliterator.unjiggle(node);
@@ -798,6 +819,31 @@ const to = {
         else return literated;
     },
     
+    ewts: text => {
+        const ewts = new EwtsConverter({fix_spacing: true, pass_through: true,fix_sloppy: false});
+        return ewts.to_ewts(text.toLowerCase()
+                   .replaceAll('ༀ','om̐'))
+                   .replaceAll(/[rl]-[iI]/g,(m) => {
+                        switch (m) {
+                            case 'r-i':
+                                return 'ṛ';
+                            case 'r-I':
+                                return 'ṝ';
+                            case 'l-i': 
+                                return 'l̥';
+                            default:
+                                return 'l̥̄';
+                        }
+                   }).replaceAll(/([gṭḍbd])\+h/g,'$1h');
+    },
+    dbumed: text => {
+        const ewts = new EwtsConverter();
+        return ewts.to_unicode(text);
+    },
+    dbucan: text => {
+        const ewts = new EwtsConverter();
+        return ewts.to_unicode(text);
+    },
     tamil: text => {
         const txt = to.smush(text);
         const grv = new Map([
