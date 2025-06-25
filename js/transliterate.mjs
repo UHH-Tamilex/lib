@@ -21,6 +21,7 @@ const _state = Object.seal({
         ['sarada','Shrd'],
         ['sinhala','Sinh'],
         ['telugu','Telu'],
+        ['kannada','Knda'],
         ['nandinagari','Nand'],
         ['dbumed','Tibt'],
         ['dbucan','Tibt'],
@@ -1000,7 +1001,16 @@ const to = {
 
         return Sanscript.t(posttext,'iast','telugu');
     },
+
+    kannada: txt => {
+
+        const smushedtext = to.smush(txt);
+        const replacedtext = smushedtext.replace(/r(?=[kgcjṭḍṇtdnpbmyvlh])/,'ṙ');
+
+        return Sanscript.t(replacedtext,'iast','kannada');
+    },
     
+
     newa: function(txt) {
 
         const pretext = txt//.replace(/ṙ/g, 'r')
