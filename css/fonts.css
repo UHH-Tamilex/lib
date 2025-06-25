@@ -166,7 +166,8 @@
     font-size-adjust: ex-height 0.4;
 }
 
-[lang^="ml-Mlym"], [lang^="te-Telu"] {
+[lang^="ml-Mlym"], [lang^="te-Telu"], [lang^="kn-Knda"],
+[lang^="sa-Mlym"], [lang^="sa-Telu"], [lang^="sa-Knda"] {
     font-size-adjust: ex-height 0.55;
 }
 
