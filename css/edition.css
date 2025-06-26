@@ -214,6 +214,7 @@ span.invisible {
     /*margin-left: -3.5rem;*/
     display: flex;
     flex-direction: column;
+    z-index: 2;
 }
 
 #topbar > div {
