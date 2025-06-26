@@ -170,6 +170,7 @@ Citer.closePopup = () => {
     document.getElementById('blackout').style.display = 'none';
     const popup = document.getElementById('citation-popup');
     popup.querySelector('.boxen div').innerHTML = '';
+    popup.style.display = 'none';
  
 };
 
