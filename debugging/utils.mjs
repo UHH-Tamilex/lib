@@ -87,4 +87,31 @@ const addEditButton = blockel => {
     (wideblock || block).prepend(editmenu);
 };
 
-export {decodeRLE, matchCounts, countLines, addEditButtons, addEditButton};
+const getLineEls = (doc,id) => {
+    const el = doc.querySelector(`[*|id="${id}"]`);
+    const lg = el.querySelector('[type="edition"]') || el;
+    return [...lg.querySelectorAll('l')];
+};
+
+const findLines = (doc,id,standOff) => {
+    const lines = getLineEls(doc,id);
+    const linecounts = countLines(lines);
+    
+    const alignmentel = standOff.querySelector('interp[select="0"]');
+    const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
+
+    const realcounts = matchCounts(alignment,linecounts);
+    const entries = [...standOff.querySelectorAll(':scope > entry, :scope > superEntry')];
+    let linecount = 0;
+    let wordcount = 0;
+    for(let n=0; n<entries.length;n++) {
+        entries[n].setAttribute('linenum',linecount);
+        wordcount = wordcount + entryLength(entries[n]);
+        if(wordcount >= realcounts[0]) {
+            linecount = linecount + 1;
+            realcounts.shift();
+        }
+    }
+};
+
+export {decodeRLE, matchCounts, countLines, findLines, addEditButtons, addEditButton};

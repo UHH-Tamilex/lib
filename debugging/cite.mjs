@@ -1,3 +1,4 @@
+import { findLines } from './utils.mjs';
 const Citer = {};
 
 const Sheet = (new DOMParser()).parseFromString(`<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:tei="http://www.tei-c.org/ns/1.0">
@@ -122,6 +123,14 @@ Citer.makeCitation = (doc, id, nums) => {
     return newdoc;
 };
 
+const getLineNums = (doc, id) => {
+    const docClone = Citer.thisDoc.cloneNode(true);
+    const standOff = docClone.querySelector(`standOff[type="wordsplit"][corresp="#${id}"]`);
+    findLines(docClone,id,standOff);
+    const entries = standOff.querySelectorAll(':scope > entry, :scope > superEntry');
+    return [entries.item(nums[0]),entries.item(nums[1])];
+};
+
 Citer.docSelect = e => {
     const sel = document.getSelection();
     if(sel.isCollapsed) return;
@@ -133,15 +142,16 @@ Citer.docSelect = e => {
     const nums = getWords(edblock, range);
     const id = edblock.closest('[id]').id;
     const q = Citer.makeCitation(Citer.thisDoc, id, nums);
+    
+    const linenums = getLineNums(Citer.thisDoc, id);
 
     const qserial = (new XMLSerializer()).serializeToString(q.documentElement);
     const url = new URL(window.location);
     const base = url.origin + url.pathname;
     const out = `<cit source="${base}?id=${id}&amp;w=${nums.join(',')}">
     ${qserial}
-    <ref target="${base}">${id}</ref>
+    <ref target="${base}">${id}, ${linenums[0] === linenums[1] ? 'line ' + linenums[0] : 'lines' + linenums.join('–')}</ref>
 </cit>`;
-    //TODO: find line numbers
 
     document.getElementById('blackout').style.display = 'flex';
     const popup = document.getElementById('citation-popup');
