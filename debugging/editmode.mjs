@@ -50,7 +50,7 @@ const docClick = e => {
     }
     const apparatus = e.target.closest('.mini_apparatus');
     if(apparatus) {
-        Apparatuser.addVariants(e.target.closest('[id]').id);
+        Apparatuser.addVariants(e.target.closest('[id]')?.id || e.target.closest('.lg').querySelector('[id]').id);
     }
 };
 
