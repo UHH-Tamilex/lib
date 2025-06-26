@@ -163,7 +163,8 @@ Citer.docSelect = e => {
     const outbox = popup.querySelector('.boxen div');
     outbox.innerHTML = Prism.highlight(out,Prism.languages.xml,'xml');
     copyToClipboard(out,outbox);
-        
+    
+    sel.empty();
 };
 
 Citer.closePopup = () => {
