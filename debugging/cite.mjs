@@ -123,12 +123,15 @@ Citer.makeCitation = (doc, id, nums) => {
     return newdoc;
 };
 
-const getLineNums = (doc, id) => {
+const getLineNums = (doc, id, nums) => {
     const docClone = Citer.thisDoc.cloneNode(true);
     const standOff = docClone.querySelector(`standOff[type="wordsplit"][corresp="#${id}"]`);
     findLines(docClone,id,standOff);
     const entries = standOff.querySelectorAll(':scope > entry, :scope > superEntry');
-    return [entries.item(nums[0]),entries.item(nums[1])];
+    return [
+        parseInt(entries.item(nums[0]).getAttribute('linenum')) + 1,
+        parseInt(entries.item(nums[1]).getAttribute('linenum')) + 1
+        ];
 };
 
 Citer.docSelect = e => {
@@ -143,14 +146,15 @@ Citer.docSelect = e => {
     const id = edblock.closest('[id]').id;
     const q = Citer.makeCitation(Citer.thisDoc, id, nums);
     
-    const linenums = getLineNums(Citer.thisDoc, id);
+    const linenums = getLineNums(Citer.thisDoc, id, nums);
 
     const qserial = (new XMLSerializer()).serializeToString(q.documentElement);
     const url = new URL(window.location);
     const base = url.origin + url.pathname;
+    const link = base + '?highlight=' + encodeURIComponent(`[id=${id}] .l:nth-of-type(${linenums[0]})`);
     const out = `<cit source="${base}?id=${id}&amp;w=${nums.join(',')}">
     ${qserial}
-    <ref target="${base}">${id}, ${linenums[0] === linenums[1] ? 'line ' + linenums[0] : 'lines' + linenums.join('–')}</ref>
+    <ref target="${link}">${id}, ${linenums[0] === linenums[1] ? 'line ' + linenums[0] : 'lines ' + linenums.join('–')}</ref>
 </cit>`;
 
     document.getElementById('blackout').style.display = 'flex';

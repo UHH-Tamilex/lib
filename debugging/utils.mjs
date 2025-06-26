@@ -93,6 +93,26 @@ const getLineEls = (doc,id) => {
     return [...lg.querySelectorAll('l')];
 };
 
+const entryLength = el => {
+    const doOne = (entry) => {
+        const firstForm = entry.querySelector('form').cloneNode(true);
+
+        for(const i of firstForm.querySelectorAll('[type="ignored"]'))
+            i.remove();
+
+        const gaplen = [...firstForm.querySelectorAll('gap')].reduce(
+           (acc,cur) => acc + cur.getAttribute('quantity') || 1,
+        0);
+        return gaplen + firstForm.textContent.trim().length;
+    };
+    if(el.nodeName === 'entry')
+        return doOne(el);
+    else {
+        const entries = el.querySelector('entry').querySelectorAll('entry');
+        return [...entries].reduce((acc,cur) => acc + doOne(cur),0);
+    }
+};
+
 const findLines = (doc,id,standOff) => {
     const lines = getLineEls(doc,id);
     const linecounts = countLines(lines);
