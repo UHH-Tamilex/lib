@@ -481,4 +481,14 @@ hr {
     ul {
         list-style-type: none;
     }
+    #togglers {
+        writing-mode: vertical-lr;
+        height: auto;
+        transform: rotate(180deg);
+        height: auto;
+        width: 100vw;
+    }
+    #rotator {  
+        display: none !important;
+    }
 }
