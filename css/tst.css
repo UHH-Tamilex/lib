@@ -481,6 +481,9 @@ hr {
     body {
         flex-direction: column;
     }
+    #buttoncontainer {
+        flex-direction: row;
+    }
     /*
     .record.thin .teitext {
         width: 95%;
