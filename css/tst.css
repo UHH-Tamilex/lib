@@ -486,6 +486,9 @@ hr {
         width: 95%;
     }
     */
+    .record.thin, .record.fat {
+        padding-left: 1rem;
+    }
     ul {
         list-style-type: none;
     }
