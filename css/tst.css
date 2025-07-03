@@ -114,6 +114,11 @@ body {
     top: 2px;
 }
 
+#buttoncontainer > div:hover {
+    background: #ff9900;
+    border: 1px solid #ff9900;
+}
+
 #transbutton {
     display: none;
     position: absolute;
