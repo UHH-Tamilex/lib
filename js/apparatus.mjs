@@ -80,7 +80,7 @@ const highlight = {
         const allleft = [...par.querySelectorAll('.lem-inline')];
         const pos = allleft.indexOf(targ);
         const right = par.parentElement.querySelector('.apparatus-block');
-        const allright = right.querySelectorAll(':scope > .app > .lem');
+        const allright = right.querySelectorAll(':scope > .app > .lem .rdg-text');
         allright[pos].classList.add('highlit');
     },
     apparatus(targ) {
