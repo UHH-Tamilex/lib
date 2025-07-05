@@ -18,7 +18,13 @@ const go = () => {
         const n = /\d/.exec(str)?.index;
         if(!n) return str;
         const start = str.slice(0,n);
-        const end = str.slice(n).padStart(5,'0');
+        const end = str.slice(n)
+                       .split(/(\.)/)
+                       .reduce((acc, cur) => {
+                            if(/^\d+$/.test(cur))
+                                return acc + cur.padStart(5,'0');
+                            else return acc + cur;
+                       },'');
         return start + end;
     };
 
