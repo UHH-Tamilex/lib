@@ -14,19 +14,13 @@ const go = () => {
             flist.push(f);
     });
     
-    const padnums = str => {
-        const n = /\d/.exec(str)?.index;
-        if(!n) return str;
-        const start = str.slice(0,n);
-        const end = str.slice(n)
-                       .split(/(\.)/)
-                       .reduce((acc, cur) => {
-                            if(/^\d+$/.test(cur))
-                                return acc + cur.padStart(5,'0');
-                            else return acc + cur;
-                       },'');
-        return start + end;
-    };
+    const padnums = str =>
+        str.split(/(\d+)/)
+           .reduce((acc, cur) => {
+                if(/^\d+$/.test(cur))
+                    return acc + cur.padStart(5,'0');
+                else return acc + cur;
+            },'');
 
     flist.sort((a,b) => padnums(a) < padnums(b) ? -1 : 1);
 
