@@ -14,9 +14,15 @@ const go = () => {
             flist.push(f);
     });
     
-    flist.sort((a,b) =>
-        parseInt(a.replaceAll(/\D/g,'')) - parseInt(b.replaceAll(/\D/g,''))
-    );
+    const padnums = str => {
+        const n = /\d/.exec(str)?.index;
+        if(!n) return str;
+        const start = str.slice(0,n);
+        const end = str.slice(n).padStart(5,'0');
+        return start + end;
+    };
+
+    flist.sort((a,b) => padnums(a) < padnums(b) ? -1 : 1);
 
     const list = [];
     for(const f of flist) {
