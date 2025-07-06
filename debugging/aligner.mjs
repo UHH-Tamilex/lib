@@ -275,13 +275,14 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
             start = start + 1; // better solution for this?
             startchar = alignment[1][start];
         }
+        tam[n] = tam[n].replaceAll('_',' ');
         const entry = {word: tam[n], 
                        tokenized: tamilSplit(tam[n].split('/')[0].replaceAll('|','')), 
                        sandhi: null, 
                        translation: eng[n]
                       };
 
-        let reallen = entry.tokenized.length;
+        let reallen = entry.tokenized.filter(c => c !== ' ').length;
         for(let m=0;m<reallen;m++) {
             const endchar = alignment[1][start + m];
             if(endchar === '') reallen = reallen + 1;
@@ -326,7 +327,7 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
 const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     //const wl = restoreSandhi(removeOptions(tam).join(''));
     const wl = removeOptions(tam);
-    const wordtokens = wl.map(w => tamilSplit(w));
+    const wordtokens = wl.map(w => tamilSplit(w.replaceAll('_','')));
     const wordjoin = wordtokens.flat();
     // split cīrs first, in case of "a u", "a i", etc.
     const toktext = text.split(/\s+/).map(c => tamilSplit(c)).flat();
@@ -834,4 +835,4 @@ const jiggleAlignment = (aligned, tokenizedwords) => {
     //return aligned;
 };
 
-export { alignWordsplits, tamilSplit, gramAbbreviations, findGrammar, gramMap };
+export { alignWordsplits, tamilSplit, findGrammar, gramMap };

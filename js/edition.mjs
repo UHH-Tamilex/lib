@@ -222,7 +222,7 @@ const wordLength = (lemma) => {
     const clone = lemma.cloneNode(true);
     for(const ignored of clone.querySelectorAll('.ignored'))
         ignored.remove();
-    return clone.textContent.trim().replaceAll(/[\s\u00AD]/g,'').length;
+    return clone.textContent.trim().replaceAll(/[\s\u00AD]/g,'').length; // remove spaces too?
 };
 
 const matchCounts = (alignment,linecounts) => {
