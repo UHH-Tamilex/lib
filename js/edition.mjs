@@ -200,6 +200,14 @@ const lineCounter = (el) => {
                 cur = realNextSibling(walker);
                 continue;
             }
+            if(cur.classList.contains('app-inline')) {
+                cur = cur.querySelector('.lem-inline');
+                continue;
+            }
+            if(cur.classList.contains('anno-inline')) {
+                cur = realNextSibling(walker);
+                continue;
+            }
             if(cur.classList.contains('ignored')) {
                 cur = realNextSibling(walker);
                 continue;
