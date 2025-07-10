@@ -393,7 +393,7 @@ const Events = {
             switchReading(msid);
             msid.addEventListener('mouseleave',restoreReading.bind(null,msid),{once: true});
         }
-        const lem = e.target.closest('.lem');
+        const lem = e.target.closest('.rdg-text')?.closest('.lem');
         if(lem) {
             highlight.apparatus(lem);
             return;
