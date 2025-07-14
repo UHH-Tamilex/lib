@@ -93,6 +93,7 @@ div.alternate {
     padding-left: 1rem;
     font-size: 90%;
     border: 1px dotted black;
+    border-radius: 4px;
 }
 div.alternate::before {
     content: attr(data-sameAs);
