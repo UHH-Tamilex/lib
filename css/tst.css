@@ -501,6 +501,7 @@ hr {
     }
     hr {
         width: auto;
+        margin-right: 0.75rem;
     }
     /*
     .record.thin .teitext {
