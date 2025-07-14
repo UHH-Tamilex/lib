@@ -479,6 +479,16 @@ hr {
     max-width: 800px;
 }
 
+@media (max-width: 1280px) {
+    .teitext {
+        width: unset;
+    }
+    hr {
+        width: auto;
+        margin-right: 0.75rem;
+    }
+}
+
 @media (max-width: 800px) {
     th {
         writing-mode: vertical-lr;
@@ -495,13 +505,6 @@ hr {
     }
     #buttoncontainer {
         flex-direction: row;
-    }
-    .teitext {
-        width: unset;
-    }
-    hr {
-        width: auto;
-        margin-right: 0.75rem;
     }
     /*
     .record.thin .teitext {
