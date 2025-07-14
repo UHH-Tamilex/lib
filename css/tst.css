@@ -496,6 +496,12 @@ hr {
     #buttoncontainer {
         flex-direction: row;
     }
+    .teitext {
+        width: unset;
+    }
+    hr {
+        width: auto;
+    }
     /*
     .record.thin .teitext {
         width: 95%;
