@@ -21,6 +21,9 @@ const newElement = (doc, name) => {
 
 const exportLaTeX = async indoc => {
     const doc = indoc.cloneNode(true);
+
+    processPreOptions(doc);
+
     for(const standOff of [...doc.querySelectorAll('standOff[type="apparatus"]')]) {
         const corresp = standOff.getAttribute('corresp').replace(/^#/,'');
         const div = doc.querySelector(`[*|id="${corresp}"]`);
@@ -69,7 +72,7 @@ const exportLaTeX = async indoc => {
             toTamil(noteblock);
     }
 
-    processOptions(doc);
+    processPostOptions(doc);
 
     const xproc = new XSLTProcessor();
     if(!_state.xsltsheet)
@@ -106,13 +109,13 @@ const normalizeLg = lg => {
         }
     }
     for(const l of lg.querySelectorAll('l')) {
-        if(l.firstChild.nodeType === 3) {
+        if(l.firstChild?.nodeType === 3) {
             if(l.firstChild.data.trim() === '')
                 l.firstChild.remove();
             else
                 l.firstChild.data = l.firstChild.data.slice(l.firstChild.data.search(/\S/));
         }
-        if(l.lastChild.nodeType === 3) {
+        if(l.lastChild?.nodeType === 3) {
             if(l.lastChild.data.trim() === '')
                 l.lastChild.remove();
             else {
@@ -159,6 +162,7 @@ const concatParallel = par => {
     if(par.children.length < 2) return;
     par.children[0].setAttribute('type','edition');
     par.children[1].setAttribute('type','translation');
+    par.children[1].setAttribute('corresp',`#${par.children[0].getAttribute('xml:id')}`);
     while(par.nextElementSibling && par.nextElementSibling.getAttribute('rend') === 'parallel') {
         par.nextElementSibling.children[0].setAttribute('type','edition');
         if(par.nextElementSibling.children[1])
@@ -168,6 +172,7 @@ const concatParallel = par => {
             newkid.setAttribute('type','translation');
             par.nextElementSibling.appendChild(newkid);
         }
+        par.nextElementSibling.children[1].setAttribute('corresp',`#${par.nextElementSibling.children[0].getAttribute('xml:id')}`);
         while(par.nextElementSibling.firstElementChild)
             par.appendChild(par.nextElementSibling.firstElementChild);
         par.nextElementSibling.remove();
@@ -370,13 +375,16 @@ const showOptions = () => {
     const popup = showPopup('export-popup');
 };
 
-const processOptions = doc => {
-    if(document.getElementById('export-underline').checked)
-        markUnderlines(doc);
+const processPreOptions = doc => {
     if(document.getElementById('export-lg-wordsplits').checked)
         addWordsplits(doc,'lg');
-    if(document.getElementById('export-lg-wordsplits').checked)
+    if(document.getElementById('export-p-wordsplits').checked)
         addWordsplits(doc,'p');
+};
+
+const processPostOptions = doc => {
+    if(document.getElementById('export-underline').checked)
+        markUnderlines(doc);
     if(!document.getElementById('export-line-breaks').checked)
         for(const lb of doc.querySelectorAll('lb'))
             lb.remove();
@@ -425,27 +433,28 @@ const markUnderlines = doc => {
 
 const addWordsplits = (doc,type) => {
     const makeL = line => {
+        if(line === '') return null;
         const l = newElement(doc,'l');
-        l.append(line);
+        l.setAttribute('rend','italic');
+        l.append(line.replaceAll('~','\\char`~').replaceAll('*',"'"));
         return l;
     };
     for(const standoff of doc.querySelectorAll('standOff[type="wordsplit"]')) {
         const id = standoff.getAttribute('corresp').slice(1);
         
-        const block = doc.querySelector(`[*|id="${selected}"]`);
+        const block = doc.querySelector(`[*|id="${id}"]`);
         if(block.nodeName !== type) continue;
         
         const parpar = block.closest('div[rend="parallel"]');
         if(!parpar) continue;
         
-        const transblock = parpar.querySelector('[*:lang="en"]');
+        const transblock = parpar.querySelector(`[*|lang="en"]`);
         if(!transblock) continue;
 
         const splits = serializeWordsplits(standoff).tam;
-        const br = newElement(doc,'pc');
-        br.setAttribute('type','line-break');
+        const br = newElement(doc,'l');
         if(type === 'lg') {
-            const ls = splits.split('\n').map(makeL);
+            const ls = splits.split('\n').map(makeL).filter(l => l);
             transblock.prepend(...ls,br);
         }
         else {
