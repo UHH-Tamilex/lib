@@ -369,6 +369,7 @@ const exportFile = async () => {
     const writer = await fileHandle.createWritable();
     writer.write(file);
     writer.close();
+    closePopup();
 };
 
 const showOptions = () => {
