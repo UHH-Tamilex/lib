@@ -216,6 +216,10 @@
     </xsl:choose>
 </xsl:template>
 
+<xsl:template match="x:pc[@type='line-break']">
+    <xsl:text>\medskip</xsl:text>
+</xsl:template>
+
 <xsl:template match="x:lg/x:l">
 <!--xsl:text>\large </xsl:text-->
 <xsl:call-template name="langstart"/>
@@ -245,6 +249,10 @@
 
 <xsl:template match="x:hi[@rend='superscript']">
 <xsl:text>\textsuperscript{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
+</xsl:template>
+
+<xsl:template match="x:hi[@rend='wavy-underline']">
+<xsl:text>\uwave{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:hi[@rend='italic']">
@@ -413,7 +421,7 @@
     <xsl:call-template name="langend"/>
 </xsl:template>
 <xsl:template match="x:note[@place='foot']">
-    <xsl:text>\footnote{</xsl:text>
+    <xsl:text>\footnoteA{</xsl:text>
     <xsl:call-template name="langstart"/>
     <xsl:apply-templates/>
     <xsl:call-template name="langend"/>

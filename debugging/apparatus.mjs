@@ -590,7 +590,7 @@ const makeApp = (doc, ed, opts) =>  {
             const rdgs = getXMLRdgs(block,d,witfile.name,ignoretags);
             return [docid, rdgs];
         })) : null;
-    
+
     let ret = '';
     let start = 0;
     for(let n=0; n<words.length;n++) {

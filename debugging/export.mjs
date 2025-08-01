@@ -1,6 +1,8 @@
 import { loadDoc } from './fileops.mjs';
 import { showSaveFilePicker } from './native-file-system-adapter/es6.js';
 import { Sanscript } from '../js/sanscript.mjs';
+import { cancelPopup, showPopup } from './popup.mjs';
+import { serializeWordsplits } from './serializeStandOff.mjs';
 
 const _NodeFilter = {
     SHOW_ALL: 4294967295,
@@ -8,14 +10,16 @@ const _NodeFilter = {
 };
 
 const _state = {
-    xsltsheet: null
+    xsltsheet: null,
+    curDoc: null,
+    libRoot: ''
 };
 
 const newElement = (doc, name) => {
     return doc.createElementNS('http://www.tei-c.org/ns/1.0',name);
 };
 
-const exportLaTeX = async (indoc,libRoot) => {
+const exportLaTeX = async indoc => {
     const doc = indoc.cloneNode(true);
     for(const standOff of [...doc.querySelectorAll('standOff[type="apparatus"]')]) {
         const corresp = standOff.getAttribute('corresp').replace(/^#/,'');
@@ -65,9 +69,11 @@ const exportLaTeX = async (indoc,libRoot) => {
             toTamil(noteblock);
     }
 
+    processOptions(doc);
+
     const xproc = new XSLTProcessor();
     if(!_state.xsltsheet)
-        _state.xsltsheet = await loadDoc(`${libRoot}debugging/latex.xsl`);
+        _state.xsltsheet = await loadDoc(`${_state.libRoot}debugging/latex.xsl`);
     xproc.importStylesheet(_state.xsltsheet);
     const res = xproc.transformToDocument(doc);
     return res.querySelector('pre')?.textContent || res.firstChild.textContent;
@@ -344,8 +350,8 @@ const countpos = (str, pos) => {
     return str.length;
 };
 
-const exportFile = async (curDoc,libRoot) => {
-    const outdoc = await exportLaTeX(curDoc,libRoot);
+const exportFile = async () => {
+    const outdoc = await exportLaTeX(_state.curDoc);
     const thisFilename = window.location.pathname.split('/').pop();
     const basename = thisFilename.substring(0,thisFilename.lastIndexOf('.'));
     const fileHandle = await showSaveFilePicker({
@@ -360,4 +366,109 @@ const exportFile = async (curDoc,libRoot) => {
     writer.close();
 };
 
-export { exportFile };
+const showOptions = () => {
+    const popup = showPopup('export-popup');
+};
+
+const processOptions = doc => {
+    if(document.getElementById('export-underline').checked)
+        markUnderlines(doc);
+    if(document.getElementById('export-lg-wordsplits').checked)
+        addWordsplits(doc,'lg');
+    if(document.getElementById('export-lg-wordsplits').checked)
+        addWordsplits(doc,'p');
+    if(!document.getElementById('export-line-breaks').checked)
+        for(const lb of doc.querySelectorAll('lb'))
+            lb.remove();
+    if(!document.getElementById('export-page-breaks').checked)
+        for(const pb of doc.querySelectorAll('pb'))
+            pb.remove();
+};
+
+const wavySurround = (doc,opts) => {
+    const range = doc.createRange();
+    if(opts.startBefore)
+        range.setStartBefore(opts.startBefore);
+    if(opts.startAfter)
+        range.setStartAfter(opts.startAfter);
+    if(opts.endBefore)
+        range.setEndBefore(opts.endBefore);
+    if(opts.endAfter)
+        range.setEndAfter(opts.endAfter);
+
+    const hi = newElement(doc,'hi');
+    hi.setAttribute('rend','wavy-underline');
+    range.surroundContents(hi);
+};
+
+const markUnderlines = doc => {
+    const anchors = doc.querySelectorAll('anchor[type="lemma"]');
+    for(const anchor of anchors) {
+        const id = anchor.getAttribute('n');
+        const app = doc.querySelector(`app[corresp="${id}"]`);
+
+        const l1 = anchor.closest('l');
+        if(!l1) {
+            wavySurround(doc,{startAfter: anchor, endBefore: app});
+            continue;
+        }
+
+        const l2 = app.closest('l');
+        if(l1 !== l2) {
+            wavySurround(doc,{startAfter: anchor, endAfter: l1.lastChild});
+            wavySurround(doc,{startBefore: l2.firstChild, endBefore: app});
+        }
+        else
+            wavySurround(doc,{startAfter: anchor, endBefore: app});
+    }
+};
+
+const addWordsplits = (doc,type) => {
+    const makeL = line => {
+        const l = newElement(doc,'l');
+        l.append(line);
+        return l;
+    };
+    for(const standoff of doc.querySelectorAll('standOff[type="wordsplit"]')) {
+        const id = standoff.getAttribute('corresp').slice(1);
+        
+        const block = doc.querySelector(`[*|id="${selected}"]`);
+        if(block.nodeName !== type) continue;
+        
+        const parpar = block.closest('div[rend="parallel"]');
+        if(!parpar) continue;
+        
+        const transblock = parpar.querySelector('[*:lang="en"]');
+        if(!transblock) continue;
+
+        const splits = serializeWordsplits(standoff).tam;
+        const br = newElement(doc,'pc');
+        br.setAttribute('type','line-break');
+        if(type === 'lg') {
+            const ls = splits.split('\n').map(makeL);
+            transblock.prepend(...ls,br);
+        }
+        else {
+            transblock.prepend(splits,br);
+        }
+    }
+};
+
+const closePopup = e => {
+    cancelPopup(e);
+};
+
+const init = (curDoc,libRoot) => {
+    _state.curDoc = curDoc;
+    _state.libRoot = libRoot;
+    const popup = document.getElementById('export-popup');
+    popup.querySelector('.closeicon').addEventListener('click',closePopup);
+    popup.querySelector('button').addEventListener('click',exportFile);
+};
+
+const Exporter = {
+    init: init,
+    showOptions: showOptions
+};
+
+export default Exporter;
