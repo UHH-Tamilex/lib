@@ -433,11 +433,12 @@ const markUnderlines = doc => {
 };
 
 const addWordsplits = (doc,type) => {
+    const cleanText = str => str.replaceAll('~','\\char`~').replaceAll('*',"'");
     const makeL = line => {
         if(line === '') return null;
         const l = newElement(doc,'l');
         l.setAttribute('rend','italic');
-        l.append(line.replaceAll('~','\\char`~').replaceAll('*',"'"));
+        l.append(cleanText(line));
         return l;
     };
     for(const standoff of doc.querySelectorAll('standOff[type="wordsplit"]')) {
@@ -453,13 +454,16 @@ const addWordsplits = (doc,type) => {
         if(!transblock) continue;
 
         const splits = serializeWordsplits(standoff).tam;
-        const br = newElement(doc,'l');
         if(type === 'lg') {
             const ls = splits.split('\n').map(makeL).filter(l => l);
+            const br = newElement(doc,'l');
             transblock.prepend(...ls,br);
         }
         else {
-            transblock.prepend(splits,br);
+            const l = newElement(doc,'hi');
+            l.setAttribute('rend','italic');
+            l.append(cleanText(splits));
+            transblock.prepend(l,' \\medskip ');
         }
     }
 };
