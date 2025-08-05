@@ -248,6 +248,11 @@ const rangeFromCoords = (positions, target, ignoretags=new Set()) => {
                 cur = realNextSibling(walker);
                 continue;
             }
+            if(cur.nodeName === 'gap') {
+                start = start + (parseInt(cur.getAttribute('quantity')) || 1);
+                cur = realNextSibling(walker);
+                continue;
+            }
         }
         
         else if(cur.nodeType === 3) {
