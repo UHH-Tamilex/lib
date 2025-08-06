@@ -476,11 +476,15 @@ listEdit.blur = e => {
 
 const disableButtons = () => {
     const saveasbutton = document.getElementById('saveasbutton');
-    saveasbutton.disabled = true;
-    saveasbutton.title = 'Realign first';
+    if(saveasbutton) {
+        saveasbutton.disabled = true;
+        saveasbutton.title = 'Realign first';
+    }
     const previewbutton = document.getElementById('previewbutton');
-    previewbutton.disabled = true;
-    previewbutton.title = 'Realign first';
+    if(previewbutton) {
+        previewbutton.disabled = true;
+        previewbutton.title = 'Realign first';
+    }
     _state.changed = true;
 };
 
