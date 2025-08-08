@@ -321,7 +321,29 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
         ret.push(entry);
         start = end;
     }
+
+    evenMoreWarnings(ret, warnings);
+
     return {words: ret, warnings: warnings};
+};
+
+const evenMoreWarnings = (wordlist, warnings) => {
+    for(let n=0;n<wordlist.length-1;n++) {
+        const e1 = wordlist[n];
+        const w1 = e1.hasOwnProperty('superEntry') ?
+            e1.superEntry[0].words[e1.superEntry[0].words.length-1].word :
+            e1.word;
+        
+        if(!w1.endsWith('+')) continue;
+
+        const e2 = wordlist[n+1];
+        const w2 = e2.hasOwnProperty('superEntry') ?
+            e2.superEntry[0].words[0].word :
+            e2.word;
+        
+        if(/^[aāiīuūeēoō]/.test(e2))
+            warnings.push(`${w1} ${w2}`);
+    }
 };
 
 const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
@@ -351,6 +373,7 @@ const alignWordsplits = async (text,tam,eng,notes,lookup=false) => {
     //    ret.wordlist = wordlist;
     return ret;
 };
+
 /*
 const cleanupTranslation = (str) => {
     return str.replace(/-(?=\w)/g, ' ');
@@ -406,7 +429,7 @@ const makeEntries = (arr) => {
     const formatSandhi = w => {
         let slice;
         if(w.particle) {
-            if(w.particletype === 'enclitic')
+            if(w.particletype === 'enclitic') // TODO: proclitics are deprecated
                 slice = w.sandhi.slice(0,w.tokenized.lastIndexOf('-'));
             else
                 slice = w.sandhi.slice(w.tokenized.indexOf('-')+1);
@@ -672,7 +695,7 @@ const cleanupWord = async (obj,lookup,notes,warnings) => {
         warnings.push(obj.word);
     if(/[kcṅñṭtpvṟ]$/.test(obj.word))
         warnings.push(obj.word);
-    if(/-un$/.test(obj.word))
+    if(/n$/.test(obj.word) && obj.word !== 'verin' && obj.word !== 'ven')
         warnings.push(obj.word);
     if(/(?<!-)[ōē]$/.test(obj.word) && obj.word.length > 2)
         warnings.push(obj.word);
