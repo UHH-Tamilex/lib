@@ -331,17 +331,15 @@ const evenMoreWarnings = (wordlist, warnings) => {
     for(let n=0;n<wordlist.length-1;n++) {
         const e1 = wordlist[n];
         const w1 = e1.hasOwnProperty('superEntry') ?
-            e1.superEntry[0].words[e1.superEntry[0].words.length-1].word :
+            e1.superEntry[0][e1.superEntry[0].length-1].word :
             e1.word;
-        
         if(!w1.endsWith('+')) continue;
 
         const e2 = wordlist[n+1];
         const w2 = e2.hasOwnProperty('superEntry') ?
-            e2.superEntry[0].words[0].word :
+            e2.superEntry[0][0].word :
             e2.word;
-        
-        if(/^[aāiīuūeēoō]/.test(e2))
+        if(/^[aāiīuūeēoō]/.test(w2))
             warnings.push(`${w1} ${w2}`);
     }
 };
@@ -697,7 +695,7 @@ const cleanupWord = async (obj,lookup,notes,warnings) => {
         warnings.push(obj.word);
     if(/n$/.test(obj.word) && obj.word !== 'verin' && obj.word !== 'ven')
         warnings.push(obj.word);
-    if(/(?<!-)[ōē]$/.test(obj.word) && obj.word.length > 2)
+    if(/(?<![-+~])[ōē]$/.test(obj.word) && obj.word.length > 2)
         warnings.push(obj.word);
 
     updateParticles(obj);
