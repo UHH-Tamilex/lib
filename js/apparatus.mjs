@@ -76,8 +76,15 @@ const highlight = {
     inline(targ) {
         const par = targ.closest('div.text-block');
         if(!par) return;
-
-        const allleft = [...par.querySelectorAll('.lem-inline')];
+        if(targ.dataset.hasOwnProperty('lemmaId')) {
+            const lemmaId = targ.dataset.lemmaId;
+            const others = [...par.querySelectorAll(`.lem-inline[data-lemma-id="${lemmaId}"]`)];
+            for(const other of others)
+                other.classList.add('highlit');
+            if(targ.classList.contains('lem-following'))
+                targ = others[0];
+        }
+        const allleft = [...par.querySelectorAll('.lem-inline:not(.lem-following)')];
         const pos = allleft.indexOf(targ);
         const right = par.parentElement.querySelector('.apparatus-block');
         const allright = right.querySelectorAll(':scope > .app > .lem .rdg-text');
@@ -163,7 +170,7 @@ const showRangeCoords = (startel,coord) => {
  * @param {Set} ignoretags
  * @returns {Array.<Range>}
  */
-const rangesFromCoords = (positions, lem, target, ignoretags=new Set()) => {
+const rangesFromCoords = (positions, target, ignoretags=new Set()) => {
     const realNextSibling = (walker) => {
         let cur = walker.currentNode;
         while(cur) {
@@ -180,6 +187,34 @@ const rangesFromCoords = (positions, lem, target, ignoretags=new Set()) => {
     positions = [...positions];
     let curPositions = positions.shift();
 
+    const checkNode = (start, end, cur) => {
+        if(!started && curPositions[0] <= end) {
+            const realpos = countpos(cur.data,curPositions[0]-start);
+            // TODO: if realpos === cur.data.length, move to beginning of next node
+            // then if next node starts with a space, +1
+            // then if the node consists only of spaces, move again to beginning of next node
+            curRange.setStart(cur,realpos);
+            started = true;
+        }
+        if(!started) return;
+        if(curPositions[1] <= end) {
+            const realpos = countpos(cur.data,curPositions[1]-start);
+            if(cur.data[realpos-1] === ' ')
+                curRange.setEnd(cur,realpos-1);
+            else
+                curRange.setEnd(cur,realpos);
+
+            retRanges.push(curRange);
+
+            if(positions.length === 0)
+                return;
+
+            curPositions = positions.shift();
+            curRange = document.createRange();
+            started = false;
+            checkNode(start,end,cur);
+        }
+    };
     const walker = document.createTreeWalker(target,NodeFilter.SHOW_ALL, { acceptNode() {return NodeFilter.FILTER_ACCEPT;}});
     let start = 0;
     let started = false;
@@ -203,29 +238,10 @@ const rangesFromCoords = (positions, lem, target, ignoretags=new Set()) => {
         else if(cur.nodeType === 3) {
             const nodecount = cur.data.trim().replaceAll(/[\s\u00AD]/g,'').length;
             const end = start + nodecount;
-            if(!started && curPositions[0] <= end) {
-                const realpos = countpos(cur.data,curPositions[0]-start);
-                // TODO: if realpos === cur.data.length, move to beginning of next node
-                // then if next node starts with a space, +1
-                // then if the node consists only of spaces, move again to beginning of next node
-                curRange.setStart(cur,realpos);
-                started = true;
-            }
-            if(curPositions[1] <= end) {
-                const realpos = countpos(cur.data,curPositions[1]-start);
-                if(cur.data[realpos-1] === ' ')
-                    curRange.setEnd(cur,realpos-1);
-                else
-                    curRange.setEnd(cur,realpos);
-
-                retRanges.push(curRange);
-
+            checkNode(start,end,cur);
                 if(positions.length === 0)
                     break;
 
-                curPositions = positions.shift();
-                curRange = new Range();
-            }
             start = end;
             //last = cur;
         }
@@ -236,9 +252,9 @@ const rangesFromCoords = (positions, lem, target, ignoretags=new Set()) => {
     return retRanges;
 };
 
-const highlightrange = (range,classname = 'highlit') => {
+const highlightrange = (range,classname = 'highlit temporary') => {
     const lemma = document.createElement('span');
-    lemma.className = `${classname} temporary`;
+    lemma.className = classname;
     lemma.append(range.extractContents());
     if(lemma.innerHTML.trim() === '') return; // avoid highlighting blank spaces/lines
 
@@ -247,7 +263,7 @@ const highlightrange = (range,classname = 'highlit') => {
     return lemma;
 };
 
-const permalightrange = (range) => highlightrange(range,'permalit');
+const permalightrange = (range) => highlightrange(range,'permalit temporary');
 
 const highlightCoords = (lem,target,ignoretags,highlightfn = highlightrange) => {
     const alignment = target.dataset.alignment?.split(',');
@@ -259,13 +275,38 @@ const highlightCoords = (lem,target,ignoretags,highlightfn = highlightrange) => 
         }
         return split;
     });
-    const ranges = rangesFromCoords(multiple, lem, target, ignoretags);
+    const ranges = rangesFromCoords(multiple, target, ignoretags);
     highlightRanges(ranges,target,highlightfn);
 };
 
+
 const markLemmata = () => {
 
+    let lemmaid = 0;
+
     const markLemmaRange = range => highlightrange(range,'lem-inline');
+    // TODO: this doesn't support xx,xx;xx,xx anymore 
+    const doOne = (lemmata,left,ignoretags,alignment) => {
+        const parsed = [...lemmata].map(el => {
+            const split = el.dataset.loc.split(',');
+            if(alignment) {
+                return [matchCounts(alignment,parseInt(split[0]),'start'),
+                        matchCounts(alignment,parseInt(split[1]),'end')];
+            }
+            return split;
+        });
+        const ranges = rangesFromCoords(parsed, left, ignoretags);
+        const highlit = highlightRanges(ranges,left,markLemmaRange);
+        for(const els of highlit) {
+            if(Array.isArray(els)) {
+                for(let n=0;n < els.length;n++) {
+                    els[n].dataset.lemmaId = lemmaid; 
+                    if(n > 0) els[n].classList.add('lem-following');
+                }
+                lemmaid = lemmaid + 1;
+            }
+        }
+    };
 
     const apparati = document.querySelectorAll('div.apparatus-block');
     for(const apparatus of apparati) {
@@ -274,8 +315,8 @@ const markLemmata = () => {
 
         const left = apparatus.parentElement.querySelector('.text-block');
         const ignoretags = getIgnoreTags(apparatus);
-        for(const lemma of lemmata)
-            highlightCoords(lemma,left,ignoretags,markLemmaRange);
+        const alignment = left.dataset.alignment?.split(',');
+        doOne(lemmata,left,ignoretags,alignment);
     }
 };
 
@@ -306,9 +347,11 @@ const matchCounts = (alignment,m,pos='start') => {
 };
 
 const highlightRanges = (ranges, target, highlightfn) => {
+    const ret = [];
     for(const range of ranges.toReversed()) {
         if(!findEls(range)) {
-            highlightfn(range);
+            const el = highlightfn(range);
+            ret.push(el);
             continue;
         }
 
@@ -346,12 +389,19 @@ const highlightRanges = (ranges, target, highlightfn) => {
         }
         
         //const firsthighlit = highlightfn(toHighlight.shift());
-
-        for(const hiNode of toHighlight)
-            highlightfn(hiNode);
+        
+        const nodearr = [];
+        for(const hiNode of toHighlight) {
+            const node = highlightfn(hiNode);
+            if(node) nodearr.push(node); // highlightrange returns undefined if range is empty
+        }
+        if(nodearr.length > 1) ret.push(nodearr);
+        else ret.push(nodearr[0]);
     }
 
     target.normalize();
+
+    return ret;
 };
 
 const unhighlight = (targ) => {
