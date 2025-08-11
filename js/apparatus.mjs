@@ -215,7 +215,7 @@ const rangesFromCoords = (positions, target, ignoretags=new Set()) => {
             curPositions = positions.shift();
             curRange = document.createRange();
             started = false;
-            checkNode(start,end,cur);
+            return checkNode(start,end,cur);
         }
     };
     const walker = document.createTreeWalker(target,NodeFilter.SHOW_ALL, { acceptNode() {return NodeFilter.FILTER_ACCEPT;}});
