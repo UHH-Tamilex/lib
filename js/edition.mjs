@@ -98,7 +98,7 @@ const apparatusswitch = (e) => {
 */
 const getEdition = standoff => {
     const target = document.getElementById(standoff.dataset.corresp.replace(/^#/,''));
-    return target.querySelector('.edition') || target;
+    return target?.querySelector('.edition') || target;
 };
 
 const wordsplit = e => {
@@ -110,7 +110,8 @@ const wordsplit = e => {
     if(target.dataset.anno === 'word-split text') {
         for(const standoff of standoffs) {
             const target = getEdition(standoff);
-        
+            if(!target) continue; // TODO: add some kind of warning -- this means an orphaned standOff
+
             target.classList.add('animation');
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.revert(target);
