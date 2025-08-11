@@ -186,7 +186,10 @@ const rangesFromCoords = (positions, target, ignoretags=new Set()) => {
     let curRange = document.createRange();
     positions = [...positions];
     let curPositions = positions.shift();
-
+    
+    /*
+     * returns false if not finished; true if finished
+     */
     const checkNode = (start, end, cur) => {
         if(!started && curPositions[0] <= end) {
             const realpos = countpos(cur.data,curPositions[0]-start);
@@ -196,7 +199,7 @@ const rangesFromCoords = (positions, target, ignoretags=new Set()) => {
             curRange.setStart(cur,realpos);
             started = true;
         }
-        if(!started) return;
+        if(!started) return false;
         if(curPositions[1] <= end) {
             const realpos = countpos(cur.data,curPositions[1]-start);
             if(cur.data[realpos-1] === ' ')
@@ -207,7 +210,7 @@ const rangesFromCoords = (positions, target, ignoretags=new Set()) => {
             retRanges.push(curRange);
 
             if(positions.length === 0)
-                return;
+                return true;
 
             curPositions = positions.shift();
             curRange = document.createRange();
@@ -238,9 +241,9 @@ const rangesFromCoords = (positions, target, ignoretags=new Set()) => {
         else if(cur.nodeType === 3) {
             const nodecount = cur.data.trim().replaceAll(/[\s\u00AD]/g,'').length;
             const end = start + nodecount;
-            checkNode(start,end,cur);
-                if(positions.length === 0)
-                    break;
+            
+            const done = checkNode(start,end,cur);
+            if(done) break;
 
             start = end;
             //last = cur;
@@ -310,9 +313,9 @@ const markLemmata = () => {
 
     const apparati = document.querySelectorAll('div.apparatus-block');
     for(const apparatus of apparati) {
+
         const lemmata = apparatus.querySelectorAll('.lem[data-loc]');
         if(lemmata.length === 0) continue;
-
         const left = apparatus.parentElement.querySelector('.text-block');
         const ignoretags = getIgnoreTags(apparatus);
         const alignment = left.dataset.alignment?.split(',');
