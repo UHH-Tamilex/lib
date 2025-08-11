@@ -504,7 +504,6 @@ const go = () => {
     if(lineview) for(const l of lineview) l.style.display = 'none';
 
     const recordcontainer = document.getElementById('recordcontainer');
-    Transliterate.init(recordcontainer);
 
     for(const t of recordcontainer.querySelectorAll('.teitext > div > div:first-child')) {
         //tamilize(t);
@@ -525,6 +524,13 @@ const go = () => {
             wordsplitbutton.style.display = 'block';
     }
 
+    //if(document.querySelector('.app')) { // init in case of editmode
+        ApparatusViewer.init();
+        ApparatusViewer.setTransliterator(Transliterate);
+    //}
+
+    Transliterate.init(recordcontainer);
+
     const highlight = searchparams.get('highlight');
     if(highlight) {
         const found = document.querySelector(highlight);
@@ -537,15 +543,7 @@ const go = () => {
         },{once: true});
     }
 
-    //if(document.querySelector('.app')) { // init in case of editmode
-        ApparatusViewer.init();
-        ApparatusViewer.setTransliterator(Transliterate);
-    //}
-
     GitHubFunctions.latestCommits();
-
-    if(searchparams.get('Taml') !== null)
-        document.getElementById('transbutton').click();
 };
 
 window.addEventListener('load',go);
