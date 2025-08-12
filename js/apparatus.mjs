@@ -88,7 +88,9 @@ const highlight = {
         const pos = allleft.indexOf(targ);
         const right = par.parentElement.querySelector('.apparatus-block');
         const allright = right.querySelectorAll(':scope > .app > .lem .rdg-text');
-        allright[pos].classList.add('highlit');
+        const el = allright[pos];
+        el.classList.add('highlit');
+        el.scrollIntoView({behavior: 'smooth', block: 'nearest', container: 'nearest'});
     },
     apparatus(targ) {
         const par = targ.closest('div.apparatus-block');
@@ -99,7 +101,9 @@ const highlight = {
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.revert(left);
             }
-            highlightCoords(targ,left,ignoretags);
+            const els = highlightCoords(targ,left,ignoretags);
+            const el = Array.isArray(els[0]) ? els[0][0] : els[0];
+            el.scrollIntoView({behavior: 'smooth', block: 'nearest', container: 'nearest'});
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.refreshCache(left);
                 Transliterate.activate(left);
@@ -109,8 +113,11 @@ const highlight = {
             const allright = [...par.querySelectorAll(':scope > .app > .lem')];
             const pos = allright.indexOf(targ);
             const allleft = left.querySelectorAll('.lem-inline');
-            if(allleft.length !== 0)
-               allleft[pos].classList.add('highlit');
+            if(allleft.length !== 0) {
+               const el = allleft[pos];
+               el.classList.add('highlit');
+               el.scrollIntoView({behavior: 'smooth', block: 'nearest', container: 'nearest'});
+            }
         }
     },
 };
@@ -280,7 +287,7 @@ const highlightCoords = (lem,target,ignoretags,highlightfn = highlightrange) => 
         return split;
     });
     const ranges = rangesFromCoords(multiple, target, ignoretags);
-    highlightRanges(ranges,target,highlightfn);
+    return highlightRanges(ranges,target,highlightfn);
 };
 
 
