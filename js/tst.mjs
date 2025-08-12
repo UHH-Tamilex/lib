@@ -3,6 +3,7 @@ import { AlignmentViewer } from './alignment.mjs';
 import { ApparatusViewer } from './apparatus.mjs';
 import { MiradorWrapper } from './miradorwrapper.mjs';
 import { GitHubFunctions } from './githubfunctions.mjs';
+import { viewPos } from './viewpos.mjs';
 import './tooltip.mjs';
 
 const _state = Object.seal({
@@ -153,7 +154,9 @@ const events = {
         }
         const lineview = e.target.closest('.line-view-icon');
         if(lineview) {
+            const vpos = viewPos.getVP(document.body);
             lineView(lineview);
+            viewPos.setVP(document.body,vpos);
             return;
         }
         const apointer = e.target.closest('.alignment-pointer');
