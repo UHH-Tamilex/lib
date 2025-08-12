@@ -256,10 +256,11 @@ const rangesFromCoords = (positions, target, ignoretags=new Set()) => {
 };
 
 const highlightrange = (range,classname = 'highlit temporary') => {
+    if(range.toString().trim() === '') return; // avoid highlighting blank spaces/lines
+
     const lemma = document.createElement('span');
     lemma.className = classname;
     lemma.append(range.extractContents());
-    if(lemma.innerHTML.trim() === '') return; // avoid highlighting blank spaces/lines
 
     range.insertNode(lemma);
     lemma.lang = lemma.parentElement.lang;
@@ -351,7 +352,7 @@ const matchCounts = (alignment,m,pos='start') => {
 
 const highlightRanges = (ranges, target, highlightfn) => {
     const ret = [];
-    for(const range of ranges.toReversed()) {
+    for(const range of ranges.toReversed()) { //TODO: toReversed() is still needed for adjacent ranges
         if(!findEls(range)) {
             const el = highlightfn(range);
             ret.push(el);
