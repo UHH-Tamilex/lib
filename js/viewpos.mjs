@@ -5,7 +5,7 @@ const set = function(par,middle) {
 };
 
 const get = function(par) {
-    const els = par.querySelectorAll('div');
+    const els = par.querySelectorAll('p,div');
     //const els = par.querySelectorAll('#summary,tr,span.milestone,span.lb,span.locus');
     var midEl = null;
     var lastDist;
