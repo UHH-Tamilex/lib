@@ -61,7 +61,7 @@ section div.wide {
 .lem .caesura {
     display: none;
 }
-.lem-inline:hover, .lem-inline:hover *, .lem .rdg-text:hover, .highlit, .highlit * {
+.lem-inline:hover, .lem-inline:hover *, .lem-inline.highlit, .lem .rdg-text:hover, .highlit, .highlit * {
     text-decoration: none;
     background: rgba(255,255,128,1);
 }
