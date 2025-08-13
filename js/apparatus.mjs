@@ -83,7 +83,7 @@ const highlight = {
             if(targ.classList.contains('lem-following'))
                 targ = others[0];
         }
-        const allleft = [...par.querySelectorAll('.lem-inline:not(.lem-following)')];
+        const allleft = [...par.querySelectorAll('.lem-inline:not(.lem-following, .lem-anchor)')];
         const pos = allleft.indexOf(targ);
         const right = par.parentElement.querySelector('.apparatus-block');
         const allright = right.querySelectorAll(':scope > .app > .lem .rdg-text');
@@ -111,7 +111,7 @@ const highlight = {
         else {
             const allright = [...par.querySelectorAll(':scope > .app > .lem')];
             const pos = allright.indexOf(targ);
-            const allleft = left.querySelectorAll('.lem-inline');
+            const allleft = [...par.querySelectorAll('.lem-inline:not(.lem-following, .lem-anchor)')];
             if(allleft.length !== 0) {
                const el = allleft[pos];
                el.classList.add('highlit');
