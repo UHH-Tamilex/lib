@@ -5,6 +5,7 @@ import { MiradorWrapper } from './miradorwrapper.mjs';
 import { GitHubFunctions } from './githubfunctions.mjs';
 import { viewPos } from './viewpos.mjs';
 import './tooltip.mjs';
+import './removehyphens.mjs';
 
 const _state = Object.seal({
     manifest: null,
@@ -66,7 +67,6 @@ const init = () => {
 
     recordcontainer.addEventListener('click',events.docClick);
     document.getElementById('togglers').addEventListener('click',events.toggleClick);
-    recordcontainer.addEventListener('copy',events.removeHyphens);
 
     Transliterate.init(recordcontainer);
     
@@ -154,9 +154,10 @@ const events = {
         }
         const lineview = e.target.closest('.line-view-icon');
         if(lineview) {
-            const vpos = viewPos.getVP(document.body);
+            const recordcontainer = document.getElementById('recordcontainer');
+            const vpos = viewPos.getVP(recordcontainer);
             lineView(lineview);
-            viewPos.setVP(document.body,vpos);
+            viewPos.setVP(recordcontainer,vpos);
             return;
         }
         const apointer = e.target.closest('.alignment-pointer');
@@ -171,14 +172,6 @@ const events = {
             const el = document.getElementById(e.target.href.split('#')[1]);
             el.scrollIntoView({behavior: 'smooth', inline:'end'});
         }
-    },
-    removeHyphens: function(ev) {
-        if(ev.target.closest('textarea'))
-            return; 
-        ev.preventDefault();
-        const hyphenRegex = new RegExp('\u00AD','g');
-        const sel = window.getSelection().toString().replaceAll(hyphenRegex,'');
-        (ev.clipboardData || window.clipboardData).setData('Text',sel);
     },
     toggleClick: e => {
         if(e.target.closest('#viewertoggle'))

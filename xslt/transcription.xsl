@@ -824,6 +824,15 @@
     </xsl:element>
 </xsl:template>
 
+<xsl:template match="x:abbr">
+    <xsl:element name="span">
+        <xsl:call-template name="lang"/>
+        <xsl:attribute name="class">abbr</xsl:attribute>
+        <xsl:attribute name="data-anno">abbreviation</xsl:attribute>
+        <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template>
+
 <xsl:template match="x:ex">
     <xsl:element name="span">
         <xsl:call-template name="lang"/>

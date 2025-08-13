@@ -62,6 +62,7 @@ const newMirador = function(id,manifest,start = 0,annoMap = _state.annoMap, anno
             sideBarOpenByDefault: false,
             imageToolsEnabled: true,
             imageToolsOpen: false,
+            defaultView: 'single',
         },
         workspace: {
             showZoomControls: true,

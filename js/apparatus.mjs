@@ -1,6 +1,5 @@
 var Transliterate;
 const setTransliterator = (obj) => Transliterate = obj;
-var Debugging = false;
 
 const nextSibling = (node) => {
     let start = node;
@@ -596,7 +595,6 @@ const init = () => {
 const ApparatusViewer = {
     init: init,
     setTransliterator: setTransliterator,
-    debug: () => Debugging = true
 };
 
 export { ApparatusViewer };
