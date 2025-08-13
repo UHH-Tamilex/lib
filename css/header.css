@@ -125,6 +125,10 @@ a[href]::after {
 a[href] {
     color: #A85110;
 }
+#tooltip a[href] {
+    color: white;
+    text-decoration: underline;
+}
 
 a[href]:hover {
     color: #2B73B7;
