@@ -57,7 +57,7 @@ const newMirador = function(id,manifest,start = 0,annoMap = _state.annoMap, anno
             allowClose: false,
             allowFullscreen: false,
             allowMaximize: false,
-            defaultSideBarPanel: 'annotations',
+            defaultSideBarPanel: 'index',
             //highlightAllAnnotations: true,
             sideBarOpenByDefault: false,
             imageToolsEnabled: true,
