@@ -123,7 +123,7 @@ const highlight = {
         else {
             const allright = [...par.querySelectorAll(':scope > .app > .lem')];
             const pos = allright.indexOf(targ);
-            const allleft = [...par.querySelectorAll('.lem-inline:not(.lem-following, .lem-anchor)')];
+            const allleft = left.querySelectorAll('.lem-inline:not(.lem-following, .lem-anchor)');
             if(allleft.length !== 0) {
                const el = allleft[pos];
                el.classList.add('highlit');
