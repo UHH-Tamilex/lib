@@ -87,6 +87,14 @@ const highlight = {
     inline(targ) {
         const par = targ.closest('div.text-block');
         if(!par) return;
+	// TODO: deprecate lem-anchor
+	const leftsel = targ.closest('.lem-anchor') ?
+		'.lem-anchor' :
+        	'.lem-inline:not(.lem-following, .lem-anchor)';
+	const rightsel = targ.closest('.lem-anchor') ? 
+		'.lem-anchor' :
+		':scope > .app > .lem .rdg-text';
+
         if(targ.dataset.hasOwnProperty('lemmaId')) {
             const lemmaId = targ.dataset.lemmaId;
             const others = [...par.querySelectorAll(`.lem-inline[data-lemma-id="${lemmaId}"]`)];
@@ -95,10 +103,10 @@ const highlight = {
             if(targ.classList.contains('lem-following'))
                 targ = others[0];
         }
-        const allleft = [...par.querySelectorAll('.lem-inline:not(.lem-following, .lem-anchor)')];
+        const allleft = [...par.querySelectorAll(leftsel)];
         const pos = allleft.indexOf(targ);
         const right = par.parentElement.querySelector('.apparatus-block');
-        const allright = right.querySelectorAll(':scope > .app > .lem .rdg-text');
+        const allright = right.querySelectorAll(rightsel);
         const el = allright[pos];
         el.classList.add('highlit');
         delayedScrollIntoView(el,targ);
@@ -106,6 +114,15 @@ const highlight = {
     apparatus(targ) {
         const par = targ.closest('div.apparatus-block');
         if(!par) return;
+
+	// TODO: deprecate lem-anchor
+	const leftsel = targ.closest('.lem-anchor') ?
+		'.lem-anchor' :
+        	'.lem-inline:not(.lem-following, .lem-anchor)';
+	const rightsel = targ.closest('.lem-anchor') ? 
+		'.lem-anchor' :
+		':scope > .app > .lem';
+
         const left = par.parentElement.querySelector('.text-block'); // or .edition?
         if(targ.dataset.loc) {
             const ignoretags = getIgnoreTags(par);
@@ -121,9 +138,9 @@ const highlight = {
             }
         }
         else {
-            const allright = [...par.querySelectorAll(':scope > .app > .lem')];
+            const allright = [...par.querySelectorAll(rightsel)];
             const pos = allright.indexOf(targ);
-            const allleft = left.querySelectorAll('.lem-inline:not(.lem-following, .lem-anchor)');
+            const allleft = left.querySelectorAll(leftsel);
             if(allleft.length !== 0) {
                const el = allleft[pos];
                el.classList.add('highlit');
@@ -509,13 +526,19 @@ const Events = {
             highlight.apparatus(lem);
             return;
         }
+	// TODO: deprecate lem-anchor
+	const lem_anchor = e.target.closest('.lem.lem-anchor');
+	if(lem_anchor) {
+	    highlight.apparatus(lem_anchor);
+	    return;
+	}
         const anchor = e.target.closest('.anchor');
         if(anchor) {
             const note = document.querySelector(`[data-target='#${anchor.id}']`);
             if(note) {
                 anchor.classList.add('highlit');
                 note.classList.add('highlit');
-                document.addEventListener('mouseout',() => {
+                anchor.addEventListener('mouseout',() => {
                     anchor.classList.remove('highlit');
                     note.classList.remove('highlit');
                 },{once: true});
@@ -528,7 +551,7 @@ const Events = {
             if(anchor) {
                 anchor.classList.add('highlit');
                 note.classList.add('highlit');
-                document.addEventListener('mouseout',() => {
+                note.addEventListener('mouseout',() => {
                     anchor.classList.remove('highlit');
                     note.classList.remove('highlit');
                 },{once: true});
