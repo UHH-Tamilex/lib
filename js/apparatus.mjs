@@ -1,6 +1,10 @@
 var Transliterate;
 const setTransliterator = (obj) => Transliterate = obj;
 
+const _state = {
+    scrollTimeout: null
+};
+
 const nextSibling = (node) => {
     let start = node;
     while(start) {
@@ -71,6 +75,14 @@ const getIgnoreTags = par => {
     );
 };
 
+const delayedScrollIntoView = (target,listentarget) => {
+    clearTimeout(_state.scrollTimeout);
+    _state.scrollTimeout = setTimeout(() => {
+        target.scrollIntoView({behavior: 'smooth', block: 'nearest', container: 'nearest'});
+    },500);
+    listentarget.addEventListener('mouseleave',() => clearTimeout(_state.scrollTimeout),{once: true});
+};
+
 const highlight = {
     inline(targ) {
         const par = targ.closest('div.text-block');
@@ -89,7 +101,7 @@ const highlight = {
         const allright = right.querySelectorAll(':scope > .app > .lem .rdg-text');
         const el = allright[pos];
         el.classList.add('highlit');
-        el.scrollIntoView({behavior: 'smooth', block: 'nearest', container: 'nearest'});
+        delayedScrollIntoView(el,targ);
     },
     apparatus(targ) {
         const par = targ.closest('div.apparatus-block');
@@ -102,7 +114,7 @@ const highlight = {
             }
             const els = highlightCoords(targ,left,ignoretags);
             const el = Array.isArray(els[0]) ? els[0][0] : els[0];
-            el.scrollIntoView({behavior: 'smooth', block: 'nearest', container: 'nearest'});
+            delayedScrollIntoView(el,targ);
             if(document.getElementById('transbutton').lang === 'en') {
                 Transliterate.refreshCache(left);
                 Transliterate.activate(left);
@@ -115,7 +127,7 @@ const highlight = {
             if(allleft.length !== 0) {
                const el = allleft[pos];
                el.classList.add('highlit');
-               el.scrollIntoView({behavior: 'smooth', block: 'nearest', container: 'nearest'});
+               delayedScrollIntoView(el,targ);
             }
         }
     },
@@ -507,6 +519,7 @@ const Events = {
                     anchor.classList.remove('highlit');
                     note.classList.remove('highlit');
                 },{once: true});
+                delayedScrollIntoView(note,anchor);
             }
         }
         const note = e.target.closest('.anchored-note');
@@ -519,6 +532,7 @@ const Events = {
                     anchor.classList.remove('highlit');
                     note.classList.remove('highlit');
                 },{once: true});
+                delayedScrollIntoView(anchor,note);
             }
         }
     },
