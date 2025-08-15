@@ -14,12 +14,10 @@ const get = function(par) {
     let currDist = null;
     const ellen = els.length;
     for(let i=0;i<ellen;i++) {
-        if(els[i].closest('#topbar')) continue;
         lastDist = currDist;
         currDist = window.innerHeight/2 - els[i].getBoundingClientRect().top;
         if(lastDist !== null && Math.abs(currDist) > Math.abs(lastDist)) {
             midEl = els[i-1];
-            console.log(els[i]);
             currDist = lastDist;
             break;
         }
