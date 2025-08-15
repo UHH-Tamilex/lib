@@ -154,10 +154,10 @@ const events = {
         }
         const lineview = e.target.closest('.line-view-icon');
         if(lineview) {
-            const recordcontainer = document.getElementById('recordcontainer');
-            const vpos = viewPos.getVP(recordcontainer);
+            const scrollcontainer = document.getElementById('recordcontainer');
+            const vpos = viewPos.getVP(scrollcontainer);
             lineView(lineview);
-            viewPos.setVP(recordcontainer,vpos);
+            viewPos.setVP(scrollcontainer,vpos);
             return;
         }
         const apointer = e.target.closest('.alignment-pointer');
