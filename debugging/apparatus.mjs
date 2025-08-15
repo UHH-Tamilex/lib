@@ -625,11 +625,14 @@ const makeApp = (doc, ed, opts) =>  {
 const updateListWit = (listWit, witnesses) => {
     if(!witnesses) return listWit;
     listWit = listWit.cloneNode(true);
-    for(const [filename,witness] of witnesses.entries()) {
+    for(const [siglum,witness] of witnesses.entries()) {
+        if(witness.type) continue;
         if(witness.hasOwnProperty('updatedfilename')) {
-	    const el = listWit.querySelector(`[source="${filename}"]`);
-	    el.setAttribute('source',witness.updatedfilename);
-	}
+            const el = listWit.querySelector(`[*|id="${siglum}"]`);
+            if(el) {
+                el.setAttribute('source',witness.updatedfilename);
+            }
+        }
     }
     return listWit;
 };

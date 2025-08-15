@@ -9,7 +9,7 @@ const _state = {
     Transliterator: null
 };
 const _opts = {
-    alignmentDir: 'aligments',
+    alignmentDir: 'alignments',
     witnessDir: 'witnesses'
 };
 
