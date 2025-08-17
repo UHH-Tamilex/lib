@@ -441,9 +441,25 @@ hr {
     font-weight: bold;
     font-family: et-book;
     cursor: pointer;
-    padding-right: 2px;
+    padding: 0 1px 0 0;
     -webkit-text-stroke: 1px rgba(1,1,1,0.2);
     text-stroke: 1px rgba(1,1,1,0.2);
+    box-shadow: -1px 2px 2px 1px rgba(0,0,0,0.45);
+}
+#togglers > div.horizontal {
+    box-shadow: 1px -2px 2px 1px rgba(0,0,0,0.45);
+    padding: 0 0 1px 0;
+}
+
+#viewertoggle.horizontal {
+    border-radius: 0 0 0 0.3rem;
+}
+#recordtoggle.horizontal {
+    border-radius: 0 0 0.3rem 0;
+}
+#rotator.horizontal {
+    border-radius: 0 0 0.3rem 0.3rem;
+    margin: 0 0.2rem 0 0.2rem;
 }
 
 .toggle {
@@ -461,7 +477,15 @@ hr {
 #togglers > div:hover {
     color: #ddd;
     background: #ff9900;
-    text-shadow: 2px 2px 1px rgba(0,0,0,0.3);
+    text-shadow: -2px 2px 1px rgba(0,0,0,0.3);
+    -webkit-text-stroke: unset;
+    text-stroke: unset;
+}
+
+#togglers > div.horizontal:hover {
+    color: #ddd;
+    background: #ff9900;
+    text-shadow: 2px -2px 1px rgba(0,0,0,0.3);
     -webkit-text-stroke: unset;
     text-stroke: unset;
 }

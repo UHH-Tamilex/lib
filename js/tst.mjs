@@ -38,6 +38,18 @@ const init = () => {
             _state.mirador = MiradorWrapper.start('viewer',_state.manifest, page);
     }
     
+    initRecordContainer();
+
+    document.getElementById('togglers')?.addEventListener('click',events.toggleClick);
+
+    if(scrollel) scrollTo(scrollel);
+
+    // check for GitHub commit history
+    GitHubFunctions.latestCommits();
+
+};
+
+const initRecordContainer = () => {
     // initialize events for the record text
     const recordcontainer = document.getElementById('recordcontainer');
 
@@ -60,20 +72,15 @@ const init = () => {
             el.classList.add('diplo');
     }
 
-    if(document.querySelector('.app')) {
+
+    //if(document.querySelector('.app')) { // init in case of editmode
         ApparatusViewer.init();
         ApparatusViewer.setTransliterator(Transliterate);
-    }
+    //}
 
     recordcontainer.addEventListener('click',events.docClick);
-    document.getElementById('togglers').addEventListener('click',events.toggleClick);
 
     Transliterate.init(recordcontainer);
-    
-    if(scrollel) scrollTo(scrollel);
-
-    // check for GitHub commit history
-    GitHubFunctions.latestCommits();
 
 };
 
@@ -154,10 +161,10 @@ const events = {
         }
         const lineview = e.target.closest('.line-view-icon');
         if(lineview) {
-            const scrollcontainer = document.getElementById('recordcontainer');
-            const vpos = viewPos.getVP(scrollcontainer);
+            const recordcontainer = document.getElementById('recordcontainer');
+            const vpos = viewPos.getVP(recordcontainer);
             lineView(lineview);
-            viewPos.setVP(scrollcontainer,vpos);
+            viewPos.setVP(recordcontainer,vpos);
             return;
         }
         const apointer = e.target.closest('.alignment-pointer');
@@ -250,30 +257,26 @@ const rotatePage = e => {
     if(e.target.textContent === '↺') {
         document.body.style.flexDirection = 'column';
         e.target.textContent = '⟳';
-        e.target.style.margin = '0 0.2rem 0 0.2rem';
-        e.target.style.borderRadius = '0 0 0.3rem 0.3rem';
         const togglers = document.getElementById('togglers');
         togglers.style.transform = 'rotate(180deg)';
         togglers.style.writingMode = 'vertical-lr';
         togglers.style.height = 'auto';
         togglers.style.width = '100vw';
-        const viewertoggle = document.getElementById('viewertoggle');
-        viewertoggle.style.borderRadius = '0.3rem 0 0 0.3rem';
+        for(const toggler of togglers.querySelectorAll('div'))
+            toggler.classList.add('horizontal');
         const rec = document.querySelector('.record.thin');
         if(rec) rec.className = 'record fat';
     }
     else {
         document.body.style.flexDirection = 'row-reverse';
         e.target.textContent = '↺';
-        e.target.style.margin = '0.2rem 0 0.2rem 0';
-        e.target.style.borderRadius = '0 0.3rem 0.3rem 0';
         const togglers = document.getElementById('togglers');
         togglers.style.transform = 'unset';
         togglers.style.writingMode = 'unset';
         togglers.style.height = '100vh';
         togglers.style.width = 'auto';
-        const viewertoggle = document.getElementById('viewertoggle');
-        viewertoggle.style.borderRadius = '0 0.3rem 0.3rem 0';
+        for(const toggler of togglers.querySelectorAll('div'))
+            toggler.classList.remove('horizontal');
         const rec = document.querySelector('.record.fat');
         if(rec) rec.className = 'record thin';
     }
@@ -341,12 +344,14 @@ const showRecord = () => {
 
 const TSTViewer = Object.freeze({
     init: init,
+    initRecordContainer: initRecordContainer,
     newMirador: MiradorWrapper.start,
     killMirador: (which) => {
         const win = which || _state.mirador;
         if(win) MiradorWrapper.kill(win);
     },
     getMirador: () => _state.mirador,
+    setMirador: (mirador, manifest) => {_state.mirador = mirador; _state.manifest = manifest;},
     getMiradorCanvasId: MiradorWrapper.getMiradorCanvasId,
     refreshMirador: MiradorWrapper.refresh,
     jumpToId: MiradorWrapper.jumpToId,
