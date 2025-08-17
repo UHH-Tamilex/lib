@@ -126,7 +126,7 @@ body {
     }
 }
 
-#transbutton {
+#transbutton {↺
     display: none;
     border: 1px solid black;
     padding: 0.1rem 0.5rem 0.1rem 0.5rem;
@@ -182,7 +182,7 @@ body {
     padding: 0.1em 0 0 0.4em;
     font-size: 1.4em;
 }
-
+↺
 #transbutton:lang(sa-Telu) {
     padding: 0.2em 0 0 0.3em;
     font-size: 1.6em;
@@ -334,7 +334,7 @@ div.teitext {
     font-size: 2rem;
 }
 
-h2, h3, h4, .editionStmt,
+#recordcontainer h2, #recordcontainer h3, #recordcontainer h4, .editionStmt,
 section > p, section > div.lg, section > table {
     max-width: 800px;
     width: 87.5%;
