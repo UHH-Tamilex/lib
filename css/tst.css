@@ -335,7 +335,7 @@ div.teitext {
     font-size: 2rem;
 }
 
-h2, h3, h4, .editionStmt,
+#recordcontainer h2, #recordcontainer h3, #recordcontainer h4, .editionStmt,
 section > p, section > div.lg, section > table {
     max-width: 800px;
     width: 87.5%;
