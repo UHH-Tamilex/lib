@@ -9,8 +9,10 @@ const mergeGroups = (doc) => {
     for(const el of els) {
         const firstw = el.removeChild(el.firstElementChild);
         while(el.firstElementChild) {
-            const norm1 = firstw.getAttribute('lemma') || firstw.textContent;
-            const norm2 = el.firstElementChild.getAttribute('lemma') || el.firstElementChild.textContent;
+            const norm1 = firstw.hasAttribute('lemma') ? 
+                firstw.getAttribute('lemma') : firstw.textContent;
+            const norm2 = el.firstElementChild.hasAttribute('lemma') ?
+                el.firstElementChild.getAttribute('lemma') : el.firstElementChild.textContent;
             firstw.setAttribute('lemma',norm1 + norm2);
             while(el.firstElementChild.firstChild)
                 firstw.appendChild(el.firstElementChild.firstChild);
