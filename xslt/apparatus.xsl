@@ -39,7 +39,7 @@
              <xsl:variable name="siglum" select="$witness/x:abbr/node()"/>
              <xsl:variable name="anno" select="$witness/x:expan"/>
 
-             <xsl:variable name="parwit" select="$witness/ancestor::x:witness"/>
+             <xsl:variable name="parwit" select="$witness/ancestor::x:witness[@source]"/>
 
              <xsl:variable name="mysource" select="$witness/@source"/>
              <xsl:variable name="parsource" select="$parwit/@source"/>
@@ -288,7 +288,7 @@
                 </xsl:when>
                 <xsl:otherwise>
                         <xsl:attribute name="class">lem-inline lem-anchor</xsl:attribute>
-                        <xsl:text>*</xsl:text>
+                        <xsl:text>†</xsl:text>
                 </xsl:otherwise>
             </xsl:choose>
         </span>
@@ -324,7 +324,7 @@
          <xsl:variable name="witness" select="//x:listWit//x:witness[@xml:id=$cleanstr]"/>
          <xsl:variable name="siglum" select="$witness/x:abbr/node()"/>
          <xsl:variable name="anno" select="$witness/x:expan"/>
-         <xsl:variable name="parwit" select="$witness/ancestor::x:witness"/>
+         <xsl:variable name="parwit" select="$witness/ancestor::x:witness[@source]"/>
 
          <xsl:variable name="mysource" select="$witness/@source"/>
          <xsl:variable name="parsource" select="$parwit/@source"/>
@@ -405,7 +405,7 @@
                 </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
-                <span class="lem lem-anchor">*</span>
+                <span class="lem lem-anchor">†</span>
             </xsl:otherwise>
         </xsl:choose>
         <xsl:if test="x:rdg | x:rdgGrp[not(@type='lemma')]">
