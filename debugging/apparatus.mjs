@@ -583,9 +583,11 @@ const serializeRange = (doc, range) => {
 const collectWitGroups = listWit => {
 	const findWitDepth = wit => {
 		let ret = 0;
-		let par = wit;
-		while(par.parentNode.closest('witness'))
+		let par = wit.parentNode.closest('witness');
+		while(par) {
 			ret = ret + 1;
+            par = par.parentNode.closest('witness');
+        }
 		return ret;
 	};
 	const preRet = [];
