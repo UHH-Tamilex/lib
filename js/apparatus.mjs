@@ -122,7 +122,7 @@ const highlight = {
         	'.lem-inline:not(.lem-following, .lem-anchor)';
 	const rightsel = targ.closest('.lem-anchor') ? 
 		'.lem-anchor' :
-		':scope > .app > .lem';
+		':scope > .app > .lem:not(.lem-anchor)';
 
         const left = par.parentElement.querySelector('.text-block'); // or .edition?
         if(targ.dataset.loc) {
