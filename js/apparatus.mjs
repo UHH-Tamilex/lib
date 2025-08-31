@@ -552,7 +552,7 @@ const Events = {
         }
         const note = e.target.closest('.anchored-note');
         if(note) {
-            const anchor = document.querySelector(note.dataset.target);
+            const anchor = document.getElementById(note.dataset.target.replace(/^#/,''));
             if(anchor) {
                 anchor.classList.add('highlit');
                 note.classList.add('highlit');
