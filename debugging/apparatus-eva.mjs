@@ -133,7 +133,7 @@ const alignAppToText = (app,text) => {
 };
 
 const processApparatus = (str,curDoc) => {
-    const apparatus = str.trim().replaceAll('FF•','•FF').split(/[Ɛ#•$]/).map(l => {
+    const apparatus = str.trim().replaceAll('FF•','•FF').split(/[Ɛ#•$]/).map(l => {
         if(l === '') return null;
 
         let clean = l.trim();
