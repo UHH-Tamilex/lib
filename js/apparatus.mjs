@@ -634,10 +634,7 @@ const init = () => {
     }
 
     // listen for refresh events
-    window.addEventListener('message', e => {
-        if(e.origin !== window.location.origin) return;
-        if(typeof e.data !== 'object') return;
-        if(e.data.type !== 'apparatus-refresh') return;
+    (new BroadcastChannel('apparatus')).addEventListener('message', e => {
         markLemmata(document.getElementById(e.data.id));
     });
 };
