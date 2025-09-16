@@ -271,8 +271,8 @@ const getFile = async (e) => {
 
     oldwide.parentNode.replaceChild(newwide,oldwide);
     newwide.classList.add('edited');
-    _state.Transliterator.refreshCache(newwide);
     (new BroadcastChannel('apparatus')).postMessage({id: blockid});
+    _state.Transliterator.refreshCache(newwide);
 
     cancelPopup();
     spinner.remove();
