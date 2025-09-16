@@ -320,7 +320,7 @@ const highlightCoords = (lem,target,ignoretags,highlightfn = highlightrange) => 
 };
 
 
-const markLemmata = () => {
+const markLemmata = (par = document) => {
 
     let lemmaid = 0;
 
@@ -348,7 +348,7 @@ const markLemmata = () => {
         }
     };
 
-    const apparati = document.querySelectorAll('div.apparatus-block');
+    const apparati = par.querySelectorAll('div.apparatus-block');
     for(const apparatus of apparati) {
 
         const lemmata = apparatus.querySelectorAll('.lem[data-loc]');
@@ -632,6 +632,14 @@ const init = () => {
         if(document.querySelector('.apparatus-block.hidden'))
             apparatusbutton.style.display = 'block';
     }
+
+    // listen for refresh events
+    window.addEventListener('message', e => {
+        if(e.origin !== window.location.origin) return;
+        if(typeof e.data !== 'object') return;
+        if(e.data.type !== 'apparatus-refresh') return;
+        markLemmata(document.getElementById(e.data.id));
+    });
 };
 
 const ApparatusViewer = {
