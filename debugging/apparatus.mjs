@@ -796,7 +796,7 @@ const addWitnesses = (doc, listwit, idsel='*|id') => {
 
         const parwit = wit.parentNode.closest('witness');
         if(!parwit)
-            doclistwit.appendChild(witclone);
+            doclistwit.append('\n',witclone);
         else {
             const parwitid = parwit.getAttribute('xml:id');
             const docparwit = doclistwit.querySelector(`witness[${idsel}="${parwitid}"]`);
@@ -804,12 +804,12 @@ const addWitnesses = (doc, listwit, idsel='*|id') => {
                 let docparlistwit = docparwit.querySelector('listWit');
                 if(!docparlistwit) {
                         docparlistwit = doc.createElementNS(nURI,'listWit');
-                        docparwit.appendChild(docparlistwit);
+                        docparwit.append('\n',docparlistwit);
                 }
-                docparlistwit.appendChild(witclone);
+                docparlistwit.append('\n',witclone);
             }
             else
-                doclistwit.appendChild(witclone);
+                doclistwit.append('\n',witclone);
         }
     }
 };
