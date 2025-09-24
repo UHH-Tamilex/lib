@@ -60,8 +60,9 @@ const checkWits = async listapp => {
             const el = witDoc.querySelector(`witness[*|id="${wit.replace(/^#/,'')}"]`);
             if(!el) warnings.push(`${wit} not recognized.`);
             else {
-                if(el.parentNode.nodeName === 'witness')
-                    allels.add(el.parentNode.outerHTML);
+				const parwit = el.parentNode.closest('witness');
+                if(parwit)
+                    allels.add(parwit.outerHTML);
                 else allels.add(el.outerHTML);
             }
         }
