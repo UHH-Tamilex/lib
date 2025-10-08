@@ -11,31 +11,37 @@ const defaultscore = (a,b) => {
 
 const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
     const op = {G:2,P:1,M:-1};
+    /*
     const UP   = Symbol('UP');
     const LEFT = Symbol('LEFT');
     const UL   = Symbol('UP-LEFT');
-
-    const mat   = {};
-    const direc = {};
+    */
+    const UP   = 1;
+    const LEFT = 2;
+    const UL   = 3;
     //const s1arr = s1.split('');
     const s1arr = s1;
     const s1len = s1arr.length;
     //const s2arr = s2.split('');
     const s2arr = s2;
     const s2len = s2arr.length;
-
+    const mat   = new Array(s1len+1);
+    const direc = new Array(s1len+1);
     // initialization
     for(let i=0; i<s1len+1; i++) {
-        mat[i] = {0:0};
-        direc[i] = {0:[]};
+        //mat[i] = {0:0};
+        //direc[i] = {0:[]};
+        mat[i] = new Float16Array(s2len+1);
+        mat[i][0] = 0;
+        direc[i] = new Uint8Array(s2len+1);
+        //direc[i][0] = [];
         for(let j=1; j<s2len+1; j++) {
             mat[i][j] = (i === 0) ? 0 : 
                 //(s1arr[i-1] === s2arr[j-1]) ? op.P : op.M;
                 scorefn(s1arr[i-1],s2arr[j-1]);
-            direc[i][j] = [];
+            //direc[i][j] = [];
         }
     }
-
     // calculate each value
     for(let i=0; i<s1len+1; i++) {
         for(let j=0; j<s2len+1; j++) {
@@ -43,18 +49,22 @@ const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
                 -op.G * (i + j) : 
                 Math.max(mat[i-1][j] - op.G, mat[i-1][j-1] + mat[i][j], mat[i][j-1] - op.G);
             if (i > 0 && j > 0) {
-
+                /*
                 if( newval === mat[i-1][j] - op.G) direc[i][j].push(UP);
                 if( newval === mat[i][j-1] - op.G) direc[i][j].push(LEFT);
                 if( newval === mat[i-1][j-1] + mat[i][j]) direc[i][j].push(UL);
+                */
+                if( newval === mat[i-1][j] - op.G) direc[i][j] = UP;
+                else if( newval === mat[i][j-1] - op.G) direc[i][j] = LEFT;
+                else if( newval === mat[i-1][j-1] + mat[i][j]) direc[i][j] = UL;
             }
             else {
-                direc[i][j].push((j === 0) ? UP : LEFT);
+                //direc[i][j].push((j === 0) ? UP : LEFT);
+                direc[i][j] = (j === 0) ? UP : LEFT;
             }
             mat[i][j] = newval;
         }
     }
-
     // get result
     const chars = [[],[]];
     const gaps0 = [];
@@ -62,7 +72,8 @@ const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
     var J = s2len;
     //const max = Math.max(I, J);
     while(I > 0 || J > 0) {
-        switch (direc[I][J][0]) {
+        //switch (direc[I][J][0]) {
+        switch (direc[I][J]) {
         case UP:
             I--;
             chars[0].unshift(s1arr[I]);
