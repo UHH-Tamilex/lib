@@ -1,3 +1,5 @@
+import {GridMixin} from './structurae/grid.js';
+
 const defaultscore = (a,b) => {
     const vowels = ['a','ā','i','ī','u','ū','o','ō','e','ē','ai','au'];
     if(a === b) return 1;
@@ -25,20 +27,24 @@ const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
     //const s2arr = s2.split('');
     const s2arr = s2;
     const s2len = s2arr.length;
-    const mat   = new Array(s1len+1);
-    const direc = new Array(s1len+1);
+    //const mat   = new Array(s1len+1);
+    //const direc = new Array(s1len+1);
+    const matgrid = GridMixin(Float16Array);
+    const mat = matgrid.create(s1len+1, s2len+1);
+    const direcgrid = GridMixin(Uint8Array);
+    const direc = direcgrid.create(s1len+1, s2len+1);
     // initialization
     for(let i=0; i<s1len+1; i++) {
         //mat[i] = {0:0};
         //direc[i] = {0:[]};
-        mat[i] = new Float16Array(s2len+1);
-        mat[i][0] = 0;
-        direc[i] = new Uint8Array(s2len+1);
+        //mat[i] = new Float16Array(s2len+1);
+        //mat[i][0] = 0;
+        //direc[i] = new Uint8Array(s2len+1);
         //direc[i][0] = [];
         for(let j=1; j<s2len+1; j++) {
-            mat[i][j] = (i === 0) ? 0 : 
-                //(s1arr[i-1] === s2arr[j-1]) ? op.P : op.M;
-                scorefn(s1arr[i-1],s2arr[j-1]);
+            //mat[i][j] = (i === 0) ? 0 : 
+            mat.setValue(i,j,(i === 0) ? 0 : 
+                scorefn(s1arr[i-1],s2arr[j-1]));
             //direc[i][j] = [];
         }
     }
@@ -47,22 +53,22 @@ const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
         for(let j=0; j<s2len+1; j++) {
             const newval = (i === 0 || j === 0) ? 
                 -op.G * (i + j) : 
-                Math.max(mat[i-1][j] - op.G, mat[i-1][j-1] + mat[i][j], mat[i][j-1] - op.G);
+                Math.max(mat.getValue(i-1,j) - op.G, mat.getValue(i-1,j-1) + mat.getValue(i,j), mat.getValue(i,j-1) - op.G);
             if (i > 0 && j > 0) {
                 /*
                 if( newval === mat[i-1][j] - op.G) direc[i][j].push(UP);
                 if( newval === mat[i][j-1] - op.G) direc[i][j].push(LEFT);
                 if( newval === mat[i-1][j-1] + mat[i][j]) direc[i][j].push(UL);
                 */
-                if( newval === mat[i-1][j] - op.G) direc[i][j] = UP;
-                else if( newval === mat[i][j-1] - op.G) direc[i][j] = LEFT;
-                else if( newval === mat[i-1][j-1] + mat[i][j]) direc[i][j] = UL;
+                if( newval === mat.getValue(i-1,j) - op.G) direc.setValue(i,j,UP);
+                else if( newval === mat.getValue(i,j-1) - op.G) direc.setValue(i,j,LEFT);
+                else if( newval === mat.getValue(i-1,j-1) + mat.getValue(i,j)) direc.setValue(i,j,UL);
             }
             else {
                 //direc[i][j].push((j === 0) ? UP : LEFT);
-                direc[i][j] = (j === 0) ? UP : LEFT;
+                direc.setValue(i,j, (j === 0) ? UP : LEFT);
             }
-            mat[i][j] = newval;
+            mat.setValue(i,j,newval);
         }
     }
     // get result
@@ -73,7 +79,7 @@ const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
     //const max = Math.max(I, J);
     while(I > 0 || J > 0) {
         //switch (direc[I][J][0]) {
-        switch (direc[I][J]) {
+        switch (direc.getValue(I,J)) {
         case UP:
             I--;
             chars[0].unshift(s1arr[I]);
