@@ -85,6 +85,14 @@ const addEditButton = blockel => {
 
     editmenu.append(wsbutton, appbutton);
     (wideblock || block).prepend(editmenu);
+
+    const alignviewer = (wideblock || block).querySelector('.alignment-pointer');
+    const alignbutton = document.createElement('button');
+    alignbutton.className = 'alignedit';
+    alignbutton.dataset.anno = `Edit alignment for ${xmlid}`;
+    alignbutton.dataset.href = alignviewer.href;
+    alignbutton.append('\u{1F589}');
+    alignviewer.after(alignbutton);
 };
 
 const getLineEls = (doc,id) => {
