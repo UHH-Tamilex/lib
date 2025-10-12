@@ -11,6 +11,24 @@ const defaultscore = (a,b) => {
     return -1;
 };
 
+const Float16Grid = GridMixin(Float16Array);
+const Float32Grid = GridMixin(Float32Array);
+const Float64Grid = GridMixin(Float64Array);
+const Uint8Grid = GridMixin(Uint8Array);
+
+const estimateSize = (len1, len2, config) => {
+    const len = Math.max(len1,len2);
+    const mut = Math.max(
+        Math.abs(config.G),
+        Math.abs(config.P),
+		Math.abs(config.M)
+        );
+    const tot = len * mut;
+    if(tot < 65504) return Float16Grid;
+    if(tot < 3.4e38) return Float32Grid;
+    return Float64Grid;
+};
+
 const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
     const op = {G:2,P:1,M:-1};
     /*
@@ -29,10 +47,10 @@ const needlemanWunsch = (s1,s2,scorefn=defaultscore/*op={G:2,P:1,M:-1}*/) => {
     const s2len = s2arr.length;
     //const mat   = new Array(s1len+1);
     //const direc = new Array(s1len+1);
-    const matgrid = GridMixin(Float16Array);
-    const mat = matgrid.create(s1len+1, s2len+1);
-    const direcgrid = GridMixin(Uint8Array);
-    const direc = direcgrid.create(s1len+1, s2len+1);
+	
+	const ArrayType = estimateSize(s1len+1,s2len+1,op);
+    const mat = ArrayType.create(s1len+1, s2len+1);
+    const direc = Uint8Grid.create(s1len+1, s2len+1);
     // initialization
     for(let i=0; i<s1len+1; i++) {
         //mat[i] = {0:0};
