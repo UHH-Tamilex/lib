@@ -395,148 +395,132 @@ const matrixLoad = (fs,str) => {
 
 };
 
-const matrixLoadAdditional = function(fs) {
-	const f = fs[0];
-	const fss = fs.slice(1);
-	const setDiff = function(setA,setB) {
+	const setDiff = (setA,setB)  => {
 		const ret = new Set(setA);
 		for(const el of setB) ret.delete(el);
 		return ret;
 	};
-
-	const go = function(add,e) {
-		const xParser = new DOMParser();
-		const newxml = xParser.parseFromString(e.target.result,'text/xml');
-		
-		const oldteis = new Map();
-		for(const tei of Find.teis()) {
-			const siglum = tei.getAttribute('n');
-			oldteis.set(siglum,tei);
-		}
-
-		const newteis = new Map();
-		for(const tei of newxml.querySelectorAll('TEI')) {
-			const siglum = tei.getAttribute('n');
-			if(oldteis.has(siglum)) {
-				newteis.set(siglum,tei);
-				continue;
-			}
-
-			const wit = newxml.querySelector(`witness[*|id="${siglum}"]`);
-			
-			// if _state.xml has XXac/XXpc and newxml has XX
-			const oldac = _state.xml.querySelector(`witness[*|id="${siglum}"] [n="ac"]`);
-			if(oldac && oldteis.has(oldac.getAttribute('xml:id'))) {
-				newteis.set(siglum + 'ac',tei);
-				const pcrow = tei.cloneNode(true);
-				pcrow.setAttribute('n',siglum + 'pc');
-				tei.after(pcrow);
-				newteis.set(siglum + 'pc',pcrow);
-				continue;
-			}
-			
-			// if _state.xml has XX and newxml has XXac/XXpc
-			const acpc = wit.getAttribute('n');
-			const parid = wit.parentNode.closest('witness')?.getAttribute('xml:id');
-			if(acpc !== null && oldteis.has(parid)) {
-				const oldrow = oldteis.get(parid);
-				oldrow.setAttribute('n',parid + 'ac');
-				const pcrow = oldrow.cloneNode(true);
-				pcrow.setAttribute('n',parid + 'pc');
-				oldrow.after(pcrow);
-				oldteis.set(parid + 'ac',oldrow);
-				oldteis.set(parid + 'pc',pcrow);
-				oldteis.delete(parid);
-			}
-			// if _state.xml has XX and newxml has XX-A, XX-B, etc.
-			else if(!oldteis.has(siglum) && parid && oldteis.has(parid)) {
-				const oldrow = oldteis.get(parid);
-				const newrow = oldrow.cloneNode(true);
-				newrow.setAttribute('n',siglum);
-				oldrow.after(newrow);
-				oldteis.set(siglum,newrow);
-			}
-			newteis.set(siglum,tei);
-		}
-		const oldsigla = new Set(oldteis.keys());
-		const newsigla = new Set(newteis.keys());
-
-		const tofill = setDiff(oldsigla,newsigla);
-		const toadd  = setDiff(newsigla,oldsigla);
-
-		
-		for(const el of toadd) Make.tei(el);
-
-		const addlemma = [...newxml.querySelector('text').querySelectorAll('w[n]')].length;
-		const lastlemma = _state.maxlemma + addlemma;
-		const addempty = new Set();
-		for(const [key,val] of newteis) {
-			if(!oldteis.has(key)) {
-				addempty.add(key);
-				/*
-				const newtei = Make.xmlel('TEI');
-				newtei.setAttribute('n',key);
-				const newtext = Make.xmlel('text');
-				Make.emptywords(newtext,lastlemma,0);
-				newtei.appendChild(newtext);
-				_state.xml.documentElement.appendChild(newtei);
-				*/
-			}
-			else {
-				const oldtext = oldteis.get(key).querySelector('text');
-				const newtext = val.querySelector('text');
-				const newwords = newtext.querySelectorAll('w[n]');
-				let cur_n = _state.maxlemma + 1;
-				for(const word of newwords) {
-					word.setAttribute('n',cur_n);
-					//oldtext.appendChild(word);
-					cur_n = cur_n + 1;
-				}
-				const newclone = newtext.cloneNode(true);
-				while(newclone.firstChild)
-					oldtext.appendChild(newclone.firstChild);
-			}
-		}
-		if(addempty.size > 0) { // we want to have the <cl>s too
-			const template = _state.xml.querySelector('TEI').cloneNode(true);
-			for(const w of template.querySelectorAll('w')) {
-				w.innerHTML = '';
-				if(w.hasAttribute('lemma')) w.removeAttribute('lemma');
-			}
-			for(const key of addempty) {
-				const newtei = template.cloneNode(true);
-				newtei.setAttribute('n',key);
-				_state.xml.documentElement.appendChild(newtei);
-			}
-		}
-		if(tofill.size > 0) {
-			const template = newxml.querySelector('text').cloneNode(true);
-			let cur_n = _state.maxlemma + 1;
-			for(const w of template.querySelectorAll('w')) {
-				w.innerHTML = '';
-				if(w.hasAttribute('lemma')) w.removeAttribute('lemma');
-				w.setAttribute('n',cur_n);
-				cur_n = cur_n + 1;
-			}
-			for(const el of tofill) {
-				//const oldtext = oldteis.get(el).querySelector('text');
-				const text = oldteis.get(el).querySelector('text');
-				const newtext = template.cloneNode(true);
-				while(newtext.firstChild)
-					text.appendChild(newtext.firstChild);
-				//Make.emptywords(text,lastlemma,_state.maxlemma + 1);
-			}
-		}
-
-		_state.maxlemma = Find.maxlemma(); // can probably change this
-		if(add.length > 0) matrixLoadAdditional(add);
-		else menuPopulate();
+	const setIntersection = (a,b) => {
+		const ret = new Set();
+		for(const el of a)
+			if(b.has(el)) ret.add(el);
+		return ret;
 	};
+
+const loadAdditionalGo = (add,e) => {
+	const xParser = new DOMParser();
+	const newxml = xParser.parseFromString(e.target.result,'text/xml');
+	
+	const oldteis = new Map();
+	for(const tei of Find.teis()) {
+		const siglum = tei.getAttribute('n');
+		oldteis.set(siglum,tei);
+	}
+
+	const newteis = new Map();
+	for(const tei of newxml.querySelectorAll('TEI')) {
+		const siglum = tei.getAttribute('n');
+		if(oldteis.has(siglum)) {
+			newteis.set(siglum,tei);
+			continue;
+		}
+
+		const wit = newxml.querySelector(`witness[*|id="${siglum}"]`);
+		
+		// if _state.xml has XXac/XXpc and newxml has XX
+		const oldac = _state.xml.querySelector(`witness[*|id="${siglum}"] [n="ac"]`);
+		if(oldac && oldteis.has(oldac.getAttribute('xml:id'))) {
+			newteis.set(siglum + 'ac',tei);
+			const pcrow = tei.cloneNode(true);
+			pcrow.setAttribute('n',siglum + 'pc');
+			tei.after(pcrow);
+			newteis.set(siglum + 'pc',pcrow);
+			continue;
+		}
+		
+		// if _state.xml has XX and newxml has XXac/XXpc
+		const acpc = wit.getAttribute('n');
+		const parid = wit.parentNode.closest('witness')?.getAttribute('xml:id');
+		if(acpc !== null && oldteis.has(parid)) {
+			const oldrow = oldteis.get(parid);
+			oldrow.setAttribute('n',parid + 'ac');
+			const pcrow = oldrow.cloneNode(true);
+			pcrow.setAttribute('n',parid + 'pc');
+			oldrow.after(pcrow);
+			oldteis.set(parid + 'ac',oldrow);
+			oldteis.set(parid + 'pc',pcrow);
+			oldteis.delete(parid);
+		}
+		// if _state.xml has XX and newxml has XX-A, XX-B, etc.
+		else if(!oldteis.has(siglum) && parid && oldteis.has(parid)) {
+			const oldrow = oldteis.get(parid);
+			const newrow = oldrow.cloneNode(true);
+			newrow.setAttribute('n',siglum);
+			oldrow.after(newrow);
+			oldteis.set(siglum,newrow);
+		}
+		// TODO: if _state.xml has XX-A, XX-B, etc. and newxml has only XX
+
+		newteis.set(siglum,tei);
+	}
+	const oldsigla = new Set(oldteis.keys());
+	const newsigla = new Set(newteis.keys());
+
+	const tofill = setDiff(oldsigla,newsigla);
+	const toadd  = setDiff(newsigla,oldsigla);
+	const toappend = setIntersection(newsigla,oldsigla);
+	
+	if(toadd.size > 0) { // we want to have the <cl>s too
+		const template = _state.xml.querySelector('TEI').cloneNode(true);
+		for(const w of template.querySelectorAll('w')) {
+			w.innerHTML = '';
+			if(w.hasAttribute('lemma')) w.removeAttribute('lemma');
+		}
+		for(const key of toadd) {
+			const newtei = template.cloneNode(true);
+			newtei.setAttribute('n',key);
+			_state.xml.documentElement.appendChild(newtei);
+			const addtext = newteis.get(key).querySelector('text').cloneNode(true);
+			const text = newtei.querySelector('text');
+			while(addtext.firstChild)
+				text.appendChild(addtext.firstChild);
+		}
+	}
+	if(tofill.size > 0) {
+		const template = newxml.querySelector('text').cloneNode(true);
+		for(const w of template.querySelectorAll('w')) {
+			w.innerHTML = '';
+			if(w.hasAttribute('lemma')) w.removeAttribute('lemma');
+		}
+		for(const el of tofill) {
+			const text = oldteis.get(el).querySelector('text');
+			const newtext = template.cloneNode(true);
+			while(newtext.firstChild)
+				text.appendChild(newtext.firstChild);
+		}
+	}
+
+	for(const key of toappend) {
+		const oldtext = oldteis.get(key).querySelector('text');
+		const newtext = newteis.get(key).querySelector('text').cloneNode(true);
+		while(newtext.firstChild)
+			oldtext.appendChild(newtext.firstChild);
+	}
+
+	edit.renumber(_state.maxlemma);
+
+	if(add.length > 0) matrixLoadAdditional(add);
+	else menuPopulate();
+};
+
+const matrixLoadAdditional = function(fs) {
+	const f = fs[0];
+	const fss = fs.slice(1);
 	if(typeof f === 'string')
-		go(fss,{target: {result: f}});
+		loadAdditionalGo(fss,{target: {result: f}});
 	else {
 		const reader = new FileReader();
-		reader.onload = go.bind(null,fss);
+		reader.onload = loadAdditionalGo.bind(null,fss);
 		reader.readAsText(f);
 	}
 	
@@ -547,14 +531,13 @@ const mssMenuPopulate = function() {
 	const mss = [...Find.teis()].map(el => el.getAttribute('n'));
 	for(const ms of mss) {
 	//    msshtml += `<li data-name="${ms}">${_texts.get(ms).desc}</li>`;
-		msshtml += `<li data-name="${ms}">${ms}</li>`;
+		const label = document.querySelector(`tr[data-n="${ms}"] th`).innerHTML;
+		msshtml += `<li data-name="${ms}">${label}</li>`;
 	}
 	document.getElementById('menu').querySelector('.ms').innerHTML = msshtml;
 };
 
 const menuPopulate = function() {
-	mssMenuPopulate();
-
 	const savebox = new menuItem('Save As...');
 	savebox.setFunction(Exporter.saveAs);
 	savebox.setStyle({fontWeight: 'bold'});
@@ -668,6 +651,9 @@ const menuPopulate = function() {
 	views.removeChild(views.querySelector('#splash'));
 
 	newBox.matrix();
+
+	mssMenuPopulate();
+
 	const matrixmenu = document.getElementById('matrixmenu');
 	matrixmenu.addEventListener('click',newBox.matrix);
 	matrixmenu.removeChild(matrixmenu.querySelector('ul'));
@@ -2144,12 +2130,14 @@ const edit = {
 			for(const row of rows) {
 				const els = [...cellfunc(false,row)];
 				const attr = Find.whichattr(els[0]);
-				for(var n=parseInt(start)+1;n < els.length;n++)
+				for(let n=parseInt(start)+1;n < els.length;n++)
 					els[n].setAttribute(attr,n);
 			}
 		};
-		dorenumber(Find.trs,Find.tds,start);
-		dorenumber(() => [true],Find.ths,start);
+		if(_state.matrix) {
+			dorenumber(Find.trs,Find.tds,start);
+			dorenumber(() => [true],Find.ths,start); // purple header row
+		}
 		dorenumber(Find.texts,Find.words,start);
 		_state.maxlemma = Find.maxlemma();
 	//_state.maxlemma = Find.firsttext().lastElementChild.getAttribute('n');
@@ -3015,9 +3003,11 @@ class TreeBox extends Box {
 				`<span class="internal" data-key="${key}">${key}</span>`)
 			+ '<span class="tree-lemma '+key+'" data-id="'+key+'"></span>';
 */
-			if(texts.has(key))
+			if(texts.has(key)) {
+				const label = document.querySelector(`tr[data-n="${key}"] th`).innerHTML;
 				newEl.innerHTML =
-`<span class="witness inactive" data-key="${key}">${key}</span><span class="tree-lemma ${key}" data-id="${key}"></span>`;
+`<span class="witness inactive" data-key="${key}">${label}</span><span class="tree-lemma ${key}" data-id="${key}"></span>`;
+			}
 			else if(key !== 'fakeroot') {
 				if(reconstructed.has(key))
 					newEl.innerHTML = `<span class="internal reconstructed" data-key="${key}" data-label="${reconstructed.get(key)}">${reconstructed.get(key)}</span><span class="tree-lemma invisible ${key}" data-id="${key}" data-label="${reconstructed.get(key)}"></span>`;
