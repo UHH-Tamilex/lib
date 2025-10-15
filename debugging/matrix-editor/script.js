@@ -1,5 +1,5 @@
-import { CSV } from './lib/csv.mjs';
-import { Smits } from './lib/jsphylosvg-custom.mjs';
+import CSV from './lib/csv.mjs';
+import Smits from './lib/jsphylosvg-custom.mjs';
 
 import Normalizer from './lib/normalize.mjs';
 import { changeScript, to } from './lib/transliterate.mjs';
@@ -10,7 +10,7 @@ import { Exporter as _Exporter } from './lib/export.mjs';
 import { actions as _Actions } from './lib/actions.mjs';
 
 import _Hypher from './lib/hypher.mjs';
-import { hyphenation_sa } from './lib/hypher-sa.mjs';
+import hyphenation_sa from './lib/hypher-sa.mjs';
 
 const _state = {
 	teins: 'http://www.tei-c.org/ns/1.0',
@@ -25,11 +25,12 @@ const _state = {
 	descs: null,
 	maxlemma: null,
 	windows: [window],
-	dragged: null,
-	draganchor: null,
 	undo: [],
 	redo: [],
-	editing: false
+	dragged: null, // th element, row dragging
+	highlightanchor: null, // td element, click-and-drag cell selection
+	editing: null, // td element, cell editing and new row naming
+	shifting: null // [low, high] cell shifting
 };
 
 const Hypher = new _Hypher(hyphenation_sa);
@@ -39,7 +40,7 @@ const Actions = new _Actions(Utils);
 const Exporter = new _Exporter(Utils, Xslt); // change to dynamic import?
 const { find: Find, check: Check, make: Make } = Utils;
 
-const removeBox = function() {
+const removeBox = () => {
 	const box = document.getElementById('tooltip');
 	if(box) box.remove();
 };
@@ -551,8 +552,8 @@ const menuPopulate = function() {
 	]);
 	const editbox = new menuBox('Edit');
 	editbox.populate([
-		{text: 'Undo', greyout: Check.undo, func: edit.undo},
-		{text: 'Redo', greyout: Check.redo, func: edit.redo},
+		{text: 'Undo', shortcut: 'Ctrl-z', greyout: Check.undo, func: edit.undo},
+		{text: 'Redo', shortcut: 'Ctrl-r', greyout: Check.redo, func: edit.redo},
 		{text: 'Select all',
 			alt: 'Deselect all',
 			toggle: Check.anyhighlit,
@@ -618,9 +619,17 @@ const menuPopulate = function() {
 
 	const cellbox = new menuBox('Cell');
 	cellbox.populate([
+		{text: 'Shift cell',
+		 alt: 'Shift cells',
+		 shortcut: 's',
+		 greyout: Check.highlitcell,
+	     toggle: Check.manyhighlitcells,
+		 func: edit.startShiftCell,
+		},
 		{text: 'Edit cell',
-			greyout: Check.highlitcell,
-			func: edit.startEditCell.bind(null,false),
+		 shortcut: 'Enter',
+		 greyout: Check.highlitcell,
+		 func: edit.startEditCell.bind(null,false),
 		}
 	]);
 	
@@ -783,21 +792,28 @@ const events = {
 	},
 
 	keyDown(e) {
-		if(!_state.editing && e.key.substring(0,5) === 'Arrow') events.cycleVariant(e);
+		if(_state.shifting) {
+			edit.doShiftCell(e.key);
+			return;
+		}
+		if(!_state.editing) {
+			if(e.key.substring(0,5) === 'Arrow') events.cycleVariant(e);
+			else if(_state.matrix && !_state.matrix.closed & e.key === 'Enter') {
+				const td = Find.highlitcell();
+				if(td) {
+					e.preventDefault();
+					edit.startEditCell(td);
+				}
+			}
+			else if(!_state.dragging && !_state.shifting && Check.highlitcell() && e.key === 's') {
+				edit.startShiftCell();
+			}
+		}
 		else if(e.ctrlKey || e.metaKey) {
 			if(e.key === 'Z')
 				edit.redo();
 			else if(e.key === 'z')
 				edit.undo();
-		}
-		else if(!_state.editing &&
-				_state.matrix && !_state.matrix.closed &
-				e.key === 'Enter') {
-			const td = Find.highlitcell();
-			if(td) {
-				e.preventDefault();
-				edit.startEditCell(td);
-			}
 		}
 	},
 
@@ -880,9 +896,10 @@ const events = {
 
 	textClick(e,skipRight = false) {
 		if(e.target.closest('tr.header')) {
-			events.matrixHeaderClick(e);
+			//events.matrixHeaderClick(e); // nothing to do in the header anymore
 			return;
 		}
+		if(_state.shifting) return;
 		const targ = e.target.classList.contains('lemma') ? 
 			e.target :
 			e.target.closest('.lemma');
@@ -1023,6 +1040,7 @@ const events = {
 
 	matrixMousedown(e) {
 		if(e.button !== 0) return;
+		if(_state.shifting) return;
 		if(e.ctrlKey) {events.rightClick(e); return;}
 		const lemma = e.target.nodeType === 1 ?
 			e.target.closest('.lemma') :
@@ -1033,7 +1051,8 @@ const events = {
 
 			multi.unHighlightAll();
 			multi.highlightLemma(lemma.dataset.n);
-			_state.draganchor = parseInt(lemma.dataset.n);
+			lemma.classList.add('highlitcell');
+			_state.highlightanchor = lemma;
 			const tabl = _state.matrix.boxdiv.querySelector('table');
 			tabl.addEventListener('mouseover',events.matrixMouseover);
 			window.addEventListener('mouseup',events.matrixMouseup);
@@ -1041,13 +1060,20 @@ const events = {
 	},
 	matrixMouseup(e) {
 		const nums = Find.highlit();
-		if(nums.size === 1)
-			events.textClick(e);
+		if(nums.size === 1) {
+			const n = [...nums][0];
+			multi.clearTrees();
+			multi.repopulateTrees(n);
+		}
 		else {
 			multi.clearTrees();
-			multi.highlightRange(nums);
+			//multi.highlightRange(nums);
+			multi.repopulateTrees(...Find.lowhigh(nums));
+			for(const box of _state.viewdiv.querySelectorAll('.text-box'))
+				if(!box.querySelector('.highlit'))
+					box.querySelector('[data-n="'+low+'"]').classList.add('highlit');      
 		}
-		_state.draganchor = null;
+		_state.highlightanchor = null;
 		const tabl = _state.matrix.boxdiv.querySelector('table');
 		tabl.removeEventListener('mouseover',events.matrixMouseover);
 		window.removeEventListener('mouseup',events.matrixMouseup);
@@ -1056,29 +1082,35 @@ const events = {
 		const lemma = e.target.nodeType === 1 ?
 			e.target.closest('.lemma') :
 			e.target.parentElement.closest('.lemma');
-		if(lemma) {
-			multi.unHighlightAll();
-			const startn = _state.draganchor;
-			const endn = parseInt(lemma.dataset.n);
-			if(startn === endn)
-				multi.highlightLemma(startn);
-			else {
-				var up, down;
-				if(startn > endn) {
-					up = startn;
-					down = endn;
+		if(!lemma) return;
+
+		multi.unHighlightAll();
+		const sorted = Find.lowhigh([_state.highlightanchor.dataset.n,lemma.dataset.n]);
+		for(let n=sorted[0];n<=sorted[1];n++) multi.highlightLemma(n,true);
+		const starttr = _state.highlightanchor.closest('tr');
+		const endtr = lemma.closest('tr');
+		if(starttr === endtr) {
+			for(let n=sorted[0];n<=sorted[1];n++) 
+				starttr.querySelector(`td[data-n="${n}"]`).classList.add('highlitcell');
+		}
+		else {
+			let started = false;
+			for(const tr of Find.trs()) {
+				if(!started && (tr === starttr || tr === endtr)) {
+					started = true;
+					for(let n=sorted[0];n<=sorted[1];n++) 
+						tr.querySelector(`td[data-n="${n}"]`).classList.add('highlitcell');
 				}
-				else {
-					up = endn;
-					down = startn;
+				else if(started) {
+					for(let n=sorted[0];n<=sorted[1];n++) 
+						tr.querySelector(`td[data-n="${n}"]`).classList.add('highlitcell');
+					if(tr === starttr || tr === endtr)
+						break;
 				}
-				for(let n=down;n<=up;n++) multi.highlightLemma(n,true);
 			}
-			//const r = Array.from(new Array(up-down), (x, i) => i+down);
-			//multi.highlightRange(new Set(r));
-			//multi.highlightLemma(lemma.dataset.n);
 		}
 	},
+	/*
 	matrixHeaderClick(e) {
 		if(e.target.tagName !== 'INPUT') return;
 		const type = e.target.className;
@@ -1091,8 +1123,9 @@ const events = {
 		//edit.startMarkAs(e.target.className,nums,e);
 		edit.doMarkAs(type,states);
 	},
-
+	*/
 	rightClick(e) {
+		if(_state.shifting) return;
 		const th = e.target.nodeType === 1 ?
 			e.target.closest('tr[data-n] th') :
 			e.target.parentElement.closest('tr[data-n] th');
@@ -1132,11 +1165,14 @@ const events = {
 				})();
 			const items = nums.size > 1 ? 
 				[
+					{text: 'shift cells',
+						func: edit.startShiftCell
+					},
 					{text: 'merge columns',
 						func: edit.startMerge.bind(null,nums)
 					},
-					{text: 'ungroup columns',
-						alt: 'group columns',
+					{text: 'group columns',
+						alt: 'ungroup columns',
 						toggle: Check.grouped,
 						func: edit.group.start.bind(null,false)
 					},
@@ -1153,15 +1189,17 @@ const events = {
 				}, */
 				] : 
 				[
-					{text: 'edit cell',
-						func: edit.startEditCell.bind(null,td)
+					{text: 'shift cell',
+						alt: 'shift cells',
+						toggle: Check.manyhighlitcells,
+						func: edit.startShiftCell
 					},
 					{text: 'delete column',
 						func: edit.removeCol.start.bind(null,nums)
 					},
 					{text: 'insert column',
 						func: edit.insertCol.start
-					},
+					}
 					/*                {text: 'insignificant',
 				 cond: Check.checkbox.bind(null,'insignificant',nums),
 				 func: edit.startMarkAs.bind(null,'insignificant',nums),
@@ -1171,6 +1209,12 @@ const events = {
 				 func: edit.startMarkAs.bind(null,'binary',nums),
 				}, */
 				];
+			if(nums.size === 1 && !Check.manyhighlitcells())
+				items.unshift(
+					{text: 'edit cell',
+						func: edit.startEditCell.bind(null,td)
+					}
+				);
 			contextMenu.remove();
 			const menu = contextMenu.create(e);
 			contextMenu.populate(menu,items);
@@ -1463,19 +1507,123 @@ const edit = {
 		edit.doMulti(dolist,'do');
 	},
 	startEditCell: function(el) {
-	//const cell = el || document.querySelector('.matrix td.highlitcell');
+        //const cell = el || document.querySelector('.matrix td.highlitcell');
 		const cell = el || Find.highlitcell();
 		if(!cell) return;
+
+        for(const el of _state.matrix.boxdiv.querySelectorAll('td.highlit'))
+            if(el !== cell) el.classList.remove('highlit');
+
+        const allhighlit = Find.highlitcells();
+        if(allhighlit.length > 1) {
+            for(const el of allhighlit)
+                if(el !== cell) el.classList.remove('highlitcell');
+        }
 		//cell.classList.add('highlitcell');
+		if(cell.dataset.hasOwnProperty('normal'))
+			cell.dataset.oldNormal = cell.dataset.normal;
 		edit.unnormalize(cell);
 		cell.dataset.oldContent = cell.textContent;
 	
 		cell.contentEditable = 'true';
 		cell.focus();
-		_state.editing = true;
+		_state.editing = cell;
 		events.selectAll(cell);
 		cell.addEventListener('blur',edit.finishEditCell);
 		cell.addEventListener('keydown',edit.cellKeyDown);
+	},
+	startShiftCell: () => {
+		const cells = Find.highlitcells();
+		if(cells.length === 0) return;
+		const nums = new Set();
+		for(const cell of cells) {
+			cell.classList.add('dragging');
+			nums.add(cell.dataset.n);
+		}
+		_state.shifting = Find.lowhigh(nums);
+		multi.unHighlightAll();
+	},
+	doShiftCell: key => {
+		const switchCells = pair => {
+			pair[1].textContent = pair[0].textContent;
+			if(pair[0].hasOwnProperty('IAST')) {
+				pair[1].IAST = pair[0].IAST;
+				delete pair[0].IAST;
+			}
+			pair[1].classList.add('dragging');
+			if(pair[0].dataset.hasOwnProperty('normal'))
+				pair[1].dataset.normal = pair[0].dataset.normal;
+			pair[0].textContent = '';
+			delete pair[0].dataset.normal;
+			pair[0].classList.remove('dragging');
+		};
+
+		if(key === 'Enter') {
+			edit.finishShiftCell();
+		}
+		else if(key === 'ArrowRight' || key === 'ArrowLeft') {
+			const trs = Find.trs();
+			const tomove = [];
+			for(const tr of trs) {
+				const highlit = tr.querySelectorAll('td.dragging');
+				if(highlit.length === 0) continue;
+
+				const origcell = key === 'ArrowRight' ? highlit[highlit.length-1] : highlit[0];
+				const newcell = key === 'ArrowRight' ? 
+					Find.adjacentRight(origcell) : Find.adjacentLeft(origcell);
+
+				if(!newcell || newcell.textContent !== '' || newcell.dataset.hasOwnProperty('normal')) {
+					const flasher = key === 'ArrowRight' ?
+						[{ filter: 'drop-shadow(4px 0 4px rgb(198,158,19))'}, { filter: 'none' }] :
+						[{ filter: 'drop-shadow(-4px 0 4px rgb(198,158,19))'}, { filter: 'none' }];
+					const timer = {
+						duration: 300,
+						iterations: 1
+					};
+					for(const cell of _state.matrix.boxdiv.querySelectorAll('.dragging'))
+						cell.animate(flasher,timer);
+					return;
+				}
+				for(const cell of highlit) {
+					if(key === 'ArrowRight')
+						tomove.unshift([cell,Find.adjacentRight(cell)]);
+					else
+						tomove.push([cell,Find.adjacentLeft(cell)]);
+				}
+			}
+			for(const pair of tomove) switchCells(pair);
+		}
+	},
+	finishShiftCell: () => {
+		const dolist = [];
+		const firstcell = _state.matrix.boxdiv.querySelector('.dragging');
+		let lastcell = firstcell;
+		const nums = new Set();
+		while(lastcell && lastcell.classList.contains('dragging')) {
+			nums.add(parseInt(lastcell.dataset.n));
+			lastcell = lastcell.nextElementSibling;
+		}
+		for(const num of _state.shifting) if(Number.isInteger(num)) nums.add(num);
+		const [low,high] = Find.lowhigh(nums);
+		const trs = _state.matrix.boxdiv.querySelectorAll('tr:has(td.dragging)');
+		for(const tr of trs) {
+			for(let cellnum=low; cellnum<=(high||low); cellnum++) {
+				const rownum = tr.dataset.n;
+				const cell = tr.querySelector(`td[data-n="${cellnum}"]`);
+				cell.classList.remove('dragging');
+				const node = cell.hasOwnProperty('IAST') ? cell.IAST : cell;
+				
+				const stuff = { content: node.textContent };
+				if(node.dataset.hasOwnProperty('normal')) stuff.normal = node.dataset.normal;
+
+				const oldcelldata = edit.xmlChangeCell(cellnum,rownum,stuff);
+				dolist.push([edit.doChangeCell,[cellnum,rownum,oldcelldata]]);
+			}
+		}
+
+		edit.doStack([edit.doMulti,[dolist]],'do');
+		_state.shifting = null;
+		multi.clearTrees();
 	},
 
 	cellKeyDown: function(e) {
@@ -1542,7 +1690,7 @@ const edit = {
 		th.scrollIntoView();
 		th.focus();
 		document.execCommand('selectAll',false,null);
-		_state.editing = true;
+		_state.editing = th;
 	},
 
 	startRenameRow: function(/*n*/) {
@@ -1590,7 +1738,8 @@ const edit = {
 	},
 
 	finishNewRow: function(e) {
-		const th = e.target;
+		const th = _state.editing;
+		//const th = e.target;
 		const label = th.textContent;
 		th.closest('tr').dataset.n = label;
 	
@@ -1598,7 +1747,7 @@ const edit = {
 
 		_state.xml.documentElement.appendChild(tei);
 	
-		_state.editing = false;
+		_state.editing = null;
 		th.contentEditable = false;
 		th.removeEventListener('blur',edit.finishNewRow);
 		th.removeEventListener('keydown',edit.thKeyDown);
@@ -1607,9 +1756,10 @@ const edit = {
 	},
 
 	finishEditCell: function(e,cancel = false) {
-		const cell = e.target;
+		//const cell = e.target;
 		//cell.classList.remove('highlitcell');
-		_state.editing = false;
+		const cell = _state.editing;
+		_state.editing = null;
 		cell.contentEditable = 'false';
 		cell.removeEventListener('blur',edit.finishEditCell);
 		cell.removeEventListener('keydown',edit.cellKeyDown);
@@ -1622,7 +1772,20 @@ const edit = {
 			if(br) br.remove();
 		}
 
-		if(cancel) return;
+		const cellnum = parseInt(cell.dataset.n);
+		const tr = cell.closest('tr');
+		const rownum = tr.dataset.n;
+
+		if(cancel) {
+			if(cell.dataset.hasOwnProperty('oldNormal')) {
+				cell.dataset.normal = cell.dataset.oldNormal;
+				const row = Find.tei(rownum).querySelector('text');
+				const xmlcell = Find.firstword(cellnum,row);
+				xmlcell.setAttribute('lemma',cell.dataset.oldNormal);
+				delete cell.dataset.oldNormal;
+			}
+			return;
+		}
 		if(content === cell.dataset.oldContent) {
 			delete cell.dataset.oldContent;
 			return;
@@ -1632,10 +1795,7 @@ const edit = {
 			cell.IAST = cell.cloneNode(true);
 		cell.IAST.textContent = content;
 
-		const cellnum = parseInt(cell.dataset.n);
-		const tr = cell.closest('tr');
-		const rownum = tr.dataset.n;
-		edit.xmlChangeCell(cellnum,rownum,content);
+		edit.xmlChangeCell(cellnum,rownum,{content: content});
 
 		/*
 		const row = cell.closest('tr');
@@ -1647,13 +1807,15 @@ const edit = {
 		if(tr.dataset.hasOwnProperty('treename') && !cell.dataset.hasOwnProperty('emended')) {
 			const emendaction = edit.doEmend(cellnum,rownum,'multido');
 			const dolist = [];
-			dolist.push([edit.doChangeCell,[cellnum,rownum,cell.dataset.oldContent]]);
+			dolist.push([edit.doChangeCell,[cellnum,rownum,{content: cell.dataset.oldContent, normal: cell.dataset.oldNormal}]]);
 			dolist.push(emendaction);
 			edit.doStack([edit.doMulti,[dolist]],'do');
 		}
 		else
-			edit.doStack([edit.doChangeCell,[cellnum,rownum,cell.dataset.oldContent]],'do');
+			edit.doStack([edit.doChangeCell,[cellnum,rownum,{content: cell.dataset.oldContent, normal: cell.dataset.oldNormal}]],'do');
 		delete cell.dataset.oldContent;
+		if(cell.dataset.hasOwnProperty('oldNormal')) 
+			delete cell.dataset.oldNormal;
 
 		//view.renormalize(cellnum-1,cellnum+1,rownum);
 		edit.refresh();
@@ -1848,7 +2010,6 @@ const edit = {
 		const merge = function(rowfunc,cellfunc,nums) {
 			const rows = rowfunc();
 			var rowsclone = [];
-			const nummap = n => cellfunc(n,row);
 			for(const row of rows) {
 				/*
 				const arr = [...nums].map(n => {
@@ -1857,6 +2018,7 @@ const edit = {
 					return cell;
 				});
 				*/
+				const nummap = n => cellfunc(n,row);
 				const arr = [...nums].map(nummap);
 				const arrclone = arr.map(el => el.cloneNode(true));
 				rowsclone.push(arrclone);
@@ -2025,21 +2187,21 @@ const edit = {
 			edit.doStack([edit.doEmend,[cellnum,rownum]],doing);
 	},
 
-	doChangeCell: function(cellnum,rownum,content,doing = 'do') {
-		const oldcontent = edit.xmlChangeCell(cellnum,rownum,content);
-		const cell = edit.htmlChangeCell(cellnum,rownum,content);
+	doChangeCell: function(cellnum,rownum,celldata,doing = 'do') {
+		const oldcelldata = edit.xmlChangeCell(cellnum,rownum,celldata);
+		const cell = edit.htmlChangeCell(cellnum,rownum,celldata);
 		//view.renormalize(cellnum-1,cellnum+1,rownum);    
 		edit.refresh();
 		view.updateAllHeaders(true);
 		events.textClick({target: cell});
 
 		if(doing === 'multido')
-			return [edit.doChangeCell,[cellnum,rownum,oldcontent]];
+			return [edit.doChangeCell,[cellnum,rownum,oldcelldata]];
 		else
-			edit.doStack([edit.doChangeCell,[cellnum,rownum,oldcontent]],doing);
+			edit.doStack([edit.doChangeCell,[cellnum,rownum,oldcelldata]],doing);
 	},
 
-	htmlChangeCell: function(cellnum,rownum,content) { // returns cell
+	htmlChangeCell: function(cellnum,rownum,celldata) { // returns cell
 		const row = Find.tr(rownum);
 		//const row = [...Find.trs()][rownum];
 		const cell = Find.firsttd(cellnum,row);
@@ -2047,24 +2209,29 @@ const edit = {
 		//                    .querySelectorAll('tr')[rownum];
 		//const cell = row.querySelector('td[data-n="'+cellnum+'"]');
 		edit.unnormalize(cell);
-		cell.textContent = content;
+		cell.textContent = celldata.content;
+		if(celldata.normal) cell.dataset.normal = celldata.normal;
 		if(cell.IAST) cell.IAST = cell.cloneNode(true);
 		return cell;
 	},
 
-	xmlChangeCell: function(cellnum,rownum,content) { // returns oldcontent
+	xmlChangeCell: function(cellnum,rownum,celldata) { // returns oldcontent
 		const row = Find.tei(rownum).querySelector('text');
 		//const row = [...Find.texts()][rownum];
 		const cell = Find.firstword(cellnum,row);
 		//const row = _state.xml.querySelectorAll('text')[rownum];
 		//const cell = row.querySelector('w[n="'+cellnum+'"]');
+		const oldnorm = cell.getAttribute('lemma');
 		edit.unnormalize(cell);
 		const oldcontent = cell.textContent;
 		if(cell.childNodes.length === 0)
-			cell.appendChild(document.createTextNode(content));
+			cell.appendChild(document.createTextNode(celldata.content));
 		else
-			cell.textContent = content;
-		return oldcontent;
+			cell.textContent = celldata.content;
+		if(celldata.normal)
+			cell.setAttribute('lemma',celldata.normal);
+
+		return {content: oldcontent, normal: oldnorm};
 	},
 
 	doMarkAs: function(type,states,doing = 'do') {
@@ -2471,12 +2638,21 @@ const contextMenu = {
 			}
 
 			if(item.hasOwnProperty('toggle')) {
-				const txt = item.toggle() ? item.text : item.alt;
-				li.appendChild(document.createTextNode(txt));
+				const txt = item.toggle() ? item.alt : item.text;
+				const frag = document.createRange().createContextualFragment(
+					`<span>${txt}</span>`
+				);
+				li.appendChild(frag);
 			}
 			else
 				li.appendChild(document.createTextNode(item.text));
 			li.addEventListener('mouseup',item.func);
+			if(item.hasOwnProperty('shortcut')) {
+				const frag = document.createRange().createContextualFragment(
+					`<span>${item.shortcut}</span>`
+				);
+				li.appendChild(frag);
+			}
 			list.appendChild(li);
 		}
 		menu.appendChild(list);
@@ -2532,26 +2708,32 @@ class menuBox {
 			const li = document.createElement('li');
 
 			if(item.hasOwnProperty('checkbox')) {
-				const form = document.createElement('form');
+				const form = document.createElement('span');
 				const input = document.createElement('input');
 				input.type = 'checkbox';
 				input.addEventListener('click',e => e.preventDefault());
 				form.appendChild(input);
+				form.appendChild(document.createTextNode(item.text));
 				li.appendChild(form);
-				li.appendChild(document.createTextNode(item.text));
 				this.conditions.set(input,item.checkbox);
 			}
-			else if(item.hasOwnProperty('toggle')) {
+			else {
 				const span = document.createElement('span');
 				span.appendChild(document.createTextNode(item.text));
-				span.dataset.text = item.text;
-				span.dataset.alt = item.alt;
-				this.conditions.set(span,item.toggle);
+				if(item.hasOwnProperty('toggle')) {
+					span.dataset.text = item.text;
+					span.dataset.alt = item.alt;
+					this.conditions.set(span,item.toggle);
+				}
 				li.appendChild(span);
 			}
-			else
-				li.appendChild(document.createTextNode(item.text));
 		
+			if(item.hasOwnProperty('shortcut')) {
+				const frag = document.createRange().createContextualFragment(
+					`<div class="shortcut">${item.shortcut}</div>`
+				);
+				li.appendChild(frag);
+			}
 			if(item.hasOwnProperty('greyout')) {
 				this.conditions.set(li,item.greyout);
 			}
@@ -2692,7 +2874,7 @@ class Box {
 		if(this.script === 0)
 			scripter.innerHTML = 'A';
 		else
-			scripter.innerHTML = to[_state.scripts[this.script]]('a');
+			scripter.innerHTML = to(_state.scripts[this.script],'a');
 		scripter.classList.add(_state.scripts[this.script]);
 		scripter.classList.remove(oldscript);
 		/*if(_state.scripts[this.script] === 'grantha')
