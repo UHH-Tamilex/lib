@@ -11,7 +11,7 @@ const defaultscore = (a,b) => {
     return -1;
 };
 
-if(!Float16Array) var Float16Array = Float32Array;
+if(typeof Float16Array == 'undefined') var Float16Array = Float32Array;
 
 const Float16Grid = GridMixin(Float16Array);
 const Float32Grid = GridMixin(Float32Array);
