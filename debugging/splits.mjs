@@ -545,7 +545,7 @@ listEdit.blur = e => {
         listEdit.updateWord(e);
 
     //document.getElementById('engsplit').value = refreshTranslation(listEdit.state.tamlines,listEdit.state.wordlist);
-    _state.cms.engsplit.setValue(refreshTranslation(listEdit.state.tamlines,listEdit.state.wordlist));
+    listEdit.state.cms.engsplit.setValue(refreshTranslation(listEdit.state.tamlines,listEdit.state.wordlist));
     e.target.blur();
     disableButtons();
 };
