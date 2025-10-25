@@ -357,7 +357,6 @@ const showSplits = async () => {
     popup.querySelector('.boxen').style.height = 'unset';
     
     document.getElementById('alignbutton').innerHTML = 'Re-align';
-    enableButtons();
 
     popup.querySelector('.output-boxen').style.display = 'flex';
 
