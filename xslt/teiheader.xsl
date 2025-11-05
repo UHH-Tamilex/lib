@@ -1324,7 +1324,9 @@
 
 <xsl:template match="x:ref">
     <xsl:element name="a">
-        <xsl:attribute name="href"><xsl:value-of select="@target"/></xsl:attribute>
+        <xsl:if test="@target">
+          <xsl:attribute name="href"><xsl:value-of select="@target"/></xsl:attribute>
+        </xsl:if>
         <xsl:if test="substring(@target,1,1) = '#'">
             <!--xsl:attribute name="class">local</xsl:attribute-->
         </xsl:if>
