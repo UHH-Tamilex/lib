@@ -144,7 +144,7 @@ const realign = (newtexts,selectedsigla,blockid/*,opts*/) => {
         else if(cl.lastElementChild === w)
           ret.clend = true;
       }
-      ret.unnorm = w.innerHTML;
+      ret.unnorm = Sanscript.t(w.innerHTML,'iast','slpish');
       const lemma = w.getAttribute('lemma');
       ret.norm = lemma === null ? ret.unnorm : lemma; 
       ret.norm = Sanscript.t(ret.norm,'iast','slpish');
@@ -211,7 +211,12 @@ const postProcess = (alignment, filtersmap, targeted) => {
     if(id === targeted) targetrow = alignment.alignment[index];
     const f = filtersmap.get(id);
     if(!f) {
-      newclean.push({siglum: id, text: row});
+      const newrow = row.map(c => {
+        if(Array.isArray(c))
+          return c.map(cc => untransliterate(cc));
+        return untransliterate(c);
+      });
+      newclean.push({siglum: id, text: newrow});
       continue;
     }
     const unfiltered = semanticCleanup(unfilterAll([...row],f));
