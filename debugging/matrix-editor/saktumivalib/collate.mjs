@@ -562,7 +562,7 @@ const cleanup3 = (xmldoc,meta) => {
     if(meta.lang === 'pi') realignVerbs(xmldoc);
 };
 
-const semanticCleanup = arr => {
+const cleanup1 = arr => {
     // move open brackets and punctuation to the beginning of a cell
     const opening = /[\[(‘“]$/;
     for(let n=0;n<arr.length;n++) {
@@ -585,8 +585,6 @@ const semanticCleanup = arr => {
     //      then check if column consists of empty or ends with space
     return arr;
 };
-
-const cleanup1 = semanticCleanup;
 
 const untransliterate = (str, lang) => {
   if(lang === 'bo') return str;
@@ -844,4 +842,4 @@ const groupBySpace = (doc,edsiglum) => {
     return doc;
 };
 
-export { processFile, preProcess, postProcess, groupBySpace, detectScript, findSplitfunc, semanticCleanup, makeWitList };
+export { processFile, preProcess, postProcess, groupBySpace, detectScript, findSplitfunc, cleanup1, cleanup2, makeWitList };

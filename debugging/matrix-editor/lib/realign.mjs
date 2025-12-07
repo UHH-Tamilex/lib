@@ -35,7 +35,7 @@ const getFilterIndices = doc => {
       if(!tagnames)
         ret.push(i);
       else if(tagnames.includes(filter.name))
-          ret.push(i);
+        ret.push(i);
     }
   }
 
@@ -158,6 +158,9 @@ const realign = (newtexts,selectedsigla,blockid/*,opts*/) => {
   const alignWorker = new Worker('./lib/realignworker.mjs',{type: 'module'});
   alignWorker.postMessage([JSON.stringify(oldtexts),JSON.stringify(toaddobjs),configfunc,scores]);
   const ret = {};
+  const meta = {
+    tokenization: tok,
+  };
   alignWorker.onmessage = e => {
     if(e.data.hasOwnProperty('progress')) {
       //console.log(e.data.progress);
@@ -165,7 +168,8 @@ const realign = (newtexts,selectedsigla,blockid/*,opts*/) => {
     }
     const alignment = JSON.parse(e.data);
     const clean = postProcess(alignment, 
-                              filtersmap, 
+                              filtersmap,
+                              meta,
                               revisedsigla.has(targeted) ? oldtexts[0].siglum : targeted);
     const newwits = makeWitList(newtexts);
     
@@ -194,7 +198,7 @@ const untransliterate = (str, lang='sa') => {
   return str;
 };
 
-const postProcess = (alignment, filtersmap, targeted) => {
+const postProcess = (alignment, filtersmap, meta, targeted) => {
   const clean = alignment.alignment.map(arr => arr.map(obj => {
     const norm = Array.isArray(obj.norm) ?  obj.norm.join('') : obj.norm;
     if(!obj.hasOwnProperty('unnorm')) return norm;
@@ -219,7 +223,7 @@ const postProcess = (alignment, filtersmap, targeted) => {
       newclean.push({siglum: id, text: newrow});
       continue;
     }
-    const unfiltered = semanticCleanup(unfilterAll([...row],f));
+    const unfiltered = cleanup1(unfilterAll([...row],f));
     const ret = new Array(unfiltered.length);
     for(let n=0;n<unfiltered.length;n++) {
       if(unfiltered[n] === row[n])
@@ -228,6 +232,7 @@ const postProcess = (alignment, filtersmap, targeted) => {
         ret[n] = [untransliterate(unfiltered[n]),untransliterate(row[n])];
     }
     newclean.push({siglum: id, text: ret});
+    cleanup2(newclean, meta);
   }
   const xml = restoreGroups(newclean, targetrow);
   //TODO: restore groups from targeted
