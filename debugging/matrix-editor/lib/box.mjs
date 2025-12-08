@@ -1101,7 +1101,7 @@ if(tr) {
   _state.dragged = null;
 }
 */
-  edit.finishMoveRow(e);
+  edit.moveRow.finish(e);
 };
 
 events.matrixMousedown = e => {
