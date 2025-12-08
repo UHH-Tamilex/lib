@@ -1651,7 +1651,8 @@ const switchCells = (a,b) => {
 const slideOne = (rows,direction) => {
   const newrows = [];
   for(const row of rows) {
-    const origcell = direction === 'left' ? row[0] : row[row.length-1];
+    //const origcell = direction === 'left' ? row[0] : row[row.length-1];
+    const origcell = row[0];
     const newcell = direction === 'left' ? 
       Find.adjacentLeft(origcell) : Find.adjacentRight(origcell);
 
@@ -1687,8 +1688,10 @@ edit.slideCell = (direction = 'left') => {
 
     const row = [];
     for(const cell of highlit) {
-      if(cell.textContent !== '' || cell.dataset.hasOwnProperty('normal'))
-        row.push(cell);
+      if(cell.textContent !== '' || cell.dataset.hasOwnProperty('normal')) {
+        if(direction === 'left') row.push(cell);
+        else row.unshift(cell);
+      }
     }
     if(row.length !== 0) {
       rownums.push(tr.dataset.n);
