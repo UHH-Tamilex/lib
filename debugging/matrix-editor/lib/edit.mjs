@@ -485,7 +485,8 @@ const edit = {
     if(celldata.hasOwnProperty('normal')) {
       if(celldata.normal === null)
         delete cell.dataset.normal;
-		  cell.dataset.normal = celldata.normal;
+      else
+        cell.dataset.normal = celldata.normal;
     }
 		if(cell.IAST) cell.IAST = cell.cloneNode(true);
 		return cell;
