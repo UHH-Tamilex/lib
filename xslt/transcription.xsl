@@ -854,7 +854,7 @@
     <xsl:variable name ="abbr" select="$TST/tst:abbreviations/tst:entry[@key=$ref]"/>
     <xsl:element name="abbr">
         <xsl:if test="$abbr">
-            <xsl:attribute name="title"><xsl:value-of select="$abbr"/></xsl:attribute>
+            <xsl:attribute name="data-anno"><xsl:value-of select="$abbr"/></xsl:attribute>
             <xsl:value-of select="$abbr/@short"/>
         </xsl:if>
     </xsl:element>
