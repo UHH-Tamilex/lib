@@ -1,6 +1,6 @@
 import { charSplit, aksaraSplit, graphemeSplit } from '../saktumivalib/split.mjs';
 import { parseString, readOne } from '../saktumivalib/browserutils.mjs';
-import { processFile, preProcess, findSplitfunc, semanticCleanup, makeWitList } from '../saktumivalib/collate.mjs';
+import { processFile, preProcess, findSplitfunc, cleanup1, cleanup2, makeWitList } from '../saktumivalib/collate.mjs';
 import { filters, unfilterAll } from '../saktumivalib/normalize.mjs';
 import tagstoignore from '../saktumivalib/tagfilters.mjs';
 import Sanscript from '../saktumivalib/sanscript.mjs';
