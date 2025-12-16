@@ -225,6 +225,7 @@ tr.supp {
 #wbwbox {
     display: flex;
     flex-grow: 1;
+    max-height: 100%;
 }
 #wbwbox textarea {
     flex-grow: 1;
