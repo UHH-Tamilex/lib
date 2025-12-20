@@ -145,7 +145,7 @@ const generateApp = async e => {
             warnp.innerHTML = listApp.warnings.join('<br>');
             output.prepend(warnp);
         }
-        copyToClipboard(standOff,popup);
+        //copyToClipboard(standOff,popup);
 
         document.getElementById('saveapparatus').style.display = 'block';
     }
@@ -299,7 +299,7 @@ const getFile = async (e) => {
         wsbutton.click();
     }
 };
-
+/*
 const copyToClipboard = async (xml,popup) => {
     const par = popup.querySelector('.popup-output');
     const tip = document.createElement('div');
@@ -325,7 +325,7 @@ const copyToClipboard = async (xml,popup) => {
     }
     setTimeout(() => tip.remove(),1000);
 };
-
+*/
 const getWitOrder = el => {
     return [...el.querySelectorAll('witness')].map(w => w.getAttribute('xml:id'));
 };
