@@ -1,12 +1,21 @@
 import xmlFormat from './xml-formatter.mjs';
 import Sanscript from '../js/sanscript.mjs';
 
-const _state = {};
-_state.logger = !window.alert ? console.log : str => alert(str);
+const logger = {};
+logger.entries = [];
+logger.clear = () => logger.entries = [];
+logger.log = str => {
+  logger.entries.push(str);
+  !window.alert ? console.log(str) : alert(str);
+};
 
 const mergeGroups = doc => {
     const els = doc.querySelectorAll('cl');
     for(const el of els) {
+        if(!el.firstElementChild) { // shouldn't happen, but oh well
+          el.parentNode.removeChild(el);
+          continue;
+        } 
         const firstw = el.removeChild(el.firstElementChild);
         while(el.firstElementChild) {
             const norm1 = firstw.hasAttribute('lemma') ? 
@@ -43,6 +52,7 @@ const cleanupGroups = base => {
             const prev = ww.previousElementSibling;
             const next = ww.nextElementSibling;
             const neighbour = prev || next;
+            if(!neighbour) continue; // i.e., if the whole block is empty in the base text
 
             const norm1 = neighbour.hasAttribute('lemma') ? 
                 neighbour.getAttribute('lemma') : neighbour.textContent;
@@ -82,6 +92,7 @@ const cleanupGroups = base => {
         el.parentNode.removeChild(el);
     }
 };
+
 const makeSorter = order => {
     return (a,b) => {
         const aindex = typeof a === 'string' ? 
@@ -107,6 +118,7 @@ const getWitList = (doc, opts, arr) => {
     const newwits = new Set();
     for(const wit of wits) {
         const witel = listWit.querySelector(`witness[${idsel}="${wit}"]`);
+        if(!witel) continue; // for reconstructed nodes
         const type = witel.getAttribute('n');
         const select = witel.hasAttribute('select');
         const par = witel.parentNode.closest('witness');
@@ -298,7 +310,7 @@ const cleanPunct = (str,posonly = false) => {
 
 const processReadings = (n,otherdocs,otherrdgs,word,opts) => {
 
-    const lemmatrimmed = cleanPunct(word.textContent);
+    const lemmatrimmed = cleanPunct(word.textContent).trimLeft();
     const lemma = opts.normlem ? 
         (word.getAttribute('lemma') || lemmatrimmed) :
         lemmatrimmed;
@@ -462,6 +474,39 @@ const removeContainer = el => {
     el.remove();
 };
 
+const getCollectives = (doc, sel, idsel = "*|id") => {
+  const ret = [sel];
+  const wit = doc.querySelector(`witness[${idsel}="${sel.replace(/^#/,'')}"]`);
+  if(!wit) return ret;
+  let par = wit.closest('[n="collective"]');
+  while(par) {
+    ret.push(`#${par.getAttribute('xml:id')}`);
+    par = par.parentNode.closest('[n="collective"]');
+  }
+  return ret;
+};
+
+const findselector = (rdg,selectors) => {
+    const wits = rdg.getAttribute('wit');
+    if(!wits) return false;
+    const candidates = wits.split(/\s+/);
+    for(const selector of selectors)
+      if(candidates.includes(selector)) return true;
+    return false;
+};
+
+const reduceDuplicateWits = (arr,app) => {
+  // first item in arr is the actual ms siglum, rest are collective sigla
+  const allwits = [...app.querySelectorAll('[wit]')].reduce((acc,cur) => {
+      for(const wit of cur.getAttribute('wit').split(/\s+/)) acc.add(wit);
+      return acc;
+      
+    },new Set());
+  for(const a of arr)
+    if(allwits.has(a)) return [a];
+  return arr;
+};
+
 const cleanBlock = (blockid,idsel,wit) => {
     const block = wit.xml.querySelector(`text[corresp="#${wit.name}"] [corresp="#${blockid}"], text[corresp="#${wit.name}"] [${idsel}="${blockid}"]`)?.cloneNode(true) || 
         wit.xml.querySelector(`text [corresp="#${blockid}"], text [${idsel}="${blockid}"]`)?.cloneNode(true);
@@ -470,6 +515,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         removeContainer(el);
     let gapid = 0;
     for(const gap of [...block.querySelectorAll('gap')]) {
+        if(gap.getAttribute('reason') === 'ellipsis') continue;
         const quantity = parseInt(gap.getAttribute('quantity')) || 1;
         for(let n=1;n<quantity + 1;n++) {
             const newgap = gap.cloneNode(true);
@@ -481,6 +527,12 @@ const cleanBlock = (blockid,idsel,wit) => {
         gapid = gapid + 1;
         gap.remove();
     }
+	
+	for(const nobreak of block.querySelectorAll('pb[break="no"],lb[break="no"]')) {
+		const prev = nobreak.previousSibling;
+		if(!prev || prev.nodeType !== 3) continue;
+		prev.data = prev.data.trimRight();
+	}
 
     const pbunit = wit.xml.querySelector('supportDesc extent measure')?.getAttribute('unit');
     if(pbunit) {
@@ -511,6 +563,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         }
     }
     else if(wit.select) {
+      const selectors = getCollectives(wit.xml,wit.select,idsel);
         for(const del of dels)
             del.remove();
         for(const add of adds)
@@ -518,13 +571,21 @@ const cleanBlock = (blockid,idsel,wit) => {
         for(const app of apps) {
             const lem = app.querySelector('lem');
             const rdgs = app.querySelectorAll('rdg');
+            const witaliases = selectors.length === 1 ? selectors :
+              reduceDuplicateWits(selectors,app);
             let foundreading = false;
             for(const rdg of rdgs) {
+                const found = findselector(rdg,witaliases);
+                if(found)
+                  foundreading = rdg;
+                /*
                 if(rdg.getAttribute('wit').split(/\s+/).includes(wit.select)) {
                     foundreading = rdg;
                 }
+                */
                 else
                     rdg.remove();
+
             }
             if(foundreading) {
                 lem.remove();
@@ -557,8 +618,10 @@ const checkAlignment = (words, block, ignoretags = []) => {
         for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
             tag.remove();
     }
-    const blocktext = Sanscript.t(blockclone.textContent.replaceAll(/\s+/g,' '),'tamil','iast');
+    const blocktext = Sanscript.t(blockclone.textContent.replaceAll(/\s+/g,' '),'tamil','iast').toLowerCase();
     if(aligntext === blocktext) return true;
+    console.log(aligntext);
+    console.log(blocktext);
     return false;
 };
 
@@ -570,7 +633,7 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
     const words = [...alignment.querySelectorAll('w')];
 
     if(!checkAlignment(words,block,ignoretags))
-        _state.logger(`${witname} doesn't match alignment.`);
+        logger.log(`${witname} doesn't match alignment.`);
 
     const ranges = [];
 
@@ -654,6 +717,20 @@ const serializeRange = (doc, range) => {
         gap.setAttribute('quantity',quantity);
         gap.textContent = '';
     }
+
+    // so that firstChild is <lb/>, etc. if there is one
+    if(temp.firstChild?.nodeType === 3 && temp.firstChild.data.trim() === '')
+      temp.firstChild.remove();
+
+    // ignore initial line breaks, etc.
+    while(temp.firstChild) {
+      if(temp.firstChild.nodeType !== 1) break;
+      if(temp.firstChild.nodeName === 'lb') temp.firstChild.remove();
+      else if(temp.firstChild.nodeName === 'pb') temp.firstChild.remove();
+      else if(temp.firstChild.nodeName === 'cb') temp.firstChild.remove();
+      else if(temp.firstChild.nodeName === 'milestone') temp.firstChild.remove();
+      else break;
+    }
     //TODO: stripping namespaces like this is very hacky
     return temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim();
 };
@@ -670,7 +747,8 @@ const collectWitGroups = listWit => {
 	};
 	const preRet = [];
 	for(const group of listWit.querySelectorAll('witness[n="collective"]')) {
-		const wits = [...group.querySelectorAll(':scope > listWit > witness')].map(w => w.getAttribute('xml:id'));
+		//const wits = [...group.querySelectorAll(':scope > listWit > witness')].map(w => w.getAttribute('xml:id'));
+		const wits = [...group.querySelectorAll('witness')].filter(w => !w.hasAttribute('n')).map(w => w.getAttribute('xml:id'));
 		const depth = findWitDepth(group);
 		preRet.push({id: group.getAttribute('xml:id'), children: new Set(wits), depth: depth});
 	}
@@ -680,25 +758,26 @@ const collectWitGroups = listWit => {
 };
 
 const makeApp = (doc, ed, opts) =>  {
-    const base = doc.querySelector(`TEI[n="${opts.base}"]`);
-    if(!base) return {error: `${opts.base} not found in alignment file.`};
-    if(opts.mergerdgs) mergeGroups(doc);
-    cleanupGroups(base);
-    
-    const curListWit = ed.querySelector('listWit');
-    
-    const idsel = opts.idsel || '*|id';
-    const sorter = opts.sort ? makeSorter(opts.sort) :
-                   curListWit ? makeSorter(getWitOrder(curListWit)) : 
-                   null;
-    const witlistopts = {idsel: idsel};
-	if(curListWit?.querySelector('witness[n="collective"]')) {
-		witlistopts.witgroups = collectWitGroups(curListWit);
-		witlistopts.sorter = sorter;
-	}
+  logger.clear();
+  const base = doc.querySelector(`TEI[n="${opts.base}"]`);
+  if(!base) return {error: `${opts.base} not found in alignment file.`};
+  if(opts.mergerdgs) mergeGroups(doc);
+  cleanupGroups(base);
+  
+  const curListWit = ed.querySelector('listWit');
+  
+  const idsel = opts.idsel || '*|id';
+  const sorter = opts.sort ? makeSorter(opts.sort) :
+                 curListWit ? makeSorter(getWitOrder(curListWit)) : 
+                 null;
+  const witlistopts = {idsel: idsel};
+  if(curListWit?.querySelector('witness[n="collective"]')) {
+    witlistopts.witgroups = collectWitGroups(curListWit);
+    witlistopts.sorter = sorter;
+  }
 
     //const curriedWitList = curry(getWitList)(doc)(witlistopts);
-    
+
     const words = doc.querySelector(`TEI[n="${opts.base}"]`).querySelectorAll('w');
 
     const ignoretags = ((par) => {
@@ -709,7 +788,7 @@ const makeApp = (doc, ed, opts) =>  {
 
     const block = cleanBlock(opts.blockid,idsel,{name: opts.base, xml: ed});
     if(!checkAlignment([...words],block,ignoretags))
-        _state.logger(`${opts.base} doesn't match alignment.`);
+        logger.log(`${opts.base} doesn't match alignment.`);
 
     const otherdocs = [...doc.querySelectorAll(`TEI:not([n="${opts.base}"])`)];
     if(sorter) otherdocs.sort(sorter);
@@ -719,7 +798,7 @@ const makeApp = (doc, ed, opts) =>  {
             const docid = d.getAttribute('n');
             const witfile = opts.witnesses.get(docid);
             if(!witfile) {
-                _state.logger(`Can't find file for ${docid}.`);
+                logger.log(`Can't find file for ${docid}.`);
                 return [docid,null];
             }
             const block = cleanBlock(opts.blockid,idsel,witfile);
@@ -762,7 +841,7 @@ const makeApp = (doc, ed, opts) =>  {
         
     }
     const listWit = updateListWit(doc.querySelector('listWit'),opts.witnesses,idsel);
-    return {listwit: listWit, listapp: ret};
+    return {listwit: listWit, listapp: ret, warnings: logger.entries};
 };
 
 const updateListWit = (listWit, witnesses, idsel='*|id') => {
@@ -814,7 +893,7 @@ const addWitnesses = (doc, listwit, idsel='*|id') => {
     }
 };
 
-const addApparatus = (doc, listappstr, alignxml, block, alignmentfn) => {
+const addApparatus = (doc, listappstr, warnings, alignxml, block, alignmentfn) => {
     const nURI = doc.documentElement.namespaceURI;
     const docstandoff = doc.querySelector(`standOff[type="apparatus"][corresp="#${block}"]`) || (() => {
         const newstandoff = doc.createElementNS(nURI,'standOff');
@@ -831,7 +910,9 @@ const addApparatus = (doc, listappstr, alignxml, block, alignmentfn) => {
         lineSeparator: '\n'
     };
     const listappel = listappstr ? xmlFormat(`<listApp>${listappstr}</listApp>`,formatopts) : '';
-    docstandoff.innerHTML = xmlFormat(`<interp type="normalization"><desc type="tagfilters">${tagfilters}</desc></interp>`,formatopts) + listappel;
+    const warncomm = warnings.length === 0 ? '' :
+      '\n<!--Warnings\n' + warnings.join('\n') + '\n-->';
+    docstandoff.innerHTML = xmlFormat(`<interp type="normalization"><desc type="tagfilters">${tagfilters}</desc></interp>`,formatopts) + warncomm + listappel;
 };
 
 const getWits = (...args) => {
