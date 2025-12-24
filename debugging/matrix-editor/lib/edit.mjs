@@ -303,7 +303,7 @@ const edit = {
 		_state.matrix.boxdiv.querySelector('tbody').appendChild(tr);
 		th.scrollIntoView();
 
-		const fitchWorker = new Worker(new URL('./worker.js', import.meta.url));
+		const fitchWorker = new Worker(new URL('./fitchworker.js', import.meta.url));
 		const normalized = Check.normalizedView();
 		const serialreadings = Find.serializedtexts(tree.nexml,normalized);
 		const readings0 = new Map(serialreadings.map(arr => [arr[0],arr[1][0]]));

@@ -11,6 +11,10 @@ logger.log = str => {
 const mergeGroups = doc => {
     const els = doc.querySelectorAll('cl');
     for(const el of els) {
+        if(!el.firstElementChild) { // shouldn't happen, but oh well
+          el.parentNode.removeChild(el);
+          continue;
+        } 
         const firstw = el.removeChild(el.firstElementChild);
         while(el.firstElementChild) {
             const norm1 = firstw.hasAttribute('lemma') ? 
@@ -87,6 +91,7 @@ const cleanupGroups = base => {
         el.parentNode.removeChild(el);
     }
 };
+
 const makeSorter = order => {
     return (a,b) => {
         const aindex = typeof a === 'string' ? 
@@ -304,7 +309,7 @@ const cleanPunct = (str,posonly = false) => {
 
 const processReadings = (n,otherdocs,otherrdgs,word,opts) => {
 
-    const lemmatrimmed = cleanPunct(word.textContent);
+    const lemmatrimmed = cleanPunct(word.textContent).trimLeft();
     const lemma = opts.normlem ? 
         (word.getAttribute('lemma') || lemmatrimmed) :
         lemmatrimmed;
@@ -481,10 +486,24 @@ const getCollectives = (doc, sel, idsel = "*|id") => {
 };
 
 const findselector = (rdg,selectors) => {
-    const candidates = rdg.getAttribute('wit').split(/\s+/);
+    const wits = rdg.getAttribute('wit');
+    if(!wits) return false;
+    const candidates = wits.split(/\s+/);
     for(const selector of selectors)
       if(candidates.includes(selector)) return true;
     return false;
+};
+
+const reduceDuplicateWits = (arr,app) => {
+  // first item in arr is the actual ms siglum, rest are collective sigla
+  const allwits = [...app.querySelectorAll('[wit]')].reduce((acc,cur) => {
+      for(const wit of cur.getAttribute('wit').split(/\s+/)) acc.add(wit);
+      return acc;
+      
+    },new Set());
+  for(const a of arr)
+    if(allwits.has(a)) return [a];
+  return arr;
 };
 
 const cleanBlock = (blockid,idsel,wit) => {
@@ -495,6 +514,7 @@ const cleanBlock = (blockid,idsel,wit) => {
         removeContainer(el);
     let gapid = 0;
     for(const gap of [...block.querySelectorAll('gap')]) {
+        if(gap.getAttribute('reason') === 'ellipsis') continue;
         const quantity = parseInt(gap.getAttribute('quantity')) || 1;
         for(let n=1;n<quantity + 1;n++) {
             const newgap = gap.cloneNode(true);
@@ -550,9 +570,11 @@ const cleanBlock = (blockid,idsel,wit) => {
         for(const app of apps) {
             const lem = app.querySelector('lem');
             const rdgs = app.querySelectorAll('rdg');
+            const witaliases = selectors.length === 1 ? selectors :
+              reduceDuplicateWits(selectors,app);
             let foundreading = false;
             for(const rdg of rdgs) {
-                const found = findselector(rdg,selectors);
+                const found = findselector(rdg,witaliases);
                 if(found)
                   foundreading = rdg;
                 /*
@@ -693,6 +715,20 @@ const serializeRange = (doc, range) => {
         }
         gap.setAttribute('quantity',quantity);
         gap.textContent = '';
+    }
+
+    // so that firstChild is <lb/>, etc. if there is one
+    if(temp.firstChild?.nodeType === 3 && temp.firstChild.data.trim() === '')
+      temp.firstChild.remove();
+
+    // ignore initial line breaks, etc.
+    while(temp.firstChild) {
+      if(temp.firstChild.nodeType !== 1) break;
+      if(temp.firstChild.nodeName === 'lb') temp.firstChild.remove();
+      else if(temp.firstChild.nodeName === 'pb') temp.firstChild.remove();
+      else if(temp.firstChild.nodeName === 'cb') temp.firstChild.remove();
+      else if(temp.firstChild.nodeName === 'milestone') temp.firstChild.remove();
+      else break;
     }
     //TODO: stripping namespaces like this is very hacky
     return temp.innerHTML.replaceAll(' xmlns="http://www.tei-c.org/ns/1.0"','').replaceAll(/\s+/g,' ').trim();

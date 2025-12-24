@@ -68,6 +68,18 @@ const witshave = (arr1, arr2) => {
   return false;
 };
 
+const reduceDuplicateWits = (arr,app) => {
+  // first item in arr is the actual ms siglum, rest are collective sigla
+  const allwits = [...app.querySelectorAll('[wit]')].reduce((acc,cur) => {
+      for(const wit of cur.getAttribute('wit').split(/\s+/)) acc.add(wit);
+      return acc;
+      
+    },new Set());
+  for(const a of arr)
+    if(allwits.has(a)) return [a];
+  return arr;
+};
+
 const scriptandfilter = (el,type,filters,lang) => {
     const clone = el.cloneNode(true);
     const dels = clone.querySelectorAll('del');
@@ -91,6 +103,9 @@ const scriptandfilter = (el,type,filters,lang) => {
         for(const app of clone.querySelectorAll('app')) {
             const lem = app.querySelector('lem');
             const rdgs = app.querySelectorAll('rdg');
+            const witaliases = typearr.length === 1 ? typearr :
+              reduceDuplicateWits(typearr,app);
+
             let foundreading = false;
             for(const rdg of rdgs) {
                 const wits = rdg.getAttribute('wit')?.split(/\s+/);
@@ -98,7 +113,7 @@ const scriptandfilter = (el,type,filters,lang) => {
                   rdg.remove();
                   continue;
                 }
-                if(witshave(wits,typearr))
+                if(witshave(wits,witaliases))
                   foundreading = true;
                 else
                   rdg.remove();
@@ -669,8 +684,8 @@ const processFile = (teixml, filename, state, idsel = '*|id') => {
     for(const siglum of new Set([overallsiglum,...textsigla])) {
         if(state.alltexts.has(siglum) || state.alltexts.has(`${siglum}ac`))
             warnings.push(`Warning: ${siglum} used more than once.`);
-
     }
+
     const textmap = new Map();
     for(const text of texts) {
         const siglum = text.getAttribute('corresp')?.replace(/^#/,'') || overallsiglum;

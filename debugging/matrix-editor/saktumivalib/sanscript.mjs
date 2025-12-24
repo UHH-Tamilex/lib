@@ -339,6 +339,30 @@ var schemes = Sanscript.schemes = {
             'q','qh','ġ','z','zh','f','ṙ','ṙh','ṫh','ḋh','w'],
             symbols: ['0','1','2','3','4','5','6','7','8','9','oṁ','oḿ','\'','|','||','⁰','⁰⁰','⁰⁰⁰'],
         },
+        hk: {
+            vowels: ['a','A',
+            'i','I',
+            'u','U',
+            'R','RR',
+            'lR','lRR',
+            'e','E','ai',
+            'o','O','au',
+            'e','ai','o','au', // Devanāgarī pṛṣṭhamātrās
+            'ae','aee'],
+            other_marks: ['M','H','M','H','H','K'],
+            virama: [''],
+            consonants: ['k','kh','g','gh','G',
+            'c','ch','j','jh','J',
+            'T','Th','D','Dh','N',
+            't','th','d','dh','n',
+            'p','ph','b','bh','m',
+            'y','r','l','v',
+            'z','S','s','h',
+            'L','LL','RRR','NN', // Dravidian
+            'y', // Bengali
+            'q','qh','gg','z','zh','f','rr','rrh','tth','ddh','w'],
+            symbols: ['0','1','2','3','4','5','6','7','8','9','oM','oM','\'','|','||','0','00','000'],
+        },
         slpish: {
             vowels: ['a','ā',
             'i','ī',
@@ -484,7 +508,7 @@ var cheapCopy = function(scheme) {
         schemeNames = 'iast itrans hk kolkata slp1 velthuis wx'.split(' ');
     kolkata.vowels = 'a ā i ī u ū ṛ ṝ ḷ ḹ e ē ai o ō au'.split(' ');
     */
-    var schemeNames = ['iast','slpish'];
+    var schemeNames = ['iast','hk','slpish'];
     // These schemes already belong to Sanscript.schemes. But by adding
     // them again with `addRomanScheme`, we automatically build up
     // `romanSchemes` and define a `vowel_marks` field for each one.

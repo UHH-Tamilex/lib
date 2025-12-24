@@ -18,15 +18,20 @@
     </xsl:if>
 </xsl:template>
 
+<xsl:variable name="export-lang" select="//x:interp[@type='script-options']/x:ab[@type='language']"/>
+<xsl:variable name="export-script" select="//x:interp[@type='script-options']/x:ab[@type='script']"/>
+
 <xsl:template name="langstart">
     <xsl:choose>
-        <xsl:when test="./@xml:lang='sa'"><xsl:text>\texttamil{</xsl:text></xsl:when>
+        <xsl:when test="./@xml:lang='ta'"><xsl:text>\texttamil{</xsl:text></xsl:when>
+        <xsl:when test="./@xml:lang='sa'"><xsl:text>\textsanskrit{</xsl:text></xsl:when>
         <xsl:when test="./@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:when>
         <xsl:otherwise/>
     </xsl:choose>
 </xsl:template>
 <xsl:template name="langend">
     <xsl:choose>
+        <xsl:when test="./@xml:lang='ta'"><xsl:text>}</xsl:text></xsl:when>
         <xsl:when test="./@xml:lang='sa'"><xsl:text>}</xsl:text></xsl:when>
         <xsl:when test="./@xml:lang='en'"><xsl:text>}</xsl:text></xsl:when>
         <xsl:otherwise/>
@@ -95,12 +100,13 @@
 \renewcommand{\headrulewidth}{0pt}
 
 \arrangementX[A]{paragraph}
+\renewcommand*{\thefootnoteA}{\textenglish{\arabic{footnoteA}}}
 \arrangementX[B]{paragraph}
-\renewcommand*{\thefootnoteB}{\alph{footnoteB}}
+\renewcommand*{\thefootnoteB}{\textenglish{\Roman{footnoteB}}}
 \arrangementX[C]{paragraph}
-\renewcommand*{\thefootnoteC}{\Roman{footnoteC}}
+\renewcommand*{\thefootnoteC}{\textenglish{\alph{footnoteC}}}
 \arrangementX[D]{paragraph}
-\renewcommand*{\thefootnoteD}{\roman{footnoteD}}
+\renewcommand*{\thefootnoteD}{\textenglish{\roman{footnoteD}}}
 
 \Xarrangement[A]{paragraph}
 \Xnotenumfont[A]{\bfseries}
@@ -108,11 +114,50 @@
 
 \setdefaultlanguage{english}
 \setmainfont{Brill}
-\setotherlanguage{sanskrit}
-\newfontfamily\sanskritfont{Brill}
-    % \newfontfamily\sanskritfont{Brill-Roman.ttf}[BoldFont={Brill-Bold.ttf}]
+    </xsl:text>
+    <xsl:choose>
+      <xsl:when test="$export-lang = 'tamil'">
+      <xsl:text>
+  \setotherlanguage{tamil}
+      </xsl:text>
+      <xsl:choose>
+        <xsl:when test="$export-script = 'tamil'">
+% Download the TST Tamil font here: https://github.com/UHH-Tamilex/lib/blob/main/fonts/TSTTamil.otf
+\newfontfamily\tamilfont{TSTTamil.otf}[Script=Tamil,Ligatures=Historic,BoldFont={NotoSerifTamil-Bold.ttf}]
 \newICUfeature{AllAlternates}{1}{+aalt}
-% \newcommand{\vowelsign}{\tamilfont\addfontfeature{AllAlternates=1}}
+\newcommand{\vowelsign}{\tamilfont\addfontfeature{AllAlternates=1}}
+\tamilfont\fontdimen2\font=0.8em
+\tamilfont\large\fontdimen2\font=0.5em
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>
+\newfontfamily\tamilfont{Brill-Roman.ttf}[BoldFont={Brill-Bold.ttf}]
+          </xsl:text>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:when>
+    <xsl:when test="$export-lang = 'sanskrit'">
+        <xsl:text>
+\setotherlanguage{sanskrit}
+      </xsl:text>
+      <xsl:choose>
+        <xsl:when test="$export-script = 'devanagari'">
+% Download Pedantic Devangari here: https://github.com/chchch/PedanticIndic/tree/master/PedanticDevanagari
+\newfontfamily\sanskritfont{PedanticDevangari.otf}
+\newfontfamily\sanskritfont{PedanticDevanagariLight.otf}[Script=Devanagari,BoldFont={PedanticDevanagariBold.otf}]
+\newICUfeature{AllAlternates}{1}{+aalt}
+ \newcommand{\vowelsign}{\sanskritfont\addfontfeature{AllAlternates=1}}
+        </xsl:when>
+        <xsl:otherwise>
+        <xsl:text>
+\newfontfamily\sanskritfont{Brill-Roman.ttf}[BoldFont={Brill-Bold.ttf}]
+        </xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise/>
+    </xsl:choose>
+    <xsl:text>
 \setlength{\parskip}{12pt}
 
 \setstanzaindents{1,0,0}
@@ -212,13 +257,23 @@
     </xsl:choose>
 </xsl:template>
 
+<xsl:template match="x:pc[@type='line-break']">
+    <xsl:text>\medskip </xsl:text>
+</xsl:template>
+
 <xsl:template match="x:lg/x:l">
-<!--xsl:text>\large </xsl:text-->
-<xsl:call-template name="langstart"/>
-<xsl:apply-templates/>
-<xsl:call-template name="langend"/>
-<xsl:text>&amp;
-</xsl:text>
+    <!--xsl:text>\large </xsl:text-->
+    <xsl:call-template name="langstart"/>
+    <xsl:if test="@rend='italic'">
+        <xsl:text>\emph{</xsl:text>
+    </xsl:if>
+    <xsl:apply-templates/>
+    <xsl:if test="@rend='italic'">
+        <xsl:text>}</xsl:text>
+    </xsl:if>
+    <xsl:call-template name="langend"/>
+    <xsl:text>&amp;
+    </xsl:text>
 </xsl:template>
 
 <xsl:template match="x:lg/x:l[position()=last()]">
@@ -241,6 +296,10 @@
 
 <xsl:template match="x:hi[@rend='superscript']">
 <xsl:text>\textsuperscript{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
+</xsl:template>
+
+<xsl:template match="x:hi[@rend='wavy-underline']">
+<xsl:text>\uwave{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:hi[@rend='italic']">
@@ -335,9 +394,9 @@
 <xsl:template match="x:g">
     <xsl:text>\uwave{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>           
 </xsl:template>
-<!--xsl:template match="x:g[@rend='vowel-sign']">
-    <xsl:text>{\vowelsign{}</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>          
-</xsl:template-->
+<xsl:template match="x:g[@rend='vowel-sign']">
+    <xsl:text>{\vowelsign{}</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>           
+</xsl:template>
 
 <xsl:template match="x:supplied">
     <xsl:text>(\textbf{</xsl:text><xsl:apply-templates/><xsl:text>})</xsl:text>
@@ -405,10 +464,12 @@
 <xsl:template match="x:note">
     <xsl:call-template name="langstart"/>
     <xsl:apply-templates/>
+    <xsl:text> </xsl:text>
     <xsl:call-template name="langend"/>
 </xsl:template>
 <xsl:template match="x:note[@place='foot']">
-    <xsl:text>\footnoteA{</xsl:text>
+    <!--xsl:text>\footnoteA{</xsl:text-->
+    <xsl:text>\footnote{</xsl:text>
     <xsl:call-template name="langstart"/>
     <xsl:apply-templates/>
     <xsl:call-template name="langend"/>
@@ -506,7 +567,9 @@
         </xsl:otherwise>
     </xsl:choose>
     <xsl:text>}</xsl:text>
-    <xsl:text>; \textsanskrit{</xsl:text>
+    <xsl:text>; \text</xsl:text>
+    <xsl:value-of select="$export-lang"/>
+    <xsl:text>{</xsl:text>
     <xsl:apply-templates select="./x:rdg | ./x:rdgGrp"/>
     <xsl:text>}}}</xsl:text>
 </xsl:template>

@@ -402,9 +402,9 @@ const filters = [
     },
     {
         name: 'final anusvāra variants', // A 8.4.59
-        search: '([aāiīuūeēoōṛṝ]|l̥|l̥̄)ṃ?[mṅ](?!\\S)|n(?=\\s+[tdn])|ñ(?=\\s+[jc])',
-        search_slpish: '([aāiīuūeēEoōOṛṝ]|l̥|l̥̄)ṃ?[mṅ](?!\\S)|n(?=\\s+[tTdDn])|ñ(?=\\s+[jJcC])',
-        replace: match => match[1] + 'ṃ',
+        search: 'ṃ?[mṅ](?!\\S)|n(?=\\s+[tdn])|ñ(?=\\s+[jc])',
+        search_slpish: 'ṃ?[mṅ](?!\\S)|n(?=\\s+[tTdDn])|ñ(?=\\s+[jJcC])',
+        replace: match => 'ṃ',
         group: 'sanskrit'
     }, 
     {
@@ -530,7 +530,7 @@ const filters = [
         group: 'sanskrit'
     },
     {
-        name: 'final t + n/m',
+        name: 'final t + n/m', // maybe get rid of this?
         search: '([ai])n(?=\\s+[nm])',
         replace: (match) => `${match[1]}t`,
         group: 'sanskrit'

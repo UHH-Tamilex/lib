@@ -1,3 +1,5 @@
+import Sanscript from './sanscript.mjs';
+
 const _NodeFilter = {
     SHOW_ALL: 4294967295,
     SHOW_TEXT: 4
@@ -6,6 +8,8 @@ const _NodeFilter = {
 const _state = {
     xsltsheet: null
 };
+
+const XMLNS = 'http://www.w3.org/XML/1998/namespace';
 
 const loadDoc = async (fn,cache='no-cache') => {
     const res = await fetch(fn, {cache: cache});
@@ -18,8 +22,36 @@ const newElement = (doc, name) => {
     return doc.createElementNS('http://www.tei-c.org/ns/1.0',name);
 };
 
+const getLang = doc => {
+  const xmllang = doc.querySelector('text').getAttributeNS(XMLNS,'lang');
+  if(xmllang) {
+    if(xmllang === 'sa' || xmllang.startsWith('sa-')) return 'sanskrit';
+    if(xmllang === 'ta' || xmllang.startsWith('ta-')) return 'tamil';
+    if(xmllang === 'bo' || xmllang.startsWith('bo-')) return 'tibetan';
+    if(xmllang === 'pi' || xmllang.startsWith('bo-')) return 'pali';
+  }
+  return 'english';
+};
+
+const expandLang = str => {
+  if(str === 'sa') return 'sanskrit';
+  if(str === 'ta') return 'tamil';
+  if(str === 'pi') return 'pali';
+  if(str === 'bo') return 'tibetan';
+};
+
 const exportLaTeX = async (indoc,libRoot,exportRoot) => {
     const doc = indoc.cloneNode(true);
+    const scriptel = exportRoot.getElementById('export-script');
+    const transc = scriptel && scriptel.checked ? {script: scriptel.dataset.script, lang: scriptel.dataset.lang} : undefined;
+     
+    const scriptopts = newElement(doc,'interp');
+    scriptopts.setAttribute('type','script-options');
+    if(transc)
+      scriptopts.innerHTML = `<ab type="script">${transc.script}</ab><ab type="language">${expandLang(transc.lang)}</ab>`;
+    else
+      scriptopts.innerHTML = `<ab type="script">roman</ab><ab type="language">${getLang(doc)}</ab>`;
+    doc.documentElement.appendChild(scriptopts);
 
     for(const standOff of [...doc.querySelectorAll('standOff[type="apparatus"]')]) {
         const corresp = standOff.getAttribute('corresp').replace(/^#/,'');
@@ -61,12 +93,11 @@ const exportLaTeX = async (indoc,libRoot,exportRoot) => {
         concatParallel(par);
     
     for(const lg of doc.querySelectorAll('text lg, text p'))
-        normalizeLg(lg);
+        normalizeLg(lg,transc);
 
     for(const noteblock of doc.querySelectorAll('standOff[type="notes1"], standOff[type="notes2"], standOff[type="notes3"], standOff[type="notes4"]')) {
-            const xmlns = 'http://www.w3.org/XML/1998/namespace';
-            noteblock.setAttributeNS(xmlns,'lang','en');
-            //toTamil(noteblock);
+            noteblock.setAttributeNS(XMLNS,'lang','en');
+            if(transc) toScript(noteblock,transc);
     }
 
     processPostOptions(doc,exportRoot);
@@ -88,7 +119,7 @@ const normalizeApp = app => {
     }
 };
 
-const normalizeLg = lg => {
+const normalizeLg = (lg,transc) => {
     lg.normalize();
     if(lg.firstChild?.nodeType === 3) {
         if(lg.firstChild.data.trim() === '')
@@ -122,19 +153,55 @@ const normalizeLg = lg => {
             }
         }
     }
+    if(transc) toScript(lg,transc);
+    /*
     const walker = document.createTreeWalker(lg,NodeFilter.SHOW_TEXT);
     let cur = walker.nextNode();
     while(cur) {
         cur.data = cur.data.replaceAll('_','\\_').replaceAll(/\s+/g,' ');
         cur = walker.nextNode();
     }
+    */
+};
+
+const toScript = (el, transc) => {
+  const script = transc.script;
+  const lang = transc.lang;
+  const walker = document.createTreeWalker(el,NodeFilter.SHOW_ALL);
+  const parlang = el.closest('[*|lang]').getAttributeNS(XMLNS,'lang');
+  el.setAttributeNS(XMLNS,'lang',parlang);
+  let cur = walker.nextNode();
+  while(cur) {
+      if(cur.nodeType === 1 && cur.hasChildNodes()) {
+          const curlang = cur.getAttributeNS(XMLNS,'lang');
+          if(!curlang) {
+              cur.setAttributeNS(XMLNS,'lang',cur.parentNode.getAttributeNS(XMLNS,'lang'));
+          }
+          if(cur.getAttributeNS(XMLNS,'lang') === lang) {
+              if(cur.closest('[type="translation"]') ||
+                cur.closest('note')?.getAttributeNS(XMLNS,'lang') === 'en')
+                  cur.setAttributeNS(XMLNS,'lang',`${lang}-Latn`);
+          }
+      }
+      else if(cur.nodeType === 3) {
+          const curlang = cur.parentNode.getAttributeNS(XMLNS,'lang');
+          if(curlang === lang || curlang.startsWith(lang + '-Latn-t-')) {
+          // TODO: distinguish between sa-Latn and sa-Latn-t-sa-Deva
+              const clean = cur.data.toLowerCase()
+                                    .replaceAll(/(\S)·/g,'$1\u200C');
+              cur.data = Sanscript.t(clean,'iast', script);
+          }
+          cur.data = cur.data.replaceAll('_','\\_');
+      }
+      cur = walker.nextNode();
+  }
 };
 
 const concatParallel = par => {
     if(par.children.length < 2) return;
     par.children[0].setAttribute('type','edition');
     par.children[1].setAttribute('type','translation');
-    par.children[1].setAttribute('corresp',`#${par.children[0].getAttribute('xml:id')}`);
+    par.children[1].setAttribute('corresp',`#${par.children[0].getAttributeNS(XMLNS,'id')}`);
     while(par.nextElementSibling && par.nextElementSibling.getAttribute('rend') === 'parallel') {
         par.nextElementSibling.children[0].setAttribute('type','edition');
         if(par.nextElementSibling.children[1])
@@ -144,7 +211,7 @@ const concatParallel = par => {
             newkid.setAttribute('type','translation');
             par.nextElementSibling.appendChild(newkid);
         }
-        par.nextElementSibling.children[1].setAttribute('corresp',`#${par.nextElementSibling.children[0].getAttribute('xml:id')}`);
+        par.nextElementSibling.children[1].setAttribute('corresp',`#${par.nextElementSibling.children[0].getAttributeNS(XMLNS,'id')}`);
         while(par.nextElementSibling.firstElementChild)
             par.appendChild(par.nextElementSibling.firstElementChild);
         par.nextElementSibling.remove();
@@ -355,38 +422,133 @@ const wavySurround = (doc,opts) => {
     const range = doc.createRange();
     if(opts.startBefore)
         range.setStartBefore(opts.startBefore);
-    if(opts.startAfter)
-        range.setStartAfter(opts.startAfter);
-    if(opts.endBefore)
-        range.setEndBefore(opts.endBefore);
-    if(opts.endAfter)
-        range.setEndAfter(opts.endAfter);
+    if(opts.startAfter) {
+      const nxt = opts.startAfter.nextSibling;
+      if(nxt.nodeType === 3)
+        range.setStart(nxt,0);
+      else
+        range.setStartBefore(nxt);
+    }
+    if(opts.endBefore) {
+      const bef = opts.endBefore.previousSibling;
+      if(bef.nodeType === 3)
+        range.setEnd(bef,bef.data.length);
+      else if(bef.lastChild)
+        range.setEndAfter(bef.lastChild);
+      else
+        range.setEndAfter(bef);
+    }
+    if(opts.endAfter) {
+      if(opts.endAfter.nodeType === 3)
+        range.setEnd(opts.endAfter,opts.endAfter.length);
+      else if(opts.endAfter.lastChild)
+          range.setEndAfter(opts.endAfter.lastChild);
+      else
+          range.setEndAfter(opts.endAfter);
+    }
+    surroundRange(doc,range);
+};
 
+const findEls = range => {
+  const container = range.cloneContents();
+  if(container.firstElementChild) return true;
+  return false;
+};
+
+const wrongSeg = txtnode => {
+  /*
+  const ignored = txtnode.parentNode.closest('.ignored');
+  if(ignored) return ignored;
+  */
+  const el = txtnode.parentNode.closest('.choiceseg');
+  return el && el !== el.parentNode.firstChild;
+};
+
+const nextSibling = node => {
+    let start = node;
+    while(start) {
+        const sib = start.nextSibling;
+        if(sib) return sib;
+        else start = start.parentElement; 
+    }
+    return null;
+};
+
+const surroundOne = (doc,range) => {
     const hi = newElement(doc,'hi');
     hi.setAttribute('rend','wavy-underline');
     range.surroundContents(hi);
+}
+const surroundRange = (doc,range) => {
+  if(!findEls(range)) {
+      surroundOne(doc,range);
+      return;
+  }
+  const toHighlight = [];
+  const start = (range.startContainer.nodeType === 3) ?
+      range.startContainer :
+      range.startContainer.childNodes[range.startOffset];
+
+  const end = (range.endContainer.nodeType === 3) ?
+      range.endContainer :
+      range.endContainer.childNodes[range.endOffset-1];
+  if(start.nodeType === 3 && range.startOffset !== start.length && !wrongSeg(start)) {
+      const textRange = document.createRange();
+      textRange.setStart(start,range.startOffset);
+      textRange.setEnd(start,start.length);
+      toHighlight.push(textRange);
+  }
+  
+  const getNextNode = (n) => n.firstChild || nextSibling(n);
+
+  for(let node = getNextNode(start); node !== end; node = getNextNode(node)) {
+      if(node.nodeType === 3 && !wrongSeg(node)) {
+          const textRange = document.createRange();
+          textRange.selectNode(node);
+          toHighlight.push(textRange);
+      }
+  }
+
+  if(end.nodeType === 3 && range.endOffset > 0 && !wrongSeg(end)) {
+      const textRange = document.createRange();
+      textRange.setStart(end,0);
+      //const realend = range.endOffset > end.data.length ? end.data.length : range.endOffset;
+      textRange.setEnd(end,range.endOffset);
+      toHighlight.push(textRange);
+  }
+  
+  //const firsthighlit = highlightfn(toHighlight.shift());
+  
+  const nodearr = [];
+  for(const hiNode of toHighlight) {
+    const node = surroundOne(doc,hiNode);
+  }
 };
 
 const markUnderlines = doc => {
-    const anchors = doc.querySelectorAll('anchor[type="lemma"]');
-    for(const anchor of anchors) {
-        const id = anchor.getAttribute('n');
-        const app = doc.querySelector(`app[corresp="${id}"]`);
+  const anchors = doc.querySelectorAll('anchor[type="lemma"]');
+  const toSurround = [];
+  for(const anchor of anchors) {
+      const id = anchor.getAttribute('n');
+      const app = doc.querySelector(`app[corresp="${id}"]`);
 
-        const l1 = anchor.closest('l');
-        if(!l1) {
-            wavySurround(doc,{startAfter: anchor, endBefore: app});
-            continue;
-        }
+      const l1 = anchor.closest('l');
+      if(!l1) {
+          toSurround.push({startAfter: anchor, endBefore: app});
+          continue;
+      }
 
-        const l2 = app.closest('l');
-        if(l1 !== l2) {
-            wavySurround(doc,{startAfter: anchor, endAfter: l1.lastChild});
-            wavySurround(doc,{startBefore: l2.firstChild, endBefore: app});
-        }
-        else
-            wavySurround(doc,{startAfter: anchor, endBefore: app});
-    }
+      const l2 = app.closest('l');
+      if(l1 !== l2) {
+          toSurround.push({startAfter: anchor, endAfter: l1.lastChild});
+          toSurround.push({startBefore: l2.firstChild, endBefore: app});
+      }
+      else
+          toSurround.push({startAfter: anchor, endBefore: app});
+  }
+  toSurround.reverse();
+  for(const todo of toSurround) 
+    wavySurround(doc,todo);
 };
 
 export { exportLaTeX };
