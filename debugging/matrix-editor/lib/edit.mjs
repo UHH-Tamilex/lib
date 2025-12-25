@@ -207,7 +207,11 @@ const edit = {
         for(const witness of tempel.firstChild.childNodes) {
           if(witness.nodeType !== 1) continue;
           const xmlid = witness.getAttribute('xml:id');
-          if(!listWit.querySelector(`[*|id="${xmlid}"]`))
+          const existingwit = listWit.querySelector(`[*|id="${xmlid}"]`);
+          // replace old <witness>, in case things have changed, i.e. added new subwitnesses
+          if(existingwit)
+            listWit.replaceChild(witness.cloneNode(true),existingwit);
+          else
             listWit.appendChild(witness.cloneNode(true));
         }
 
