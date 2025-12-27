@@ -198,6 +198,7 @@ hr {
 }
 #views > div.matrix {
 	background: rgb(232,232,231);
+  padding-bottom: 10px;
 }
 
 #views > div.matrix, #views > div.tree-box {
