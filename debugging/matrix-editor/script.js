@@ -1847,7 +1847,7 @@ const maybeLoadData = async () => {
 		const url = (new URLSearchParams(window.location.search)).get('url');
 		if(url) {
 			const decoded = decodeURIComponent(url);
-			const res = await fetch(decoded);
+			const res = await fetch(decoded, {cache: 'no-cache'});
 			const data = await res.text();
 			const f = {name: urlBasename(decoded)};
 			const ev = {target: {result: data}};
