@@ -276,6 +276,7 @@ const restoreGroups = (alignment, ref) => {
       else
         text.appendChild(w);
     }
+    if(cl) text.appendChild(cl);
     ret.push({siglum: row.siglum, text: text});
   }
   return ret;
