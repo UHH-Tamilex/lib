@@ -178,6 +178,7 @@
 <xsl:template match="x:subst">
     <xsl:element name="span">
     <xsl:attribute name="class">subst</xsl:attribute>
+    <xsl:call-template name="lang"/>
     <xsl:attribute name="data-anno">
         <xsl:text>substitution</xsl:text>
         <xsl:if test="@rend">
