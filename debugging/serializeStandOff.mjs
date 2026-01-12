@@ -153,4 +153,105 @@ const countLines = lines => {
     },[]);
 };
 */
-export {serializeWordsplits, getEditionText};
+
+const prettyWord = el => {
+    const form = el.querySelector('form');
+    const clone = form.cloneNode(true);
+    const chars = clone.querySelectorAll('c');
+    for(const c of chars) {
+        const type = c.getAttribute('type');
+        switch (type) {
+            case 'elided':
+                c.replaceWith("'");
+                break;
+            case 'geminated':
+                c.replaceWith('{\\color{grey}' + c.textContent + '}');
+                break;
+            case 'glide':
+                c.replaceWith('{\\color{grey}' + c.textContent + '}');
+                break;
+            case 'uncertain':
+                c.replaceWith('{\\color{grey}(' + c.textContent + ')}');
+                break;
+            case 'inserted':
+                c.replaceWith('{\\color{grey}[' + c.textContent + ']}');
+                break;
+        }
+    }
+    return getEditionText(clone).trim();
+};
+
+const prettySuperWord = (superEntry) => {
+    const ret = {
+            type: superEntry.getAttribute('type'),
+            strands: []
+        };
+    for(const strand of superEntry.querySelectorAll(':scope > entry')) {
+        const strandentries = [];
+        for(const entry of strand.querySelectorAll(':scope > entry')) {
+            strandentries.push(prettyWord(entry));
+        }
+        ret.strands.push(strandentries);
+    }
+    return ret;
+};
+const latexWordsplits = (standOff, serializer) => {
+    const words = [];
+    const doc = standOff.ownerDocument;
+    const selected = standOff.getAttribute('corresp').slice(1);
+    for(const child of standOff.children) {
+        if(child.nodeName === 'entry')
+            words.push(prettyWord(child));
+        else if(child.nodeName === 'superEntry')
+            words.push(processSuperEntry(child));
+    }
+
+    const tamsplits = [];
+    // TODO: add notes
+    /*
+    const allnotes = [];
+    const cleanNote = n => {
+        if(serializer)
+            return serializer(n).replaceAll('<note xmlns="http://www.tei-c.org/ns/1.0">','<note>');
+        const xs = new XMLSerializer();
+        return xs.serializeToString(n).replaceAll('<note xmlns="http://www.tei-c.org/ns/1.0">','<note>');
+    };
+    */
+    for(const word of words) {
+        if(word.hasOwnProperty('strands')) {
+            tamsplits.push(word.strands.map(w => w.join(' ')).join('/'));
+        }
+        else {
+            tamsplits.push(word);
+        }
+    }
+    const block = doc.querySelector(`[*|id="${selected}"]`);
+    const edtype= block.querySelector('[type="edition"]');
+    const lines = (edtype || block).querySelectorAll('l');
+    const linecounts = countLines(lines);
+    
+    const alignmentel = standOff.querySelector('interp[select="0"]');
+
+    if(!alignmentel) {
+        return tamsplits.join(' ');
+    }
+
+    const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
+
+    const realcounts = matchCounts(alignment,linecounts);
+    let tamout = '';
+    let engout = '';
+    let wordcount = 0;
+    for(let n=0; n<tamsplits.length;n++) {
+        wordcount = wordcount + firstOption(tamsplits[n]).length;
+        if(wordcount >= realcounts[0]) {
+            tamout = tamout + tamsplits[n] + '\n';
+            realcounts.shift();
+        }
+        else {
+            tamout = tamout + tamsplits[n] + ' ';
+        }
+    }
+    return tamout;
+};
+export {serializeWordsplits, latexWordsplits, getEditionText};

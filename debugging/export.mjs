@@ -2,7 +2,7 @@ import { loadDoc } from './fileops.mjs';
 import { showSaveFilePicker } from './native-file-system-adapter/es6.js';
 import Sanscript from '../js/sanscript.mjs';
 import { cancelPopup, showPopup } from './popup.mjs';
-import { serializeWordsplits } from './serializeStandOff.mjs';
+import { latexWordsplits } from './serializeStandOff.mjs';
 
 const _NodeFilter = {
     SHOW_ALL: 4294967295,
@@ -458,7 +458,7 @@ const addWordsplits = (doc,type) => {
         const transblock = parpar.querySelector(`[*|lang="en"]`);
         if(!transblock) continue;
 
-        const splits = serializeWordsplits(standoff).tam;
+        const splits = latexWordsplits(standoff);
         if(type === 'lg') {
             const ls = splits.split('\n').map(makeL).filter(l => l);
             const br = newElement(doc,'l');
