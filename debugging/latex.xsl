@@ -220,7 +220,7 @@
     <xsl:text>\medskip </xsl:text>
 </xsl:template>
 
-<xsl:template match="x:lg/x:l">
+<xsl:template match="x:l">
     <!--xsl:text>\large </xsl:text-->
     <xsl:call-template name="langstart"/>
     <xsl:if test="@rend='italic'">
