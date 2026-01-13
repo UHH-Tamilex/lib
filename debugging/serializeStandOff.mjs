@@ -174,7 +174,7 @@ const prettyWord = el => {
                 c.replaceWith('{\\color{grey}(' + c.textContent + ')}');
                 break;
             case 'inserted':
-                c.replaceWith('{\\color{grey}[' + c.textContent + ']}');
+                c.replaceWith('{\\color{grey}' + c.textContent + '}');
                 break;
         }
     }
