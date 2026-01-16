@@ -103,6 +103,19 @@ div.lg div.l.diplo {
     text-indent: 0;
 }
 
+.trailer {
+    font-size: inherit;
+    width: 60%;
+    display: inline-block;
+    text-align: right;
+    line-height: 2rem; 
+    font-size: 1.2rem; 
+}
+.trailer[lang^='ta-Taml'] {
+    line-height: 2.3rem;
+    font-size: 1.15rem;
+}
+
 [lang^="sa-Deva"] .l {
                         line-height: 1.4em;
 }
