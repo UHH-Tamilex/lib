@@ -253,7 +253,7 @@ const getFile = async (e) => {
     document.getElementById('blackout').appendChild(spinner);
 
     addWitnesses(Apparatuser.sharedState.curDoc, app.listwit);
-    addApparatus(Apparatuser.sharedState.curDoc, app.listapp, xml, blockid, e.name);
+    addApparatus(Apparatuser.sharedState.curDoc, app.listapp, app.warnings, xml, blockid, e.name);
     const curStandOff = Apparatuser.sharedState.curDoc.querySelector(`standOff[type="apparatus"][corresp="#${blockid}"]`);
     const standOff = curStandOff.outerHTML;
     //output.innerHTML = Prism.highlight(standOff, Prism.languages.xml, 'xml');
