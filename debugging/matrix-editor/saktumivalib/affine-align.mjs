@@ -17,7 +17,7 @@ const scorechar = ({match = 1, mismatch = -1, missing = '‡', prop = null}) => 
 
 const scorearr = ({match = 1, mismatch = -1, gap_open = -2, gap_extend = -0.5, missing = '‡', prop = null}) => {
 	const charfn = scorechar({match: match, mismatch: mismatch, missing: missing, prop: prop});
-	const charconf = new charConfig({match: match,mismatch: mismatch,missing: missing,gap_open: gap_open,gap_extend: gap_extend,prop: prop});
+	const charconf = new charConfig({match: match, mismatch: mismatch, missing: missing, gap_open: gap_open, gap_extend: gap_extend, prop: null});
   const arrEq = (a,b,len) => {
     var i;
     for(i = len; i-- !== 0;)
