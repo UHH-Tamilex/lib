@@ -93,8 +93,8 @@ section div.wide {
     content: ']';
 }
 
-.lem-wit {
-    white-space: normal;
+.negapp .lem-wit {
+  display: none;
 }
 
 .rdg-text {
@@ -170,7 +170,6 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 
 .msid a[href]::after {
     background: none;
-    text-decoration: none;
     padding-right: 0;
 }
 
@@ -200,10 +199,12 @@ a.alignment-pointer:link, a.alignment-pointer:active {
     top: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(50,50,50,.5);
+    background: none;
+    backdrop-filter: blur(5px) brightness(60%) saturate(150%);
 }
 #alignment-viewer {
     max-width: 60%;
+    max-height: 90vh;
     overflow: scroll;
     background-color: #fffff8;
     padding: 10px 10px 10px 0;
@@ -254,7 +255,11 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 .anchor::after, .anchored-note::before {
     content: '*';
     color: rgb(168,81,16);
-    cursor: default;
+  vertical-align: super;
+  cursor: default;
+}
+.anchor[data-n]::after, .anchored-note[data-n]::before {
+  content: attr(data-n);
 }
 
 .apparatus-block .anchored-note {

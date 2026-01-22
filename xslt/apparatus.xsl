@@ -72,20 +72,13 @@
              <xsl:variable name="parsource" select="$parwit/@source"/>
              <xsl:variable name="source" select="$mysource[$mysource] | $parsource[not($mysource)]"/-->
 
-             <xsl:variable name="spacestring">
-                <xsl:text> </xsl:text>
-                <xsl:value-of select="$msstring"/>
-                <xsl:text> </xsl:text>
-             </xsl:variable>
              <xsl:variable name="par" select="x:rdgGrp | ."/>
-             <xsl:choose>
-                 <xsl:when test="$par/x:rdg[not(@type='main')][contains(concat(' ', normalize-space(@wit), ' '),$spacestring)]">
-                    <xsl:attribute name="class">msid mshover</xsl:attribute>
-                 </xsl:when>
-                 <xsl:otherwise>
-                    <xsl:attribute name="class">msid</xsl:attribute>
-                 </xsl:otherwise>
-             </xsl:choose>
+             <xsl:attribute name="class">
+                <xsl:text>msid</xsl:text>
+                <xsl:if test="$par/x:rdg[not(@type='main')][contains(concat(' ', normalize-space(@wit), ' '),concat(' ',$msstring,' '))]">
+                    <xsl:text> mshover</xsl:text>
+                </xsl:if>
+             </xsl:attribute>
 
              <xsl:if test="$anno">
                  <xsl:attribute name="data-anno"/>
@@ -94,6 +87,7 @@
                      <xsl:apply-templates select="$anno"/>
                  </xsl:element>
              </xsl:if>
+
              <xsl:choose>
                 <xsl:when test="$siglum">
                     <xsl:choose>
@@ -239,7 +233,7 @@
     </xsl:choose>
 </xsl:template>
 
-<xsl:template match="x:text//x:lg"> <!-- not child of x:div[@rend='parallel'] -->
+<xsl:template match="x:text//x:lg | x:text//x:l[@xml:id]"> <!-- not child of x:div[@rend='parallel'] -->
     <xsl:variable name="xmlid" select="@xml:id"/>
     <xsl:variable name="id"><xsl:text>#</xsl:text><xsl:value-of select="$xmlid"/></xsl:variable>
     <xsl:variable name="apparatus" select="//x:standOff[@type='apparatus' and @corresp=$id]"/>
@@ -350,14 +344,19 @@
          <xsl:attribute name="class">msid</xsl:attribute>
          <xsl:attribute name="lang">en</xsl:attribute>
          <!--xsl:variable name="witness" select="/x:TEI/x:teiHeader/x:fileDesc/x:sourceDesc/x:listWit//x:witness[@xml:id=$cleanstr]"/-->
-         <xsl:variable name="witness" select="//x:listWit//x:witness[@xml:id=$cleanstr]"/>
+         <xsl:variable name="witness" select="$witlist/x:witness[@id=$cleanstr]"/>
+         <xsl:variable name="siglum" select="$witness/x:abbr/node()"/>
+         <xsl:variable name="anno" select="$witness/x:expan"/>
+         <xsl:variable name="source" select="$witness/@source"/>
+         <xsl:variable name="parwit" select="$witness/@parid"/>
+         <!--xsl:variable name="witness" select="//x:listWit//x:witness[@xml:id=$cleanstr]"/>
          <xsl:variable name="siglum" select="$witness/x:abbr/node()"/>
          <xsl:variable name="anno" select="$witness/x:expan"/>
          <xsl:variable name="parwit" select="$witness/ancestor::x:witness[@source]"/>
 
          <xsl:variable name="mysource" select="$witness/@source"/>
          <xsl:variable name="parsource" select="$parwit/@source"/>
-         <xsl:variable name="source" select="$mysource[$mysource] | $parsource[not($mysource)]"/>
+         <xsl:variable name="source" select="$mysource[$mysource] | $parsource[not($mysource)]"/-->
          <xsl:variable name="corresp" select="ancestor::*[@corresp]/@corresp"/>
          <xsl:if test="$anno">
              <xsl:attribute name="data-anno"></xsl:attribute>
@@ -373,7 +372,7 @@
                     <xsl:value-of select="$source"/>
                     <xsl:text>?corresp=</xsl:text>
                     <xsl:choose>
-                        <xsl:when test="$parwit"><xsl:value-of select="$parwit/@xml:id"/></xsl:when>
+                        <xsl:when test="$parwit"><xsl:value-of select="$parwit"/></xsl:when>
                         <xsl:otherwise><xsl:value-of select="$cleanstr"/></xsl:otherwise>
                     </xsl:choose>
                 </xsl:variable>
@@ -533,7 +532,12 @@
     <span>
         <xsl:attribute name="class">anchor</xsl:attribute>
         <xsl:attribute name="data-teiname">anchor</xsl:attribute>
-        <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
+        <xsl:if test="@xml:id">
+          <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
+        </xsl:if>
+        <xsl:if test="@n">
+          <xsl:attribute name="data-n"><xsl:value-of select="@n"/></xsl:attribute>
+        </xsl:if>
     </span>
 </xsl:template>
 <xsl:template match="x:text//x:div[@xml:id] | x:text//x:div[@rend='parallel']">
@@ -669,9 +673,16 @@
     </xsl:element>
     <xsl:for-each select="$standOff/x:note">
         <span class="anchored-note">
-            <xsl:attribute name="data-target">
-                    <xsl:value-of select="@target"/>
-            </xsl:attribute>
+            <xsl:if test="@target">
+              <xsl:attribute name="data-target">
+                <xsl:value-of select="@target"/>
+              </xsl:attribute>
+            </xsl:if>
+            <xsl:if test="@n">
+              <xsl:attribute name="data-n">
+                <xsl:value-of select="@n"/>
+              </xsl:attribute>
+            </xsl:if>
             <xsl:call-template name="lang"/>
             <xsl:apply-templates/>
         </span>
