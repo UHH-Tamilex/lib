@@ -540,20 +540,26 @@ const Events = {
 	}
         const anchor = e.target.closest('.anchor');
         if(anchor) {
-            const note = document.querySelector(`[data-target='#${anchor.id}']`);
-            if(note) {
-                anchor.classList.add('highlit');
-                note.classList.add('highlit');
-                anchor.addEventListener('mouseout',() => {
-                    anchor.classList.remove('highlit');
-                    note.classList.remove('highlit');
-                },{once: true});
-                delayedScrollIntoView(note,anchor);
-            }
+            const idnotes = document.querySelectorAll(`[data-target='#${anchor.id}']`);
+            const numnotes = anchor.closest('.wide').querySelectorAll(`.anchored-note[data-n='${anchor.dataset.n}']`);
+            const notes = [...idnotes,...numnotes];
+            if(notes.length > 0) {
+                for(const note of notes) {
+                  anchor.classList.add('highlit');
+                  note.classList.add('highlit');
+                  anchor.addEventListener('mouseout',() => {
+                      anchor.classList.remove('highlit');
+                      note.classList.remove('highlit');
+                  },{once: true});
+                  delayedScrollIntoView(note,anchor);
+              }
+          }
         }
         const note = e.target.closest('.anchored-note');
         if(note) {
-            const anchor = document.getElementById(note.dataset.target.replace(/^#/,''));
+            const anchor = note.dataset.target ? 
+              document.getElementById(note.dataset.target.replace(/^#/,'')) :
+              note.closest('.wide').querySelector(`.anchor[data-n='${note.dataset.n}']`);
             if(anchor) {
                 anchor.classList.add('highlit');
                 note.classList.add('highlit');
