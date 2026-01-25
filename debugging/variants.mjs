@@ -209,12 +209,11 @@ const getFile = async (e) => {
                     cachedfiles.set(wit.filename,file);
             }
             if(file) { // file could be null from loadDoc
-                cachedwitnesses.set(wit.name, {
-                    name: wit.name,
-                    type: wit.type,
-                    select: wit.select,
+                const newitem = {
+                    ...wit,
                     xml: file
-                });
+                };
+                cachedwitnesses.set(wit.name, newitem);
                 if(newfilename) cachedwitnesses.get(wit.name).updatedfilename = newfilename;
             }
         }

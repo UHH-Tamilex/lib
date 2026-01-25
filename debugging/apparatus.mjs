@@ -508,8 +508,10 @@ const reduceDuplicateWits = (arr,app) => {
 };
 
 const cleanBlock = (blockid,idsel,wit) => {
-    const block = wit.xml.querySelector(`text[corresp="#${wit.name}"] [corresp="#${blockid}"], text[corresp="#${wit.name}"] [${idsel}="${blockid}"]`)?.cloneNode(true) || 
-        wit.xml.querySelector(`text [corresp="#${blockid}"], text [${idsel}="${blockid}"]`)?.cloneNode(true);
+    const block = wit.parent ? 
+      wit.xml.querySelector(`text[corresp="#${wit.parent}"] [corresp="#${blockid}"]`) :
+      wit.xml.querySelector(`text[corresp="#${wit.name}"] [corresp="#${blockid}"], text[corresp="#${wit.name}"] [${idsel}="${blockid}"]`)?.cloneNode(true) || 
+      wit.xml.querySelector(`text [corresp="#${blockid}"], text [${idsel}="${blockid}"]`)?.cloneNode(true);
     if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
@@ -924,9 +926,13 @@ const getWits = (...args) => {
                 name: id,
                 filename: w.getAttribute('source') ||
                           w.closest('[source]')?.getAttribute('source'),
-                type: w.getAttribute('n'),
-                select: w.getAttribute('select')
+                type: w.getAttribute('n')
             };
+            const select = w.getAttribute('select');
+            if(select) {
+              newitem.select = select;    
+              newitem.parent = w.closest('[source]').getAttribute('xml:id');
+            }
             acc.set(id, newitem);
         }
         return acc;

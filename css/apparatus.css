@@ -255,8 +255,9 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 .anchor::after, .anchored-note::before {
     content: '*';
     color: rgb(168,81,16);
-  vertical-align: super;
-  cursor: default;
+    vertical-align: super;
+    cursor: default;
+    line-height: normal;
 }
 .anchor[data-n]::after, .anchored-note[data-n]::before {
   content: attr(data-n);
