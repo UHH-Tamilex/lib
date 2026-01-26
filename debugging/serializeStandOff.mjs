@@ -23,6 +23,7 @@ const serializeWordsplits = (standOff, serializer) => {
     };
 
     for(const word of words) {
+      //TODO: use tamlength (so that, e.g. celk(a) doesn't count as 6 characters)
         if(word.hasOwnProperty('strands')) {
             tamsplits.push(word.strands.map(arr => arr.map(w => w.tamil).join('|')).join('/'));
             engsplits.push(word.strands.map(arr => arr.map(w => w.note ? w.english + '*' : w.english).join('|')).join('/'));
@@ -73,14 +74,16 @@ const firstOption = str => str.replace(/\/.+$/,'').replaceAll(/\|/g,'');
 const processEntry = (entry) => {
     const def = entry.querySelector('def');
     const grammar = getGrammar(entry);
+    const {text, textlength} = retransformWord(entry.querySelector('form'));
     return {
-        tamil: retransformWord(entry.querySelector('form')),
+        tamil: text,
+        tamlen: textlength,
         english: def ? def.textContent.trim().replaceAll(/\s+/g,'_') + grammar : 
                        grammar || '()',
         note: entry.querySelector('note')
    };
 };
-const processSuperEntry = (superEntry) => {
+const processSuperEntry = superEntry => {
     const ret = {
             type: superEntry.getAttribute('type'),
             strands: []
@@ -105,6 +108,7 @@ const getGrammar = entry => {
 };
 const retransformWord = el => {
     const clone = el.cloneNode(true);
+    const tamlen = clone.textContent.length;
     const chars = clone.querySelectorAll('c');
     for(const c of chars) {
         const type = c.getAttribute('type');
@@ -126,7 +130,7 @@ const retransformWord = el => {
                 break;
         }
     }
-    return getEditionText(clone).trim().replaceAll(/\s/g,'_');
+    return {text: getEditionText(clone).trim().replaceAll(/\s/g,'_'), textlength: tamlen};
 };
 
 const getEditionText = el => {
@@ -157,6 +161,7 @@ const countLines = lines => {
 const prettyWord = el => {
     const form = el.querySelector('form');
     const clone = form.cloneNode(true);
+    const tamlen = clone.textContent.length;
     const chars = clone.querySelectorAll('c');
     for(const c of chars) {
         const type = c.getAttribute('type');
@@ -165,23 +170,23 @@ const prettyWord = el => {
                 c.replaceWith("'");
                 break;
             case 'geminated':
-                c.replaceWith('{\\color{grey}' + c.textContent + '}');
+                c.replaceWith('{\\color{gray}' + c.textContent + '}');
                 break;
             case 'glide':
-                c.replaceWith('{\\color{grey}' + c.textContent + '}');
+                c.replaceWith('{\\color{gray}' + c.textContent + '}');
                 break;
             case 'uncertain':
-                c.replaceWith('{\\color{grey}(' + c.textContent + ')}');
+                c.replaceWith('{\\color{gray}(' + c.textContent + ')}');
                 break;
             case 'inserted':
-                c.replaceWith('{\\color{grey}' + c.textContent + '}');
+                c.replaceWith('{\\color{gray}' + c.textContent + '}');
                 break;
         }
     }
-    return getEditionText(clone).trim();
+    return {text: getEditionText(clone).trim(), textlength: tamlen};
 };
 
-const prettySuperWord = (superEntry) => {
+const prettySuperWord = superEntry => {
     const ret = {
             type: superEntry.getAttribute('type'),
             strands: []
@@ -203,7 +208,7 @@ const latexWordsplits = (standOff, serializer) => {
         if(child.nodeName === 'entry')
             words.push(prettyWord(child));
         else if(child.nodeName === 'superEntry')
-            words.push(processSuperEntry(child));
+            words.push(prettySuperWord(child));
     }
 
     const tamsplits = [];
@@ -217,6 +222,7 @@ const latexWordsplits = (standOff, serializer) => {
         return xs.serializeToString(n).replaceAll('<note xmlns="http://www.tei-c.org/ns/1.0">','<note>');
     };
     */
+    /*
     for(const word of words) {
         if(word.hasOwnProperty('strands')) {
             tamsplits.push(word.strands.map(w => w.join(' ')).join('/'));
@@ -225,6 +231,7 @@ const latexWordsplits = (standOff, serializer) => {
             tamsplits.push(word);
         }
     }
+    */
     const block = doc.querySelector(`[*|id="${selected}"]`);
     const edtype= block.querySelector('[type="edition"]');
     const lines = (edtype || block).querySelectorAll('l');
@@ -233,7 +240,12 @@ const latexWordsplits = (standOff, serializer) => {
     const alignmentel = standOff.querySelector('interp[select="0"]');
 
     if(!alignmentel) {
-        return tamsplits.join(' ');
+        return tamsplits.map(word => {
+          if(word.hasOwnProperty('strands')) {
+              return word.strands.map(w => w.tamil.join(' ')).join('/');
+          }
+          else return word;
+        }).join(' ');
     }
 
     const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
@@ -242,14 +254,18 @@ const latexWordsplits = (standOff, serializer) => {
     let tamout = '';
     let engout = '';
     let wordcount = 0;
-    for(let n=0; n<tamsplits.length;n++) {
-        wordcount = wordcount + firstOption(tamsplits[n]).length;
+    for(let n=0; n<words.length;n++) {
+        const len = words[n].hasOwnProperty('strands') ? 
+          words[n].strands[0].map(w => w.textlength).reduce((a,c) => a + c,0) : words[n].textlength;
+        const word = words[n].hasOwnProperty('strands') ? 
+          words[n].strands.map(s => s.map(w => w.text).join(' ')).join('/') : words[n].text;
+        wordcount = wordcount + len;
         if(wordcount >= realcounts[0]) {
-            tamout = tamout + tamsplits[n] + '\n';
+            tamout = tamout + word + '\n';
             realcounts.shift();
         }
         else {
-            tamout = tamout + tamsplits[n] + ' ';
+            tamout = tamout + word + ' ';
         }
     }
     return tamout;

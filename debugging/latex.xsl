@@ -20,8 +20,8 @@
 
 <xsl:template name="langstart">
     <xsl:choose>
-        <xsl:when test="./@xml:lang='ta'"><xsl:text>\texttamil{</xsl:text></xsl:when>
-        <xsl:when test="./@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:when>
+      <xsl:when test="./@xml:lang='ta'"><xsl:text>\foreignlanguage{tamil}{</xsl:text></xsl:when>
+      <xsl:when test="./@xml:lang='en'"><xsl:text>\foreignlanguage{english}{</xsl:text></xsl:when>
         <xsl:otherwise/>
     </xsl:choose>
 </xsl:template>
@@ -76,7 +76,7 @@
 
 <xsl:template match="x:TEI">
     <xsl:text>\documentclass[12pt]{extarticle}
-\usepackage{polyglossia,fontspec,xunicode}
+\usepackage{fontspec,xunicode}
 \usepackage[normalem]{ulem}
 \usepackage[noend,noeledsec,noledgroup]{reledmac}
 \usepackage{reledpar}
@@ -107,15 +107,11 @@
 \Xnotenumfont[A]{\bfseries}
 \Xlemmafont[A]{\bfseries}
 
-\setdefaultlanguage{english}
-\setmainfont{Brill}
-
-\setotherlanguage{tamil}
-\newfontfamily\tamilfont{TSTTamil.otf}[Script=Tamil,Ligatures=Historic,BoldFont={NotoSerifTamil-Bold.ttf}]
+\usepackage[english]{babel}
+\babelfont{rm}{Brill-Roman.ttf}
+\babelfont[tamil]{rm}{TSTTamil.otf}[Script=Tamil,Ligatures=Historic,BoldFont={NotoSerifTamil-Bold.ttf}]
 \newICUfeature{AllAlternates}{1}{+aalt}
-\newcommand{\vowelsign}{\tamilfont\addfontfeature{AllAlternates=1}}
-\tamilfont\fontdimen2\font=0.8em
-\tamilfont\large\fontdimen2\font=0.5em
+\newcommand{\vowelsign}{\\foreignlanguage{tamil}\addfontfeature{AllAlternates=1}}
 
 \setlength{\parskip}{12pt}
 
@@ -528,7 +524,7 @@
         </xsl:otherwise>
     </xsl:choose>
     <xsl:text>}</xsl:text>
-    <xsl:text>; \texttamil{</xsl:text>
+    <xsl:text>; \foreignlanguage{tamil}{</xsl:text>
     <xsl:apply-templates select="./x:rdg | ./x:rdgGrp"/>
     <xsl:text>}}}</xsl:text>
 </xsl:template>
