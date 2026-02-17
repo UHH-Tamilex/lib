@@ -583,8 +583,14 @@
             <xsl:text>text-block p </xsl:text>
             <xsl:choose>
                 <xsl:when test="@type='translation'"><xsl:text>translation</xsl:text></xsl:when>
-                <xsl:when test="../@rend = 'parallel' and @xml:lang"><xsl:text>translation</xsl:text></xsl:when>
-                <xsl:otherwise><xsl:text>edition nolemmata</xsl:text></xsl:otherwise>
+                <xsl:when test="../@rend = 'parallel'">
+                  <xsl:choose>
+                    <xsl:when test="@xml:lang"><xsl:text>translation</xsl:text></xsl:when>
+                    <xsl:when test="../p[@xml:lang]"><xsl:text>edition nolemmata</xsl:text></xsl:when>
+                      <xsl:otherwise><xsl:text>edition</xsl:text></xsl:otherwise>
+                  </xsl:choose>
+                </xsl:when>
+                <xsl:otherwise><xsl:text>edition</xsl:text></xsl:otherwise>
             </xsl:choose>
         </xsl:attribute>
         <xsl:call-template name="lang"/>
@@ -598,8 +604,14 @@
             <xsl:text>text-block lg </xsl:text>
             <xsl:choose>
                 <xsl:when test="@type='translation'"><xsl:text>translation</xsl:text></xsl:when>
-                <xsl:when test="../@rend = 'parallel' and @xml:lang"><xsl:text>translation</xsl:text></xsl:when>
-                <xsl:otherwise><xsl:text>edition nolemmata</xsl:text></xsl:otherwise>
+                <xsl:when test="../@rend = 'parallel'">
+                  <xsl:choose>
+                    <xsl:when test="@xml:lang"><xsl:text>translation</xsl:text></xsl:when>
+                    <xsl:when test="../lg[@xml:lang]"><xsl:text>edition nolemmata</xsl:text></xsl:when>
+                      <xsl:otherwise><xsl:text>edition</xsl:text></xsl:otherwise>
+                  </xsl:choose>
+                </xsl:when>
+                <xsl:otherwise><xsl:text>edition</xsl:text></xsl:otherwise>
             </xsl:choose>
         </xsl:attribute>
             <xsl:if test="@n">
