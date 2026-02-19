@@ -35,7 +35,8 @@ const getWords = (par, range) => {
     if(!start || !end) return;
     
     const ret = [];
-    for(const [n, word] of [...par.querySelectorAll('.word, .choice')].entries()) {
+    let n=0;
+    for(const word of par.querySelectorAll('.word, .choice')) {
         if(word.parentNode.closest('.choice')) continue;
         if(word === start || word === end) {
             ret.push(n);
@@ -48,6 +49,7 @@ const getWords = (par, range) => {
             ret.sort((a,b) => a > b);
             return ret;
         }
+      n = n + 1;
     }
     return;
 };
