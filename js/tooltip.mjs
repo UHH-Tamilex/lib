@@ -3,9 +3,10 @@ const _state = {
 };
 
 const Events = {
-    docMouseover: (e) => {
-        const go = e => {
-            var targ = e.target.closest('[data-anno]');
+    docMouseover: e => {
+        const go = ee => {
+            if(!ee.target.matches(':hover')) return;
+            var targ = ee.target.closest('[data-anno]');
             while(targ && targ.hasAttribute('data-anno')) {
                
                 //ignore if apparatus is already on the side
@@ -16,7 +17,7 @@ const Events = {
                     continue;
                 }
 
-                ToolTip.make(e,targ);
+                ToolTip.make(ee,targ);
                 targ = targ.parentNode;
             }
         };
