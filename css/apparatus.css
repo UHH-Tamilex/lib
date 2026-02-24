@@ -264,7 +264,7 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 }
 
 .apparatus-block .anchored-note {
-    display: inline-block;
+    display: block;
 }
 
 .anchor.highlit::after {
