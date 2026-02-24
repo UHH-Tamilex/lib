@@ -5,7 +5,7 @@ const _state = {
 const Events = {
     docMouseover: e => {
         const go = ee => {
-            if(!ee.target.matches(':hover')) return;
+            //if(!ee.target.matches(':hover')) return; // doesn't work on Chrome?
             var targ = ee.target.closest('[data-anno]');
             while(targ && targ.hasAttribute('data-anno')) {
                
