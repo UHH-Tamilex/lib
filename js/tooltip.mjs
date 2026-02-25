@@ -31,6 +31,29 @@ const Events = {
             },300);
         }
 
+    },
+    docTouchstart: e => {
+        const go = ee => {
+            //if(!ee.target.matches(':hover')) return; // doesn't work on Chrome?
+            var targ = ee.target.closest('[data-anno]');
+            while(targ && targ.hasAttribute('data-anno')) {
+                //ignore if apparatus is already on the side
+                if(document.querySelector('.record.fat') && 
+                   targ.classList.contains('app-inline') &&
+                   !targ.closest('.teitext').querySelector('.diplo') ) {
+                    targ = targ.parentNode;
+                    continue;
+                }
+
+                ToolTip.make(ee,targ);
+                targ = targ.parentNode;
+            }
+        };
+
+       /* if(document.getElementById('tooltip'))
+          ToolTip.remove();
+        */
+        go(e);
     }
 };
 
@@ -57,17 +80,17 @@ const ToolTip = {
             document.body.appendChild(tBox);
             tBoxDiv.myTarget = targ;
         }
-
-        tBox.style.top = (e.clientY + 10) + 'px';
-        tBox.style.left = (e.clientX + 1) + 'px';
+        const yCoord = e.clientY || e.changedTouches[0].clientY;
+        const xCoord = e.clientX || e.changedTouches[0].clientX;
+        tBox.style.top = (yCoord + 10) + 'px';
+        tBox.style.left = (xCoord + 1) + 'px';
         tBoxDiv.append(toolText);
         tBoxDiv.myTarget = targ;
         tBox.appendChild(tBoxDiv);
         const ydiff = tBox.getBoundingClientRect().bottom - document.documentElement.clientHeight;
         if(ydiff > 0)
-            tBox.style.top = (e.clientY - ydiff + 10) + 'px';
+            tBox.style.top = (yCoord - ydiff + 10) + 'px';
         targ.addEventListener('mouseleave',ToolTip.remove,{once: true});
-
         //window.getComputedStyle(tBox).opacity;
         //tBox.style.opacity = 1;
         tBox.animate([
@@ -103,4 +126,6 @@ const ToolTip = {
 };
 
 document.addEventListener('mouseover',Events.docMouseover);
+document.addEventListener('touchstart',Events.docTouchstart);
 document.addEventListener('click',ToolTip.remove);
+document.addEventListener('touchend',ToolTip.remove);
