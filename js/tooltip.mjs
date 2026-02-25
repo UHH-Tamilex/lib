@@ -1,5 +1,6 @@
 const _state = {
-    tooltipTimeout: null
+    tooltipTimeout: null,
+    touched: false
 };
 
 const Events = {
@@ -32,7 +33,7 @@ const Events = {
         }
 
     },
-    docTouchstart: e => {
+    docTouchend: e => {
         const go = ee => {
             //if(!ee.target.matches(':hover')) return; // doesn't work on Chrome?
             var targ = ee.target.closest('[data-anno]');
@@ -45,20 +46,28 @@ const Events = {
                     continue;
                 }
 
-                ToolTip.make(ee,targ);
+                ToolTip.make(ee,targ,true);
                 targ = targ.parentNode;
             }
         };
 
-       /* if(document.getElementById('tooltip'))
+        if(document.getElementById('tooltip'))
           ToolTip.remove();
-        */
+        
         go(e);
+        _state.touched = true;
+    },
+    docClick: e => {
+      if(_state.touched) {
+        _state.touched = false;
+        return;
+     }
+      ToolTip.remove(e);
     }
 };
 
 const ToolTip = {
-    make: function(e,targ) {
+    make: function(e,targ,touch=false) {
         const toolText = targ.dataset.anno || targ.querySelector(':scope > .anno-inline')?.cloneNode(true);
         if(!toolText) return;
 
@@ -90,7 +99,7 @@ const ToolTip = {
         const ydiff = tBox.getBoundingClientRect().bottom - document.documentElement.clientHeight;
         if(ydiff > 0)
             tBox.style.top = (yCoord - ydiff + 10) + 'px';
-        targ.addEventListener('mouseleave',ToolTip.remove,{once: true});
+        if(!touch) targ.addEventListener('mouseleave',ToolTip.remove,{once: true});
         //window.getComputedStyle(tBox).opacity;
         //tBox.style.opacity = 1;
         tBox.animate([
@@ -101,20 +110,28 @@ const ToolTip = {
     },
     remove: function(e) {
         clearTimeout(_state.tooltipTimeout);
-
         const tBox = document.getElementById('tooltip');
         if(!tBox) return;
 
-        if(tBox.children.length === 1) {
-            tBox.remove();
-            return;
+        if(!e) {
+          for(const kid of tBox.childNodes)
+            kid.remove();
+          tBox.remove(e);
+          return;
         }
 
-        const targ = e.target;
-        for(const kid of tBox.childNodes) {
-            if(kid.myTarget === targ) {
-                kid.remove();
-                break;
+        if(tBox.children.length === 1) {
+            tBox.remove(e);
+            return;
+        }
+        
+        else {
+            const targ = e.target;
+            for(const kid of tBox.childNodes) {
+                if(kid.myTarget === targ) {
+                    kid.remove();
+                    break;
+                }
             }
         }
         if(tBox.children.length === 1) {
@@ -126,6 +143,5 @@ const ToolTip = {
 };
 
 document.addEventListener('mouseover',Events.docMouseover);
-document.addEventListener('touchstart',Events.docTouchstart);
-document.addEventListener('click',ToolTip.remove);
-document.addEventListener('touchend',ToolTip.remove);
+document.addEventListener('touchend',Events.docTouchend);
+document.addEventListener('click',Events.docClick);
