@@ -6,8 +6,10 @@ const _state = {
 const Events = {
     docMouseover: e => {
         const go = ee => {
-            //if(!ee.target.matches(':hover')) return; // doesn't work on Chrome?
             var targ = ee.target.closest('[data-anno]');
+
+            if(!targ || !targ.matches(`${targ.tagName}:hover`)) return; // need tagname; see https://stackoverflow.com/questions/14795099/pure-javascript-to-check-if-something-has-hover-without-setting-on-mouseover-ou
+
             while(targ && targ.hasAttribute('data-anno')) {
                
                 //ignore if apparatus is already on the side
@@ -22,7 +24,6 @@ const Events = {
                 targ = targ.parentNode;
             }
         };
-
         if(document.getElementById('tooltip'))
             go(e);
         else {
@@ -142,6 +143,8 @@ const ToolTip = {
     },
 };
 
-document.addEventListener('mouseover',Events.docMouseover);
-document.addEventListener('touchend',Events.docTouchend);
+//if(window.matchMedia('(hover: hover)').matches)
+  document.addEventListener('mouseover',Events.docMouseover);
+//else
+  document.addEventListener('touchend',Events.docTouchend);
 document.addEventListener('click',Events.docClick);
