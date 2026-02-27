@@ -124,7 +124,12 @@
 
 <xsl:template name="lg">
     <xsl:element name="div">
-        <xsl:attribute name="class">lg</xsl:attribute>
+      <xsl:attribute name="class">
+        <xsl:text>lg</xsl:text>
+        <xsl:if test="ancestor::x:text[@type='edition']">
+          <xsl:text> edition</xsl:text>
+        </xsl:if>
+      </xsl:attribute>
         <xsl:if test="@xml:id">
             <xsl:attribute name="id">
                 <xsl:value-of select="@xml:id"/>
