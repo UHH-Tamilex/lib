@@ -21,7 +21,6 @@ const compileImports = async (xsltsheet,relurl) => {
     if(!relurl) relurl = window.location.href;
     for(const x of imports) {
         const href = (new URL(x.getAttribute('href'),relurl)).href;
-        console.log(href);
         const i = await loadDoc(href,'default');
         while(i.documentElement.firstChild) {
 

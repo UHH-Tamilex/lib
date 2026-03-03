@@ -69,7 +69,9 @@ const Events = {
 
 const ToolTip = {
     make: function(e,targ,touch=false) {
-        const toolText = targ.dataset.anno || targ.querySelector(':scope > .anno-inline')?.cloneNode(true);
+        const toolText = targ.classList.contains('msid') ?
+          document.getElementById(targ.dataset.id).querySelector('.expan')?.cloneNode(true) :
+          targ.dataset.anno || targ.querySelector(':scope > .anno-inline')?.cloneNode(true);
         if(!toolText) return;
 
         var tBox = document.getElementById('tooltip');
@@ -85,10 +87,12 @@ const ToolTip = {
         else {
             tBox = document.createElement('div');
             tBox.id = 'tooltip';
-            //tBox.style.opacity = 0;
-            //tBox.style.transition = 'opacity 0.2s ease-in';
             document.body.appendChild(tBox);
             tBoxDiv.myTarget = targ;
+            tBox.animate([
+                {opacity: 0 },
+                {opacity: 1, easing: 'ease-in'}
+                ], 200);
         }
         const yCoord = e.clientY || e.changedTouches[0].clientY;
         const xCoord = e.clientX || e.changedTouches[0].clientX;
@@ -101,16 +105,11 @@ const ToolTip = {
         if(ydiff > 0)
             tBox.style.top = (yCoord - ydiff + 10) + 'px';
         if(!touch) targ.addEventListener('mouseleave',ToolTip.remove,{once: true});
-        //window.getComputedStyle(tBox).opacity;
-        //tBox.style.opacity = 1;
-        tBox.animate([
-            {opacity: 0 },
-            {opacity: 1, easing: 'ease-in'}
-            ], 200);
-        
     },
+
     remove: function(e) {
         clearTimeout(_state.tooltipTimeout);
+
         const tBox = document.getElementById('tooltip');
         if(!tBox) return;
 
@@ -125,14 +124,12 @@ const ToolTip = {
             tBox.remove(e);
             return;
         }
-        
-        else {
-            const targ = e.target;
-            for(const kid of tBox.childNodes) {
-                if(kid.myTarget === targ) {
-                    kid.remove();
-                    break;
-                }
+
+        const targ = e.target;
+        for(const kid of tBox.childNodes) {
+            if(kid.myTarget === targ) {
+                kid.remove();
+                break;
             }
         }
         if(tBox.children.length === 1) {
