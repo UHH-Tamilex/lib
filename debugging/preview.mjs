@@ -42,6 +42,12 @@ const compileImports = async (xsltsheet,relurl) => {
 
             x.before(i.documentElement.firstChild);
         }
+        
+        for(const attr of i.documentElement.attributes) {
+          if(!xsltsheet.documentElement.getAttributeNS(attr.namespaceURI,attr.localName))
+            xsltsheet.documentElement.setAttributeNS(attr.namespaceURI,attr.name,attr.value);
+        }
+
         x.remove();
     }
     return xsltsheet;
