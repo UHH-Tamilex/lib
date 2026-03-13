@@ -301,7 +301,9 @@ const formatReading = str => {
 };
 
 const cleanPunct = (str,posonly = false) => {
-    const endpunct = str.search(/\s*[.,:;!?|\-–—―\d\s]+$/);
+    let endpunct = str.search(/\s*[.,:!?|\-–—―\d\s]+$/);
+    if(endpunct === -1) // don't mess up XML enttites
+      endpunct = str.search(/(?<!&[\d\w]+);$/);
     if(posonly) return endpunct > -1 ? endpunct : str.length;
     return endpunct > -1 ?
         str.slice(0,endpunct) :
@@ -627,7 +629,7 @@ const checkAlignment = (words, block, ignoretags = []) => {
     return false;
 };
 
-const getXMLRdgs = (block, alignment, witname, ignoretags) => {
+const getXMLRdgs = (block, blockid, alignment, witname, ignoretags) => {
     if(!block) return;
     if(!block.firstChild) return;
 
@@ -635,7 +637,7 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
     const words = [...alignment.querySelectorAll('w')];
 
     if(!checkAlignment(words,block,ignoretags))
-        logger.log(`${witname} doesn't match alignment.`);
+        logger.log(`${blockid}: ${witname} doesn't match alignment.`);
 
     const ranges = [];
 
@@ -790,7 +792,7 @@ const makeApp = (doc, ed, opts) =>  {
 
     const block = cleanBlock(opts.blockid,idsel,{name: opts.base, xml: ed});
     if(!checkAlignment([...words],block,ignoretags))
-        logger.log(`${opts.base} doesn't match alignment.`);
+        logger.log(`${opts.blockid}: ${opts.base} doesn't match alignment.`);
 
     const otherdocs = [...doc.querySelectorAll(`TEI:not([n="${opts.base}"])`)];
     if(sorter) otherdocs.sort(sorter);
@@ -804,7 +806,7 @@ const makeApp = (doc, ed, opts) =>  {
                 return [docid,null];
             }
             const block = cleanBlock(opts.blockid,idsel,witfile);
-            const rdgs = getXMLRdgs(block,d,witfile.name,ignoretags);
+            const rdgs = getXMLRdgs(block,opts.blockid,d,witfile.name,ignoretags);
             return [docid, rdgs];
         })) : null;
 
