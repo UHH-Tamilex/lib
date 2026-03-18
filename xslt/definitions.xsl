@@ -568,7 +568,7 @@
     <tst:entry key="#Kali" short="Kali"><x:title xml:lang="ta">Kalittokai</x:title></tst:entry>
     <tst:entry key="#Kall" short="Kall"><x:persName xml:lang="ta">Kallāṭaṉār</x:persName></tst:entry>
     <tst:entry key="#Mani" short="Maṇi"><x:title xml:lang="ta">Maṇimēkalai</x:title></tst:entry>
-    <tst:entry key="#MuTA" short="MuTA"><x:title xml:lang="ta">Muṉṟān Tiruvantāti</x:title></tst:entry>
+    <tst:entry key="#MuTA" short="MuTA"><x:title xml:lang="ta">Mūṉṟān Tiruvantāti</x:title></tst:entry>
     <tst:entry key="#NA" short="NA"><x:title xml:lang="ta">Naṟṟiṇai</x:title></tst:entry>
     <tst:entry key="#Nacc" short="Nacc"><x:persName xml:lang="ta">Nacciṉārkkiṉiyār</x:persName></tst:entry>
     <tst:entry key="#Pati" short="Pati"><x:title xml:lang="ta">Patiṟṟuppattu</x:title></tst:entry>
