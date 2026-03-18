@@ -568,11 +568,15 @@
     <tst:entry key="#Kali" short="Kali"><x:title xml:lang="ta">Kalittokai</x:title></tst:entry>
     <tst:entry key="#Kall" short="Kall"><x:persName xml:lang="ta">Kallāṭaṉār</x:persName></tst:entry>
     <tst:entry key="#Mani" short="Maṇi"><x:title xml:lang="ta">Maṇimēkalai</x:title></tst:entry>
+    <tst:entry key="#MnTA" short="MnTA"><x:title xml:lang="ta">Muṉṟān Tiruvantāti</x:title></tst:entry>
     <tst:entry key="#NA" short="NA"><x:title xml:lang="ta">Naṟṟiṇai</x:title></tst:entry>
     <tst:entry key="#Nacc" short="Nacc"><x:persName xml:lang="ta">Nacciṉārkkiṉiyār</x:persName></tst:entry>
+    <tst:entry key="#Pati" short="Pati"><x:title xml:lang="ta">Patiṟṟuppattu</x:title></tst:entry>
+    <tst:entry key="#Pari" short="Pari"><x:title xml:lang="ta">Paripāṭal</x:title></tst:entry>
+    <tst:entry key="#Parim" short="Parim"><x:title xml:lang="ta">Parimēlaḻakar</x:title></tst:entry>
     <tst:entry key="#Pink" short="Piṅk"><x:title xml:lang="ta">Piṅkalam</x:title></tst:entry>
     <tst:entry key="#PN" short="PN"><x:title xml:lang="ta">Puṟanāṉūṟu</x:title></tst:entry>
-    <tst:entry key="#pu" short="p.u."><x:term xml:lang="ta">paḻaiyavuṟai</x:term></tst:entry>
+    <tst:entry key="#pu" short="p.u."><x:term xml:lang="ta">paḻaiyavurai</x:term></tst:entry>
     <tst:entry key="#Tev" short="Tēv"><x:title xml:lang="ta">Tēvāram</x:title></tst:entry>
     <tst:entry key="#Tiv" short="Tiv"><x:title xml:lang="ta">Tivākaram</x:title></tst:entry>
     <tst:entry key="#TK" short="TK"><x:title xml:lang="ta">Tirukkuṛaḷ</x:title></tst:entry>
