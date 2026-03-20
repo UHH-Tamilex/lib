@@ -241,6 +241,13 @@ const filters = [
         replace: () => 'o'
     },
     {
+        name: 'remove overshort -u',
+        group: 'tamil',
+        search: 'u(\\s+[aāiīuūeēoō])',
+        search_slpish: 'u(\\s+[aāiīuūeēEoōO])',
+        replace: (match) => match[1]
+    },
+    {
         name: 'insert glide after back vowels',
         group: 'tamil',
         search: '([aāuūoō])\\s+([aāiīuūeēoō])',
@@ -396,7 +403,7 @@ const filters = [
     {
         name: 'internal nasal variants',
         search: '[mnṅñṇ](?=[pbvmdtnṭḍcjkgsś])',
-        search_splish: '[mnṅñṇ](?=[pPbBvmdDtTnṭṬḍḌcjJkKgGsś])',
+        search_splish: '[mnṅñṇ](?=[pPbBvmdDtTnṭṬḍḌcCjJkKgGsś])',
         replace: () => 'ṃ',
         group: 'sanskrit'
     },
@@ -501,8 +508,16 @@ const filters = [
         group: 'sanskrit'
     },
     {
-        name: 'cś/tś',
-        search: '[tc](\\s*)ś',
+        name: 'ñcch/nś',
+        search: '[ñṃ]c?(\\s+)ch',
+        search_slpish: '[ñṃ](\\s+)ch',
+        replace: (match) => `n${match[1]}ś`,
+        group: 'sanskrit'
+    },
+    {
+        name: 'cś/chś/tś',
+        search: '[tc](\\s*)ś|ch(\\s*)ś',
+        search_slpish: '[tcC](\\s*)ś',
         replace: (match) => `c${match[1]}ch`,
         replace_slpish: (match) => `c${match[1]}C`,
         group: 'sanskrit'
