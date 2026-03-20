@@ -199,6 +199,7 @@
 <xsl:template match="x:label">
     <xsl:element name="span">
         <xsl:attribute name="class">label</xsl:attribute>
+        <xsl:attribute name="data-teiname">label</xsl:attribute>
         <xsl:call-template name="lang"/>
         <xsl:apply-templates/>
     </xsl:element>
