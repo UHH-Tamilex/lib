@@ -284,7 +284,7 @@ const filters = [
         group: 'tamil',
         search: 'ṉ(\\s*)([tpkn])',
         replace: (match) => {
-            if(match[2] === 't') return `ṟ${match[1]}ṟ`; // or ṉṟ
+            if(match[2] === 't') return `ṉ${match[1]}ṟ`; // or ṟṟ
             if(match[2] === 'p' && match[1] !== '') return `ṟ${match[1]}p`;
             if(match[2] === 'k' && match[1] !== '') return `ṟ${match[1]}k`;
             if(match[2] === 'n') return 'ṉ';
@@ -300,7 +300,7 @@ const filters = [
             if(match[2] === 'c' && match[1] !== '') return `ṟ${match[1]}c`;
             if(match[2] === 'ñ') return `ṉ${match[1]}ñ`;
             if(match[2] === 'p' && match[1] !== '') return `ṟ${match[1]}p`;
-            if(match[2] === 't') return 'ṟ'; // or ṉṟ or ḵṟ
+            if(match[2] === 't') return 'ṉṟ'; // or ṟ or ḵṟ
             if(match[2] === 'm') return `ṉ${match[1]}m`;
             if(match[2] === 'n') return 'ṉ';
             return `l${match[1]}${match[2]}`;
@@ -311,12 +311,12 @@ const filters = [
         group: 'tamil',
         search: 'ḷ(\\s*)([kcptmṇ])',
         replace: (match) => {
-            if(match[2] === 'k' && match[1] !== '') return `ṇ${match[1]}k`; // or ṭk
-            if(match[2] === 'c') return `ṇ${match[1]}c`; // or ṭc
-            if(match[2] === 'p' && match[1] !== '') return `ṇ${match[1]}p`; // or ṭp
-            if(match[2] === 't') return 'ṭ'; // or ṭṭ
+            if(match[2] === 'k' && match[1] !== '') return `ṭ${match[1]}k`; // or ṇk
+            if(match[2] === 'c') return `ṭ${match[1]}c`; // or ṇc
+            if(match[2] === 'p' && match[1] !== '') return `ṭ${match[1]}p`; // or ṇp
+            if(match[2] === 't') return 'ṭṭ'; // or ṭ
             if(match[2] === 'm') return `ṇ${match[1]}m`;
-            if(match[2] === 'ṇ') return 'ṇ'; // or ṇṇ
+            if(match[2] === 'ṇ') return 'ṇṇ'; // or ṇ
             return `ḷ${match[1]}${match[2]}`;
         }
     },
