@@ -243,8 +243,8 @@ const filters = [
     {
         name: 'remove overshort -u',
         group: 'tamil',
-        search: 'u(\\s+[aāiīuūeēoō])',
-        search_slpish: 'u(\\s+[aāiīuūeēEoōO])',
+        search: 'u(\\s*[aāiīuūeēoō])',
+        search_slpish: 'u(\\s*[aāiīuūeēEoōO])',
         replace: (match) => match[1]
     },
     {

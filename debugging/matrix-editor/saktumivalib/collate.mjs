@@ -578,6 +578,19 @@ const cleanup3 = (xmldoc,meta) => {
 };
 
 const cleanup1 = arr => {
+    // move initial space to first non-empty cell
+    if(arr[0] !== '' && arr[0].trim() === '') {
+      const firstnonempty = (() => {
+        for(let n=1;n<arr.length;n++) {
+          if(arr[n] !== '') return n;
+        }
+        return null;
+        })();
+      if(firstnonempty !== null) {
+        arr[firstnonempty] = arr[0] + arr[firstnonempty];
+        arr[0] = '';
+      }
+    }
     // move open brackets and punctuation to the beginning of a cell
     const opening = /[\[(‘“]$/;
     for(let n=0;n<arr.length;n++) {
