@@ -827,7 +827,11 @@ const groupBySpace = (doc,edsiglum) => {
         }
         else if(spaced / total >= 0.5 && (!editiontext || editionspace)) {
             if(groupstart === n) {
-                groupstart++;
+                // avoid groups of 1; add to previous group
+                if(groups.length > 0) {
+                  groups[groups.length-1].push(n);
+                  groupstart = groupstart+1;
+                }
                 continue;
             }
             else {

@@ -508,7 +508,7 @@ const loadAdditionalGo = (add,e) => {
 		}
 
 		const wit = newxml.querySelector(`witness[*|id="${siglum}"]`);
-		
+
 		// if _state.xml has XXac/XXpc and newxml has XX
 		const oldac = _state.xml.querySelector(`witness[*|id="${siglum}"] [n="ac"]`);
 		if(oldac && oldteis.has(oldac.getAttribute('xml:id'))) {
@@ -521,8 +521,8 @@ const loadAdditionalGo = (add,e) => {
 		}
 		
 		// if _state.xml has XX and newxml has XXac/XXpc
-		const acpc = wit.getAttribute('n');
-		const parid = wit.parentNode.closest('witness')?.getAttribute('xml:id');
+		const acpc = wit?.getAttribute('n');
+		const parid = wit?.parentNode.closest('witness')?.getAttribute('xml:id');
 		if(acpc !== null && oldteis.has(parid)) {
 			const oldrow = oldteis.get(parid);
 			oldrow.setAttribute('n',parid + 'ac');
@@ -672,7 +672,11 @@ const menuPopulate = function() {
 		},
 		{text: 'Insert column',
 			greyout: Check.anyhighlit,
-			func: edit.insertCol.start
+			func: edit.addCol.insert
+		},
+		{text: 'Append column',
+			greyout: Check.anyhighlit,
+			func: edit.addCol.append
 		},
 		{text: 'Mark insignificant',
 			checkbox: Check.checkbox.bind(null,'insignificant'),

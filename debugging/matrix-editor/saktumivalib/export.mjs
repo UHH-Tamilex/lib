@@ -1,4 +1,4 @@
-import Sanscript from './sanscript.mjs';
+import Transliterate from '../../../js/transliterate.mjs';
 
 const _NodeFilter = {
     SHOW_ALL: 4294967295,
@@ -59,6 +59,7 @@ const exportLaTeX = async (indoc,libRoot,exportRoot) => {
         if(!div) continue;
         const ed = div.querySelector('[type="edition"]') || div;
         if(!ed) continue;
+        if(ed.textContent === '') ed.textContent = ' ';
         //addSpacesInL(ed);
         //removeSpaceNodes(ed);
         
@@ -69,7 +70,7 @@ const exportLaTeX = async (indoc,libRoot,exportRoot) => {
         if(!listApp) continue;
         for(const app of [...listApp.querySelectorAll(':scope > app')].reverse()) {
             const range = rangeFromCoords(
-                app.getAttribute('loc').split(','),
+                app.getAttribute('loc').split(',').map(l => parseInt(l)),
                 ed,
                 new Set(tagFilters)
                 );
@@ -94,6 +95,11 @@ const exportLaTeX = async (indoc,libRoot,exportRoot) => {
     
     for(const lg of doc.querySelectorAll('text lg, text p'))
         normalizeLg(lg,transc);
+
+    for(const l of doc.querySelectorAll('text l')) {
+      if(!l.closest('lg'))
+        normalizeLg(l,transc);
+    }
 
     for(const noteblock of doc.querySelectorAll('standOff[type="notes1"], standOff[type="notes2"], standOff[type="notes3"], standOff[type="notes4"]')) {
             noteblock.setAttributeNS(XMLNS,'lang','en');
@@ -189,7 +195,7 @@ const toScript = (el, transc) => {
           // TODO: distinguish between sa-Latn and sa-Latn-t-sa-Deva
               const clean = cur.data.toLowerCase()
                                     .replaceAll(/(\S)·/g,'$1\u200C');
-              cur.data = Sanscript.t(clean,'iast', script);
+              cur.data = Transliterate.to[script](clean);
           }
           cur.data = cur.data.replaceAll('_','\\_');
       }
@@ -255,6 +261,12 @@ const removeSpaceNodes = node => {
 const rangeFromCoords = (positions, target, ignoretags=new Set()) => {
     const document = target.ownerDocument;
     const range = document.createRange();
+    
+    if(positions[0] === 0 && positions[1] === 0) {
+      range.setStart(target,0);
+      range.setStart(target,1);
+      return range;
+    }
 
     const realNextSibling = (walker) => {
         let cur = walker.currentNode;

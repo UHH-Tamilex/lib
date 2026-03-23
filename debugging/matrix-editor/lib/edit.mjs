@@ -1269,10 +1269,16 @@ edit.ungroup = {
 
 };
 
-edit.insertCol = {
-  start: function() {
-    const insertafter = Math.max([...Find.highlit()]) || _state.maxlemma;
-    edit.insertCol.go({mode: 'append', start: insertafter});
+edit.addCol = {
+  append: function() {
+    const highlit = Find.highlit();
+    const insertafter = highlit.size === 0 ? _state.maxlemma : Math.max(...highlit);
+    edit.addCol.go({mode: 'append', start: insertafter});
+  },
+  insert: () => {
+    const highlit = Find.highlit();
+    const insertbefore = highlit.size === 0 ? 0 : Math.min(...highlit);
+    edit.addCol.go({mode: null, start: insertbefore});
   },
   go: function(opts,doing = 'do') {
     // opts = { mode: 'append' || 'insert', start, xml, html }
@@ -1404,9 +1410,9 @@ edit.removeCol = {
       opts.start = start;
 
     if(doing === 'multido')
-      return [edit.insertCol.go,[opts]];
+      return [edit.addCol.go,[opts]];
     else
-      edit.doStack([edit.insertCol.go,[opts]],doing);
+      edit.doStack([edit.addCol.go,[opts]],doing);
   }
 };
 

@@ -209,7 +209,7 @@ const postProcess = (alignment, filtersmap, meta, targeted) => {
     return [unnorm,norm];
   }));
   const newclean = [];
-  let targetrow;
+  let targetrow = alignment.alignment[0];
   for(const [index, row] of clean.entries()) {
     const id = alignment.sigla.shift();
     if(id === targeted) targetrow = alignment.alignment[index];

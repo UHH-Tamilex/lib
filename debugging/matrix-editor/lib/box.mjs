@@ -1267,7 +1267,10 @@ events.rightClick = e => {
           func: edit.removeCol.start.bind(null,nums)
         },
         {text: 'insert column',
-          func: edit.insertCol.start
+          func: edit.addCol.insert
+        },
+        {text: 'append column',
+          func: edit.addCol.append
         }
         /*                {text: 'insignificant',
        cond: Check.checkbox.bind(null,'insignificant',nums),

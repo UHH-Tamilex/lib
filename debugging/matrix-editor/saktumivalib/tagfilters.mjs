@@ -34,7 +34,7 @@ const tagstoignore = [
     // msdescription
     "locus",
     // transcr
-    //"metamark",
+    "metamark",
     //"orig",
     //"retrace",
     //"sic",

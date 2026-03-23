@@ -300,9 +300,12 @@ const formatReading = str => {
 };
 
 const cleanPunct = (str,posonly = false) => {
-    const endpunct = str.search(/\s*[.,:;!?|\-–—―\d\s]+$/);
-    if(posonly) return endpunct > -1 ? endpunct : str.length;
-    return endpunct > -1 ?
+    let endpunct = str.search(/\s*[.,:!?|\-–—―\d\s]+$/);
+    if(endpunct === -1) // don't mess up XML enttites
+      endpunct = str.search(/(?<!&[\d\w]+);$/);
+    // if endpunct is 0, it means the whole lemma was punctuation, so we want to keep it
+    if(posonly) return endpunct > 0 ? endpunct : str.length;
+    return endpunct > 0 ?
         str.slice(0,endpunct) :
         str;
 };
@@ -327,7 +330,7 @@ const processReadings = (n,otherdocs,otherrdgs,word,opts) => {
 
         if(newstr === lemma) {
             posapp.all.add(id);
-            const realrdg = opts.witnesses && otherrdgs.get(id) ? 
+            const realrdg = opts.witnesses && otherrdgs.get(id)?.length ? 
                 cleanPunct(otherrdgs.get(id)[n]) :
                 trimmed;
             if(realrdg !== lemmatrimmed) {
@@ -507,8 +510,10 @@ const reduceDuplicateWits = (arr,app) => {
 };
 
 const cleanBlock = (blockid,idsel,wit) => {
-    const block = wit.xml.querySelector(`text[corresp="#${wit.name}"] [corresp="#${blockid}"], text[corresp="#${wit.name}"] [${idsel}="${blockid}"]`)?.cloneNode(true) || 
-        wit.xml.querySelector(`text [corresp="#${blockid}"], text [${idsel}="${blockid}"]`)?.cloneNode(true);
+    const block = wit.parent ? 
+      wit.xml.querySelector(`text[corresp="#${wit.parent}"] [corresp="#${blockid}"]`) :
+      wit.xml.querySelector(`text[corresp="#${wit.name}"] [corresp="#${blockid}"], text[corresp="#${wit.name}"] [${idsel}="${blockid}"]`)?.cloneNode(true) || 
+      wit.xml.querySelector(`text [corresp="#${blockid}"], text [${idsel}="${blockid}"]`)?.cloneNode(true);
     if(!block) return;
     for(const el of block.querySelectorAll('l, lg'))
         removeContainer(el);
@@ -624,7 +629,7 @@ const checkAlignment = (words, block, ignoretags = []) => {
     return false;
 };
 
-const getXMLRdgs = (block, alignment, witname, ignoretags) => {
+const getXMLRdgs = (block, blockid, alignment, witname, ignoretags) => {
     if(!block) return;
     if(!block.firstChild) return;
 
@@ -632,7 +637,7 @@ const getXMLRdgs = (block, alignment, witname, ignoretags) => {
     const words = [...alignment.querySelectorAll('w')];
 
     if(!checkAlignment(words,block,ignoretags))
-        logger.log(`${witname} doesn't match alignment.`);
+        logger.log(`${blockid}: ${witname} doesn't match alignment.`);
 
     const ranges = [];
 
@@ -787,7 +792,7 @@ const makeApp = (doc, ed, opts) =>  {
 
     const block = cleanBlock(opts.blockid,idsel,{name: opts.base, xml: ed});
     if(!checkAlignment([...words],block,ignoretags))
-        logger.log(`${opts.base} doesn't match alignment.`);
+        logger.log(`${opts.blockid}: ${opts.base} doesn't match alignment.`);
 
     const otherdocs = [...doc.querySelectorAll(`TEI:not([n="${opts.base}"])`)];
     if(sorter) otherdocs.sort(sorter);
@@ -801,7 +806,7 @@ const makeApp = (doc, ed, opts) =>  {
                 return [docid,null];
             }
             const block = cleanBlock(opts.blockid,idsel,witfile);
-            const rdgs = getXMLRdgs(block,d,witfile.name,ignoretags);
+            const rdgs = getXMLRdgs(block,opts.blockid,d,witfile.name,ignoretags);
             return [docid, rdgs];
         })) : null;
 
@@ -923,9 +928,13 @@ const getWits = (...args) => {
                 name: id,
                 filename: w.getAttribute('source') ||
                           w.closest('[source]')?.getAttribute('source'),
-                type: w.getAttribute('n'),
-                select: w.getAttribute('select')
+                type: w.getAttribute('n')
             };
+            const select = w.getAttribute('select');
+            if(select) {
+              newitem.select = select;    
+              newitem.parent = w.closest('[source]').getAttribute('xml:id');
+            }
             acc.set(id, newitem);
         }
         return acc;
