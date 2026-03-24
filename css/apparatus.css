@@ -29,6 +29,10 @@ section div.wide {
     line-height: 1.3rem;
     position: sticky;
 }
+.apparatus-block[lang^='bo-Tibt'] {
+  line-height: 2rem;
+}
+
 .hidden {
     display: none;
 }
@@ -48,6 +52,9 @@ section div.wide {
     /*margin-right: 2em;*/
     white-space: normal;
 }
+.app::after {
+  content: ' ';
+}
 
 .lem-inline:not(.lem-anchor) {
     /*display: inline-block;*/
@@ -55,6 +62,9 @@ section div.wide {
     text-decoration-style: wavy;
     text-decoration-color: rgb(180,184,196);
     text-decoration-thickness: from-font;
+}
+.lem-inline:not(.lem-anchor)[lang^='bo-Tibt'] {
+  text-underline-offset: -0.3rem;
 }
 
 .lem-anchor {
@@ -80,12 +90,12 @@ section div.wide {
 
 .lem {
     white-space: nowrap;
-    margin-right: 0.4rem;
+    /*margin-right: 0.4rem;*/
 }
 
 .lem .rdg-text {
     font-weight: bold;
-    margin-right: 0.5em;
+    margin-right: 0.4rem;
     white-space: normal;
 }
 
@@ -119,13 +129,15 @@ section div.wide {
     font-variant: normal;
     margin-left: 0.2rem;
     white-space: normal;
+    cursor: text;
+    color: black;
 }
 
 .rdg-alt:before {
     content: ': ';
 }
 
-.mshover {
+.mshover, a:link.mshover {
     text-decoration-line: underline;
     text-decoration-style: dotted;
     text-decoration-thickness: 1px;
@@ -205,7 +217,7 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 #alignment-viewer {
     max-width: 60%;
     max-height: 90vh;
-    overflow: scroll;
+    overflow: auto;
     background-color: #fffff8;
     padding: 10px 10px 10px 0;
     font-size: 1.1rem;
@@ -264,7 +276,7 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 }
 
 .apparatus-block .anchored-note {
-    display: block;
+    display: inline-block;
 }
 
 .anchor.highlit::after {
