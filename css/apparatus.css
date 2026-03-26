@@ -267,16 +267,24 @@ a.alignment-pointer:link, a.alignment-pointer:active {
 .anchor::after, .anchored-note::before {
     content: '*';
     color: rgb(168,81,16);
-    vertical-align: super;
-    cursor: default;
     line-height: normal;
+    cursor: default;
 }
+.anchor::after {
+  vertical-align: super;
+  font-size: 75%;
+}
+.anchored-note::before {
+  margin-right: 1ch;
+}
+
 .anchor[data-n]::after, .anchored-note[data-n]::before {
   content: attr(data-n);
 }
 
 .apparatus-block .anchored-note {
     display: inline-block;
+    margin-bottom: 1ch;
 }
 
 .anchor.highlit::after {
