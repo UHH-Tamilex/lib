@@ -114,6 +114,7 @@
     <xsl:when test="$source">
       <xsl:element name="a">
          <xsl:attribute name="lang">en</xsl:attribute>
+         <xsl:attribute name="target">_blank</xsl:attribute>
           <xsl:attribute name="data-id"><xsl:value-of select="$witness/@id"/></xsl:attribute>
          <xsl:attribute name="class">
           <xsl:text>msid</xsl:text>
@@ -386,6 +387,7 @@
     <xsl:choose>
       <xsl:when test="$source">
         <xsl:element name="a">
+          <xsl:attribute name="target">_blank</xsl:attribute>
           <xsl:attribute name="href">
             <xsl:value-of select="$source"/>
             <xsl:if test="$corresp">
