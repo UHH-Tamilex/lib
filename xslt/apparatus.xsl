@@ -71,7 +71,7 @@
       <xsl:otherwise/>
     </xsl:choose>
   </xsl:param>
-  <xsl:param name="rdggrp" select="local-name() = 'rdgGrp'"/>
+  <xsl:param name="rdggrp" select=".[local-name() = 'rdgGrp']"/>
   <xsl:param name="corresp"/>
   <xsl:call-template name="splitloop">
     <xsl:with-param name="rdggrp" select="$rdggrp"/>
@@ -90,7 +90,7 @@
 
 <xsl:template name="splitwit2">
   <xsl:param name="mss" select="@wit | @select"/>
-  <xsl:param name="rdggrp" select="local-name() = 'rdgGrp'"/>
+  <xsl:param name="rdggrp" select=".[local-name() = 'rdgGrp']"/>
   <xsl:param name="corresp"/>
   <xsl:for-each select="str:split($mss,' ')">
     <xsl:call-template name="splitloop">
@@ -118,7 +118,7 @@
           <xsl:attribute name="data-id"><xsl:value-of select="$witness/@id"/></xsl:attribute>
          <xsl:attribute name="class">
           <xsl:text>msid</xsl:text>
-          <xsl:if test="$rdggrp and ./x:rdg[@type='minor'][contains(concat(normalize-space(@wit), ' '),concat($thisms,' '))]">
+          <xsl:if test="$rdggrp and $rdggrp/x:rdg[@type='minor'][contains(concat(normalize-space(@wit), ' '),concat($thisms,' '))]">
             <xsl:text> mshover</xsl:text>
           </xsl:if>
         </xsl:attribute>
@@ -138,7 +138,7 @@
          <xsl:attribute name="lang">en</xsl:attribute>
          <xsl:attribute name="class">
           <xsl:text>msid</xsl:text>
-          <xsl:if test="$rdggrp and ./x:rdg[@type='minor'][contains(concat(normalize-space(@wit), ' '),concat($thisms,' '))]">
+          <xsl:if test="$rdggrp and $rdggrp/x:rdg[@type='minor'][contains(concat(normalize-space(@wit), ' '),concat($thisms,' '))]">
             <xsl:text> mshover</xsl:text>
           </xsl:if>
          </xsl:attribute>
@@ -538,14 +538,14 @@
                   <xsl:call-template name="splitwit2">
                     <xsl:with-param name="mss" select="$lemgrp/@select"/>
                     <xsl:with-param name="corresp" select="$corresp"/>
-                    <xsl:with-param name="rdggrp"/>
+                    <xsl:with-param name="rdggrp" select="$lemgrp"/>
                   </xsl:call-template>
                 </xsl:when>
                 <xsl:otherwise>
                   <xsl:call-template name="splitwit">
                     <xsl:with-param name="mss" select="concat($lemgrp/@select,' ')"/>
                     <xsl:with-param name="corresp" select="$corresp"/>
-                    <xsl:with-param name="rdggrp"/>
+                    <xsl:with-param name="rdggrp" select="$lemgrp"/>
                   </xsl:call-template>
                 </xsl:otherwise>
               </xsl:choose>
@@ -559,7 +559,7 @@
 
 <xsl:template name="reading">
   <xsl:param name="corresp" select="ancestor::*[@corresp]/@corresp"/>
-  <xsl:param name="rdggrp" select="local-name() = 'rdgGrp'"/>
+  <xsl:param name="rdggrp" select=".[local-name() = 'rdgGrp']"/>
   <span>
     <xsl:attribute name="class">rdg</xsl:attribute>
     <span>
@@ -591,13 +591,13 @@
         <xsl:when test="$nativesplit">
           <xsl:call-template name="splitwit2">
             <xsl:with-param name="corresp" select="$corresp"/>
-            <xsl:with-param name="rdggrp"/>
+            <xsl:with-param name="rdggrp" select="$rdggrp"/>
           </xsl:call-template>
         </xsl:when>
         <xsl:otherwise>
           <xsl:call-template name="splitwit">
             <xsl:with-param name="corresp" select="$corresp"/>
-            <xsl:with-param name="rdggrp"/>
+            <xsl:with-param name="rdggrp" select="$rdggrp"/>
           </xsl:call-template>
         </xsl:otherwise>
       </xsl:choose>
