@@ -20,6 +20,10 @@ section div.wide {
     background: none;
 }
 
+.text-block.nolemmata .anchor {
+  display: none;
+}
+
 .apparatus-block {
     top: 0;
     padding-top: 1rem;

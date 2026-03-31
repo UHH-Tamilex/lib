@@ -1,5 +1,5 @@
 import { filterAll, unfilterAll } from './normalize.mjs';
-import { slpish, wylie, aksaraSplit, graphemeSplit, charSplit } from './split.mjs';
+import { slpish, wylish, aksaraSplit, graphemeSplit, charSplit } from './split.mjs';
 import { parseString } from './browserutils.mjs';
 import Sanscript from './sanscript.mjs';
 import EwtsConverter from './EwtsConverter.mjs';
@@ -81,74 +81,74 @@ const reduceDuplicateWits = (arr,app) => {
 };
 
 const scriptandfilter = (el,type,filters,lang) => {
-    const clone = el.cloneNode(true);
-    const dels = clone.querySelectorAll('del');
-    const adds = clone.querySelectorAll('add');
-    const rdgs = clone.querySelectorAll('rdg');
-    if(type === 'ac') {
-        for(const add of adds) add.remove();
-        for(const rdg of rdgs) rdg.remove();
-    }
-    else if(type === 'pc') {
-        for(const del of dels) del.remove();
-        for(const rdg of rdgs) rdg.remove();
-    }
-    else if(type === 'lem') { // pc lemma reading
-        for(const del of dels) del.remove();
-        for(const rdg of rdgs) rdg.remove();
-    }
-    else if(type !== undefined) {
-        const typearr = !Array.isArray(type) ? [type] : type;
-        for(const del of dels) del.remove(); // pc variant reading
-        for(const app of clone.querySelectorAll('app')) {
-            const lem = app.querySelector('lem');
-            const rdgs = app.querySelectorAll('rdg');
-            const witaliases = typearr.length === 1 ? typearr :
-              reduceDuplicateWits(typearr,app);
+  const clone = el.cloneNode(true);
+  const dels = clone.querySelectorAll('del');
+  const adds = clone.querySelectorAll('add');
+  const rdgs = clone.querySelectorAll('rdg');
+  if(type === 'ac') {
+      for(const add of adds) add.remove();
+      for(const rdg of rdgs) rdg.remove();
+  }
+  else if(type === 'pc') {
+      for(const del of dels) del.remove();
+      for(const rdg of rdgs) rdg.remove();
+  }
+  else if(type === 'lem') { // pc lemma reading
+      for(const del of dels) del.remove();
+      for(const rdg of rdgs) rdg.remove();
+  }
+  else if(type !== undefined) {
+      const typearr = !Array.isArray(type) ? [type] : type;
+      for(const del of dels) del.remove(); // pc variant reading
+      for(const app of clone.querySelectorAll('app')) {
+          const lem = app.querySelector('lem');
+          const rdgs = app.querySelectorAll('rdg');
+          const witaliases = typearr.length === 1 ? typearr :
+            reduceDuplicateWits(typearr,app);
 
-            let foundreading = false;
-            for(const rdg of rdgs) {
-                const wits = rdg.getAttribute('wit')?.split(/\s+/);
-                if(!wits) {
-                  rdg.remove();
-                  continue;
-                }
-                if(witshave(wits,witaliases))
-                  foundreading = true;
-                else
-                  rdg.remove();
-            }
-            if(foundreading) lem.remove();
-        }
-    }
-    const str = clone.textContent;
+          let foundreading = false;
+          for(const rdg of rdgs) {
+              const wits = rdg.getAttribute('wit')?.split(/\s+/);
+              if(!wits) {
+                rdg.remove();
+                continue;
+              }
+              if(witshave(wits,witaliases))
+                foundreading = true;
+              else
+                rdg.remove();
+          }
+          if(foundreading) lem.remove();
+      }
+  }
+  const str = clone.textContent;
 
-    const script = detectScript(str);
-    
-    const charset = lang === 'bo' || lang === 'bo-Tibt' ? wylie : slpish;
-    
-    let transliterated;
-    if(script === 'tibetan') {
-        const ewts = new EwtsConverter({fix_spacing: true, pass_through: true,fix_sloppy: false});
-        transliterated = ewts.to_ewts(str.toLowerCase()
-                   .replaceAll('ༀ','om̐'))
-                   .replaceAll(/[rl]-[iI]/g,(m) => {
-                        switch (m) {
-                            case 'r-i':
-                                return 'ṛ';
-                            case 'r-I':
-                                return 'ṝ';
-                            case 'l-i': 
-                                return 'l̥';
-                            default:
-                                return 'l̥̄';
-                        }
-                   }).replaceAll(/([gṭḍbd])\+h/g,'$1h');
-    }
-    else
-        //transliterated = script !== 'iast' ? Sanscript.t(str,script,'iast') : str;
-        transliterated = Sanscript.t(str.toLowerCase(),script,'slpish');
-    
+  const script = detectScript(str);
+  
+  const charset = lang === 'bo' || lang.startsWith('bo-') ? wylish : slpish;
+  
+  let transliterated;
+  if(script === 'tibetan') {
+      const ewts = new EwtsConverter({fix_spacing: true, pass_through: true,fix_sloppy: false});
+      transliterated = ewts.to_ewts(str.toLowerCase()
+                 .replaceAll('ༀ','om̐'))
+                 .replaceAll(/[rl]-[iI]/g,(m) => {
+                      switch (m) {
+                          case 'r-i':
+                              return 'ṛ';
+                          case 'r-I':
+                              return 'ṝ';
+                          case 'l-i': 
+                              return 'l̥';
+                          default:
+                              return 'l̥̄';
+                      }
+                 }).replaceAll(/([gṭḍbd])\+h/g,'$1h');
+  }
+  else
+    //transliterated = script !== 'iast' ? Sanscript.t(str,script,'iast') : str;
+    transliterated = charset === wylish ? Sanscript.t(str.toLowerCase(),'wylie','wylish') :
+                                         Sanscript.t(str.toLowerCase(),script,'slpish');
     return [...filterAll(transliterated.replaceAll(/\s+/g,' '),filters),charset];
 };
 
@@ -578,6 +578,19 @@ const cleanup3 = (xmldoc,meta) => {
 };
 
 const cleanup1 = arr => {
+    // move open brackets and punctuation to the beginning of a cell
+    const opening = /[\[(‘“]$/;
+    for(let n=0;n<arr.length;n++) {
+        const cell = arr[n];
+        if(n < arr.length-1) {
+            const endpunct = cell.search(opening);
+            if(endpunct > -1) {
+                arr[n+1] = cell.slice(endpunct) + arr[n+1];
+                arr[n] = cell.slice(0,endpunct);
+            }
+        }
+    }
+    /*
     // move initial space to first non-empty cell
     if(arr[0] !== '' && arr[0].trim() === '') {
       const firstnonempty = (() => {
@@ -591,18 +604,7 @@ const cleanup1 = arr => {
         arr[0] = '';
       }
     }
-    // move open brackets and punctuation to the beginning of a cell
-    const opening = /[\[(‘“]$/;
-    for(let n=0;n<arr.length;n++) {
-        const cell = arr[n];
-        if(n < arr.length-1) {
-            const endpunct = cell.search(opening);
-            if(endpunct > -1) {
-                arr[n+1] = cell.slice(endpunct) + arr[n+1];
-                arr[n] = cell.slice(0,endpunct);
-            }
-        }
-    }
+    */
     // TODO: check for doubled consonants separated by space, e.g.
     //       A: maṇakkum malai vs. B: maṇakku m_alai
     //       and shift the consonant in B one cell
@@ -615,12 +617,13 @@ const cleanup1 = arr => {
 };
 
 const untransliterate = (str, lang) => {
-  if(lang === 'bo') return str;
+  const from = lang === 'bo' || lang.startsWith('bo-') ? 'wylish' : 'slpish';
+  const targ = lang === 'bo' || lang.startsWith('bo-') ? 'wylie' : 'iast';
   if(Array.isArray(str))
       for(let m=0;m<str.length;m++)
-        str[m] = Sanscript.t(str[m],'slpish','iast');
+        str[m] = Sanscript.t(str[m],from,targ);
   else
-    str = Sanscript.t(str,'slpish','iast');
+    str = Sanscript.t(str,from,targ);
   return str;
 };
 
@@ -631,7 +634,7 @@ const postProcess = (alignment,filtersmap,meta,parser=parseString) => {
     for(const row of joined) {
         const id = alignment.sigla.shift();
         const f = filtersmap.get(id);
-        const unfiltered = cleanup1(unfilterAll([...row],f));
+        const unfiltered = cleanup1(unfilterAll(row,f));
         const ret = new Array(unfiltered.length);
         for(let n=0;n<unfiltered.length;n++) {
             if(unfiltered[n] === row[n])

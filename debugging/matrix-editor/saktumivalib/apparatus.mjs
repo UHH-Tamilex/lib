@@ -15,19 +15,25 @@ const mergeGroups = doc => {
           el.parentNode.removeChild(el);
           continue;
         } 
+        let ignorethis = el.firstElementChild.hasAttribute('ignored');
         const firstw = el.removeChild(el.firstElementChild);
         while(el.firstElementChild) {
+            const nextw = el.firstElementChild;
+
+            if(ignorethis && !nextw.hasAttribute('ignored')) ignorethis = false;
+
             const norm1 = firstw.hasAttribute('lemma') ? 
                 firstw.getAttribute('lemma') : firstw.textContent;
-            const norm2 = el.firstElementChild.hasAttribute('lemma') ?
-                el.firstElementChild.getAttribute('lemma') : el.firstElementChild.textContent;
+            const norm2 = nextw.hasAttribute('lemma') ?
+                nextw.getAttribute('lemma') : nextw.textContent;
             firstw.setAttribute('lemma',norm1 + norm2);
-            while(el.firstElementChild.firstChild)
-                firstw.appendChild(el.firstElementChild.firstChild);
-            el.firstElementChild.remove();
+            while(nextw.firstChild)
+                firstw.appendChild(nextw.firstChild);
+            nextw.remove();
         }
         if(firstw.getAttribute('lemma') === firstw.textContent)
             firstw.removeAttribute('lemma');
+        if(ignorethis) firstw.setAttribute('ignored','1');
         el.parentNode.insertBefore(firstw,el);
         el.parentNode.removeChild(el);
     }
@@ -300,7 +306,7 @@ const formatReading = str => {
 };
 
 const cleanPunct = (str,posonly = false) => {
-    let endpunct = str.search(/\s*[.,:!?|\-–—―\d\s]+$/);
+    let endpunct = str.search(/\s*[.,:!?|\-–—―\d\s\/]+$/);
     if(endpunct === -1) // don't mess up XML enttites
       endpunct = str.search(/(?<!&[\d\w]+);$/);
     // if endpunct is 0, it means the whole lemma was punctuation, so we want to keep it
@@ -322,6 +328,9 @@ const processReadings = (n,otherdocs,otherrdgs,word,opts) => {
     for(const otherdoc of otherdocs) {
         const id = otherdoc.getAttribute('n');
         const otherword = otherdoc.querySelectorAll('w')[n];
+
+        if(otherword.hasAttribute('ignored')) continue;
+
         const trimmed = cleanPunct(otherword.textContent);
         const normattr = otherword.getAttribute('lemma');
         const normword = normattr ? normattr : trimmed;
@@ -613,16 +622,21 @@ const cleanBlock = (blockid,idsel,wit) => {
     block.normalize();
     return block;
 };
+
+const cleanText = (node, ignoretags) => {
+  const blockclone = node.cloneNode(true);
+  if(ignoretags.size > 0) {
+      for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
+          tag.remove();
+  }
+  return blockclone.textContent.replaceAll(/\s+/g,' ').toLowerCase();
+};
+
 const checkAlignment = (words, block, ignoretags = []) => {
     const aligntext = words.reduce((acc,cur) => acc + cur.textContent,'');
                            //.replaceAll('‡','')
                            //.replaceAll(/\s+/g,' '); // for spaces around gaps
-    const blockclone = block.cloneNode(true);
-    if(ignoretags.size > 0) {
-        for(const tag of blockclone.querySelectorAll([...ignoretags].join(',')))
-            tag.remove();
-    }
-    const blocktext = blockclone.textContent.replaceAll(/\s+/g,' ').toLowerCase();
+    const blocktext = cleanText(block,ignoretags);
     if(aligntext === blocktext) return true;
     console.log(aligntext);
     console.log(blocktext);
@@ -761,10 +775,80 @@ const collectWitGroups = listWit => {
 	});
 };
 
+const markIgnoredGaps = (doc,base,maxlen) => {
+  const teis = doc.querySelectorAll('TEI');
+  const basews = base.querySelectorAll('w');
+
+  const allgroups = [];
+
+  for(const tei of teis) {
+    if(tei === base) continue;
+    const thisn = tei.getAttribute('n');
+    const text = tei.querySelector('text');
+    const ws = text.querySelectorAll('w');
+    let curgroup = [];
+    let curlen = 0;
+    let groupstart = 0;
+    let index = 0;
+    for(let n=0;n<ws.length;n++) {
+      const textlength = basews[n].textContent.length;
+      const newindex = index + textlength;
+
+      if(ws[n].textContent.length > 0) {
+        if(curlen > maxlen) {
+          for(const el of curgroup)
+            el.setAttribute('ignored','1');
+          allgroups.push({start: groupstart, end: newindex, witness: thisn});
+        }
+        curgroup = [];
+        curlen = 0;
+        index = newindex;
+        continue;
+      }
+      if(curgroup.length === 0) groupstart = index;
+
+      curgroup.push(ws[n]);
+      const lem = basews[n].getAttribute('lemma');
+      const wlen = lem ? lem.length : textlength;
+      curlen = curlen + wlen;
+      index = newindex;
+    }
+  }
+  return allgroups;
+};
+
+const makeOmNotes = (objs, text, ignoretags) => {
+  const truncate = str => {
+    if(str.length < 20) return str;
+    const clean = cleanPunct(str).replaceAll(/^["‘“|\/\d]/g,'');
+    const firstspace = clean.indexOf(' ');
+    const lastspace = clean.lastIndexOf(' ');
+    if(firstspace !== lastspace && firstspace !== -1)
+      return clean.slice(0,firstspace) + '… ' + clean.slice(lastspace + 1);
+    return str;
+  };
+  
+  if(objs.length === 0) return '';
+
+  const clean = cleanText(text,ignoretags);
+  let ret = '<listApp type="omissions">';
+  for(const obj of objs) {
+    ret = ret + `<app loc="${obj.start},${obj.end}"><lem>` + 
+      truncate(clean.slice(obj.start, obj.end)) + 
+      `</lem><rdg wit="#${obj.witness}"/></app>`;
+  }
+  return ret + '</listApp>';
+};
+
 const makeApp = (doc, ed, opts) =>  {
   logger.clear();
   const base = doc.querySelector(`TEI[n="${opts.base}"]`);
   if(!base) return {error: `${opts.base} not found in alignment file.`};
+  
+  const omNotes = (opts.hasOwnProperty('maxomlength') && opts.maxomlength !== null) ?
+    markIgnoredGaps(doc,base,opts.maxomlength) :
+    [];
+
   if(opts.mergerdgs) mergeGroups(doc);
   cleanupGroups(base);
   
@@ -811,6 +895,7 @@ const makeApp = (doc, ed, opts) =>  {
         })) : null;
 
     let ret = '';
+    ret = ret + makeOmNotes(omNotes,block,ignoretags);
     let start = 0;
     for(let n=0; n<words.length;n++) {
 
@@ -913,7 +998,7 @@ const addApparatus = (doc, listappstr, warnings, alignxml, block, alignmentfn) =
         collapseContent: true,
         lineSeparator: '\n'
     };
-    const listappel = listappstr ? xmlFormat(`<listApp>${listappstr}</listApp>`,formatopts) : '';
+    const listappel = listappstr ? '\n' + xmlFormat(`<listApp>${listappstr}</listApp>`,formatopts) : '';
     const warncomm = warnings.length === 0 ? '' :
       '\n<!--Warnings\n' + warnings.join('\n') + '\n-->';
     docstandoff.innerHTML = xmlFormat(`<interp type="normalization"><desc type="tagfilters">${tagfilters}</desc></interp>`,formatopts) + warncomm + listappel;

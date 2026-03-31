@@ -222,6 +222,8 @@ const getFile = async (e) => {
         base: Apparatuser.sharedState.curDoc.querySelector(`[*|id="${blockid}"]`).closest('text').getAttribute('corresp')?.replace(/^#/,'') || siglum,
         normlem: document.getElementById('normlem').checked, 
         mergerdgs: document.getElementById('mergerdgs').checked,
+        maxomlength: document.getElementById('maxom').checked ?
+          document.getElementById('maxomlen').value : null,
         blockid: blockid,
         witnesses: cachedwitnesses
     });

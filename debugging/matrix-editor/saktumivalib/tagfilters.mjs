@@ -25,6 +25,7 @@ const tagstoignore = [
     "num",
     //"pb",
     //"ptr",
+    "rt",
     //"seg",
     //"unclear",
     // gaiji

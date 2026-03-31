@@ -223,7 +223,7 @@ const postProcess = (alignment, filtersmap, meta, targeted) => {
       newclean.push({siglum: id, text: newrow});
       continue;
     }
-    const unfiltered = cleanup1(unfilterAll([...row],f));
+    const unfiltered = cleanup1(unfilterAll(row,f));
     const ret = new Array(unfiltered.length);
     for(let n=0;n<unfiltered.length;n++) {
       if(unfiltered[n] === row[n])

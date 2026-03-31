@@ -54,7 +54,14 @@ const slpish = new CharSet({
 
 const wylie = new CharSet({
     vowels: ['a','ā','i','ī','u','ū','o','ō','e','ē','ai','au','ṛ','ṝ','l̥','l̥̄'],
-    consonants: ['\'','k','kh','g','gh','ng','c','ch','j','jh','nya','ṭ','ṭh','ḍ','ḍh','ṇ','t','th','d','dh','n','p','ph','b','bh','m','ts','tsh','dz','wa','zh','z','y','r','l','sh','ś','ṣ','s','h'],
+    consonants: ['\'','k','kh','g','gh','ng','c','ch','j','jh','ny','ṭ','ṭh','ḍ','ḍh','ṇ','t','th','d','dh','n','p','ph','b','bh','m','ts','tsh','dz','w','zh','z','y','r','l','sh','ṣ','s','h'],
+    postvowels: ['ṃ','ḥ'],
+    gap: '‡'
+});
+
+const wylish = new CharSet({
+    vowels: ['a','ā','i','ī','u','ū','o','ō','e','ē','E','O','ṛ','ṝ','l̥','l̥̄'],
+    consonants: ['\'','k','K','g','G','ṅ','c','C','j','J','ñ','ṭ','Ṭ','ḍ','Ḍ','ṇ','t','T','d','D','n','p','P','b','B','m','ŧ','Ŧ','đ','w','Z','z','y','r','l','ś','ṣ','s','h'],
     postvowels: ['ṃ','ḥ'],
     gap: '‡'
 });
@@ -195,4 +202,4 @@ console.log(graphemeSplit(teststr, iast));
 console.log(aksaraSplit(teststr, iast));
 */
 
-export { spaceSplit, aksaraSplit, charSplit, graphemeSplit, iast, slpish, wylie, getType };
+export { spaceSplit, aksaraSplit, charSplit, graphemeSplit, iast, slpish, wylie, wylish, getType };

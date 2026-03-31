@@ -403,7 +403,7 @@ const filters = [
     {
         name: 'internal nasal variants',
         search: '[mnṅñṇ](?=[pbvmdtnṭḍcjkgsś])',
-        search_splish: '[mnṅñṇ](?=[pPbBvmdDtTnṭṬḍḌcCjJkKgGsś])',
+        search_slpish: '[mnṅñṇ](?=[pPbBvmdDtTnṭṬḍḌcCjJkKgGsś])',
         replace: () => 'ṃ',
         group: 'sanskrit'
     },
@@ -665,10 +665,18 @@ const replaceAll = (filter, str) => {
     }
     return [newstr, filtered];
 };
+
+const firstNonEmpty = arr => {
+  for(let n=0;n<arr.length;n++)
+    if(arr[n].length > 0) return n;
+  return 0;
+};
+
 const unreplaceAll = (strs, fs) => {
     //fs: [{index: num, newtext: str, oldtext: str}]
-    const ret = [];
-    let tail = strs;
+    const init = firstNonEmpty(strs);
+    const ret = init > 0 ? strs.slice(0,init) : [];
+    let tail = init > 0 ? strs.slice(init) : strs;
     let offset = 0;
     while(fs.length > 0) {
         const match = fs.shift();
@@ -810,17 +818,11 @@ const filterAll = (str,filterindices = [...filters.keys()]) => {
 };
 
 const unfilterAll = (strs,filtered) => {
-    let retstrs = strs;
+    let retstrs = [...strs];
     filtered.reverse();
     for(const f of filtered) {
         retstrs = unreplaceAll(retstrs,f);
     }
-    /*
-    retstrs = retstrs.map(s => Array.isArray(s) ? 
-        s.map(ss => ss.replaceAll(/[KGCJṬḌTDPB]/g,(m) => m[0].toLowerCase() + 'h')) :
-        s.replaceAll(/[KGCJṬḌTDPB]/g,(m) => m[0].toLowerCase() + 'h')
-    );
-    */
     return retstrs;
 };
 //console.log(Normalizer(['a','r','t','th','ī','s','ā','r','tth','o ','p','a','t','ś','a','l','ī','m','artthisārttho ','pagacchati']));

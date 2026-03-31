@@ -352,7 +352,7 @@ const markLemmata = (par = document) => {
     const apparati = par.querySelectorAll('div.apparatus-block');
     for(const apparatus of apparati) {
 
-        const lemmata = apparatus.querySelectorAll('.lem[data-loc]');
+        const lemmata = apparatus.querySelectorAll(':scope > .app .lem[data-loc]');
         if(lemmata.length === 0) continue;
         const left = apparatus.parentElement.querySelector('.text-block');
         const ignoretags = getIgnoreTags(apparatus);
@@ -544,22 +544,21 @@ const Events = {
             const numnotes = anchor.closest('.wide').querySelectorAll(`.anchored-note[data-n='${anchor.dataset.n}']`);
             const notes = [...idnotes,...numnotes];
             if(notes.length > 0) {
-                for(const note of notes) {
-                  anchor.classList.add('highlit');
-                  note.classList.add('highlit');
-                  anchor.addEventListener('mouseout',() => {
-                      anchor.classList.remove('highlit');
-                      note.classList.remove('highlit');
-                  },{once: true});
-                  delayedScrollIntoView(note,anchor);
+              for(const note of notes) {
+                anchor.classList.add('highlit');
+                note.classList.add('highlit');
+                anchor.addEventListener('mouseout',() => {
+                    anchor.classList.remove('highlit');
+                    note.classList.remove('highlit');
+                },{once: true});
+                delayedScrollIntoView(note,anchor);
               }
           }
         }
+
         const note = e.target.closest('.anchored-note');
         if(note) {
-            const anchor = note.dataset.target ? 
-              document.getElementById(note.dataset.target.replace(/^#/,'')) :
-              note.closest('.wide').querySelector(`.anchor[data-n='${note.dataset.n}']`);
+            const anchor = note.dataset.target ? document.getElementById(note.dataset.target.replace(/^#/,'')) : note.closest('.wide').querySelector(`.anchor[data-n='${note.dataset.n}']`);;
             if(anchor) {
                 anchor.classList.add('highlit');
                 note.classList.add('highlit');
@@ -637,7 +636,6 @@ const init = () => {
       for(const teitext of document.querySelectorAll('.teitext'))
         teitext.classList.add('negapp');
     }
-    if(!params.has('nounderline')) markLemmata();
 
     const apparatusbutton = document.getElementById('apparatusbutton');
     if(apparatusbutton) {
@@ -646,10 +644,31 @@ const init = () => {
             apparatusbutton.style.display = 'block';
     }
 
+    renumberNotes();
+
+    if(!params.has('nounderline')) markLemmata();
+
     // listen for refresh events
     (new BroadcastChannel('apparatus')).addEventListener('message', e => {
         markLemmata(document.getElementById(e.data.id));
     });
+};
+
+/* take <anchor>s with @xml:id and change them to <anchor>s with @n */
+const renumberNotes = () => {
+  console.log('huh');
+  let n = 1;
+  for(const anchor of document.querySelectorAll('.anchor')) {
+    const id = anchor.id;
+    const notes = document.querySelectorAll(`.anchored-note[data-target="#${id}"]`);
+    anchor.dataset.n = n;
+    anchor.removeAttribute('id');
+    for(const note of notes) {
+      note.dataset.n = n;
+      note.removeAttribute('data-target');
+    }
+    n = n + 1;
+  }
 };
 
 const ApparatusViewer = {

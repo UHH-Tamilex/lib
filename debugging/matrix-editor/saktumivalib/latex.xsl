@@ -23,9 +23,9 @@
 
 <xsl:template name="langstart">
     <xsl:choose>
-        <xsl:when test="./@xml:lang='ta'"><xsl:text>\texttamil{</xsl:text></xsl:when>
-        <xsl:when test="./@xml:lang='sa'"><xsl:text>\textsanskrit{</xsl:text></xsl:when>
-        <xsl:when test="./@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:when>
+      <xsl:when test="./@xml:lang='ta'"><xsl:text>\foreignlanguage{tamil}{</xsl:text></xsl:when>
+      <xsl:when test="./@xml:lang='sa'"><xsl:text>\foreignlanguage{sanskrit}{</xsl:text></xsl:when>
+      <xsl:when test="./@xml:lang='en'"><xsl:text>\foreignlanguage{english}{</xsl:text></xsl:when>
         <xsl:otherwise/>
     </xsl:choose>
 </xsl:template>
@@ -37,14 +37,25 @@
         <xsl:otherwise/>
     </xsl:choose>
 </xsl:template>
+<xsl:variable name="listwit">
+   <xsl:variable name="witness" select="//x:witness"/>
+   <xsl:for-each select="$witness">
+    <x:witness>
+      <xsl:attribute name="hashid"><xsl:value-of select="concat('#',@xml:id)"/></xsl:attribute> 
+      <xsl:copy-of select="x:abbr"/>
+    </x:witness>
+   </xsl:for-each>
+</xsl:variable>
+<xsl:variable name="witlist" select="exsl:node-set($listwit)"/>
 <xsl:template name="splitwit">
-    <xsl:param name="mss" select="@wit | @select"/>
-    <xsl:variable name="msstring" select="substring-before(
-                            concat($mss,' '),
-                          ' ')"/>
-
-    <xsl:variable name="cleanstr" select="substring-after($msstring,'#')"/>
-    <xsl:variable name="witness" select="//x:listWit//x:witness[@xml:id=$cleanstr]"/>
+    <xsl:param name="mss">
+      <xsl:choose>
+        <xsl:when test="@wit"><xsl:value-of select="concat(@wit,' ')"/></xsl:when>
+        <xsl:when test="@select"><xsl:value-of select="concat(@select,' ')"/></xsl:when>
+      </xsl:choose>
+    </xsl:param>
+    <xsl:variable name="msstring" select="substring-before($mss,' ')"/>
+    <xsl:variable name="witness" select="$witlist/x:witness[@hashid=$msstring]"/>
     <xsl:variable name="siglum" select="$witness/x:abbr/node()"/>
              <!-- TODO: subvariants
              <xsl:variable name="spacestring">
@@ -67,11 +78,11 @@
             <xsl:apply-templates select="$siglum"/>
         </xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="$cleanstr"/>
+            <xsl:value-of select="substring-after($msstring,'#')"/>
         </xsl:otherwise>
     </xsl:choose>
     <xsl:variable name="nextstr" select="substring-after($mss, ' ')"/>
-    <xsl:if test="string-length($nextstr)">
+    <xsl:if test="$nextstr != ''">
         <xsl:text> </xsl:text>
         <xsl:call-template name="splitwit">
             <xsl:with-param name="mss" select="$nextstr"/>
@@ -81,7 +92,7 @@
 
 <xsl:template match="x:TEI">
     <xsl:text>\documentclass[12pt]{extarticle}
-\usepackage{polyglossia,fontspec,xunicode}
+\usepackage{fontspec,xunicode}
 \usepackage[normalem]{ulem}
 \usepackage[noend,noeledsec,noledgroup]{reledmac}
 \usepackage{reledpar}
@@ -100,53 +111,44 @@
 \renewcommand{\headrulewidth}{0pt}
 
 \arrangementX[A]{paragraph}
-\renewcommand*{\thefootnoteA}{\textenglish{\arabic{footnoteA}}}
+\renewcommand*{\thefootnoteA}{\foreignlanguage{english}{\arabic{footnoteA}}}
 \arrangementX[B]{paragraph}
-\renewcommand*{\thefootnoteB}{\textenglish{\Roman{footnoteB}}}
+\renewcommand*{\thefootnoteB}{\foreignlanguage{english}{\Roman{footnoteB}}}
 \arrangementX[C]{paragraph}
-\renewcommand*{\thefootnoteC}{\textenglish{\alph{footnoteC}}}
+\renewcommand*{\thefootnoteC}{\foreignlanguage{english}{\alph{footnoteC}}}
 \arrangementX[D]{paragraph}
-\renewcommand*{\thefootnoteD}{\textenglish{\roman{footnoteD}}}
+\renewcommand*{\thefootnoteD}{\foreignlanguage{english}{\roman{footnoteD}}}
 
 \Xarrangement[A]{paragraph}
 \Xnotenumfont[A]{\bfseries}
 \Xlemmafont[A]{\bfseries}
 
-\setdefaultlanguage{english}
+\usepackage[provide=*, sanskrit]{babel}
 \setmainfont{Brill}
     </xsl:text>
     <xsl:choose>
       <xsl:when test="$export-lang = 'tamil'">
-      <xsl:text>
-  \setotherlanguage{tamil}
-      </xsl:text>
       <xsl:choose>
         <xsl:when test="$export-script = 'tamil'">
 % Download the TST Tamil font here: https://github.com/UHH-Tamilex/lib/blob/main/fonts/TSTTamil.otf
-\newfontfamily\tamilfont{TSTTamil.otf}[Script=Tamil,Ligatures=Historic,BoldFont={NotoSerifTamil-Bold.ttf}]
+\babelfont[tamil]{rm}{TSTTamil.otf}[Script=Tamil,Ligatures=Historic,BoldFont={NotoSerifTamil-Bold.ttf}]
 \newICUfeature{AllAlternates}{1}{+aalt}
-\newcommand{\vowelsign}{\tamilfont\addfontfeature{AllAlternates=1}}
-\tamilfont\fontdimen2\font=0.8em
-\tamilfont\large\fontdimen2\font=0.5em
+\newcommand{\vowelsign}{\foreignlanguage{tamil}\addfontfeature{AllAlternates=1}}
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>
-\newfontfamily\tamilfont{Brill-Roman.ttf}[BoldFont={Brill-Bold.ttf}]
+\babelfont[tamil]{rm}{Brill-Roman.ttf}[BoldFont={Brill-Bold.ttf}]
           </xsl:text>
         </xsl:otherwise>
         </xsl:choose>
     </xsl:when>
     <xsl:when test="$export-lang = 'sanskrit'">
-        <xsl:text>
-\setotherlanguage{sanskrit}
-      </xsl:text>
       <xsl:choose>
         <xsl:when test="$export-script = 'devanagari'">
 % Download Pedantic Devangari here: https://github.com/chchch/PedanticIndic/tree/master/PedanticDevanagari
-\newfontfamily\sanskritfont{PedanticDevangari.otf}
-\newfontfamily\sanskritfont{PedanticDevanagariLight.otf}[Script=Devanagari,BoldFont={PedanticDevanagariBold.otf}]
+\babelfont[sanskrit]{rm}{PedanticDevanagariLight.otf}[Script=Devanagari,BoldFont={PedanticDevanagariBold.otf}]
 \newICUfeature{AllAlternates}{1}{+aalt}
- \newcommand{\vowelsign}{\sanskritfont\addfontfeature{AllAlternates=1}}
+  \newcommand{\vowelsign}{\foreignlanguage{sanskrit}\addfontfeature{AllAlternates=1}}
         </xsl:when>
         <xsl:otherwise>
         <xsl:text>
@@ -323,7 +325,7 @@
 </xsl:template>
 
 <xsl:template match="x:unclear">
-<xsl:text>\textenglish{\color{gray}(}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{gray})}</xsl:text>
+<xsl:text>\foreignlanguage{english}{\color{gray}(}</xsl:text><xsl:apply-templates/><xsl:text>\foreignlanguage{english}{\color{gray})}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:subst">
@@ -350,7 +352,7 @@
 </xsl:template>
 
 <xsl:template match="x:sic">
-    <xsl:text>\textenglish{\color{gray}¿}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{gray}?}</xsl:text>
+    <xsl:text>\foreignlanguage{english}{\color{gray}¿}</xsl:text><xsl:apply-templates/><xsl:text>\foreignlanguage{english}{\color{gray}?}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:surplus">
@@ -371,7 +373,7 @@
 </xsl:template>
 
 <xsl:template match="x:lb">
-    <xsl:text>\textenglish{\color{gray}⸤}</xsl:text>
+    <xsl:text>\foreignlanguage{english}{\color{gray}⸤}</xsl:text>
     <!--
         <xsl:text>\textsc{(</xsl:text>
         <xsl:choose>
@@ -387,7 +389,7 @@
 </xsl:template>
 
 <!--xsl:template match="x:pb">
-    <xsl:text>\textenglish{\color{gray}⎡}</xsl:text>
+    <xsl:text>\foreignlanguage{english}{\color{gray}⎡}</xsl:text>
 </xsl:template-->
 <xsl:template match="x:pb"/>
 
@@ -416,7 +418,7 @@
 </xsl:template>
 
 <xsl:template match="x:gap">
-    <xsl:text>\textenglish{{\color{gray}[}</xsl:text>
+    <xsl:text>\foreignlanguage{english}{{\color{gray}[}</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -437,7 +439,7 @@
 </xsl:template>
 
 <xsl:template match="x:space">
-    <xsl:text>\textenglish{{\color{gray}[}</xsl:text>
+    <xsl:text>\foreignlanguage{english}{{\color{gray}[}</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -508,8 +510,12 @@
     <xsl:apply-templates/>
 </xsl:template>
 
-<xsl:template match="x:item/x:title">
-    <xsl:text>\emph{</xsl:text><xsl:apply-templates/><xsl:text>}</xsl:text>
+<xsl:template match="x:title">
+    <xsl:text>\emph{</xsl:text>
+    <xsl:call-template name="langstart"/>
+    <xsl:apply-templates/>
+    <xsl:call-template name="langend"/>
+    <xsl:text>}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:anchor[@type='lemma']">
@@ -519,30 +525,35 @@
 </xsl:template>
 <xsl:template match="x:anchor">
     <xsl:variable name="noteid" select="concat('#',@xml:id)"/>
-    <xsl:variable name="note" select="//x:note[@target=$noteid]"/>
-    <xsl:variable name="type" select="$note/ancestor::x:standOff/@type"/>
-    <xsl:choose>
-        <xsl:when test="$type = 'notes1'">
-            <xsl:text>\footnoteA{</xsl:text>
-            <xsl:apply-templates select="$note"/>
-            <xsl:text>}</xsl:text>
-        </xsl:when>
-        <xsl:when test="$type = 'notes2'">
-            <xsl:text>\footnoteB{</xsl:text>
-            <xsl:apply-templates select="$note"/>
-            <xsl:text>}</xsl:text>
-        </xsl:when>
-        <xsl:when test="$type = 'notes3'">
-            <xsl:text>\footnoteC{</xsl:text>
-            <xsl:apply-templates select="$note"/>
-            <xsl:text>}</xsl:text>
-        </xsl:when>
-        <xsl:when test="$type = 'notes4'">
-            <xsl:text>\footnoteD{</xsl:text>
-            <xsl:apply-templates select="$note"/>
-            <xsl:text>}</xsl:text>
-        </xsl:when>
-    </xsl:choose>
+    <xsl:variable name="notenum" select="@n"/>
+    <xsl:variable name="blockid" select="ancestor::*[@xml:id]/@xml:id"/>
+    <xsl:variable name="note" select="//x:note[@target=$noteid] | //x:standOff[@corresp=concat('#',$blockid)]/x:note[@n=$notenum]"/>
+    <!--xsl:variable name="note" select="//x:note[@target=$noteid]"/-->
+    <xsl:for-each select="$note">
+      <xsl:variable name="type" select="./ancestor::x:standOff/@type"/>
+      <xsl:choose>
+          <xsl:when test="$type = 'notes1'">
+              <xsl:text>\footnoteA{</xsl:text>
+              <xsl:apply-templates select="."/>
+              <xsl:text>}</xsl:text>
+          </xsl:when>
+          <xsl:when test="$type = 'notes2'">
+              <xsl:text>\footnoteB{</xsl:text>
+              <xsl:apply-templates select="."/>
+              <xsl:text>}</xsl:text>
+          </xsl:when>
+          <xsl:when test="$type = 'notes3'">
+              <xsl:text>\footnoteC{</xsl:text>
+              <xsl:apply-templates select="."/>
+              <xsl:text>}</xsl:text>
+          </xsl:when>
+          <xsl:when test="$type = 'notes4'">
+              <xsl:text>\footnoteD{</xsl:text>
+              <xsl:apply-templates select="."/>
+              <xsl:text>}</xsl:text>
+          </xsl:when>
+      </xsl:choose>
+    </xsl:for-each>
 </xsl:template>
 
 <xsl:template match="x:app[x:rdg or x:rdgGrp]">
@@ -552,7 +563,7 @@
     <xsl:text>\lemma{</xsl:text>
     <xsl:apply-templates select=".//x:lem/node()"/>
     <xsl:text>}\Afootnote{</xsl:text>
-    <xsl:text>\textenglish{</xsl:text>
+    <xsl:text>\foreignlanguage{english}{</xsl:text>
     <xsl:variable name="mss" select="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
     <xsl:choose>
         <xsl:when test="$mss">
@@ -567,9 +578,9 @@
         </xsl:otherwise>
     </xsl:choose>
     <xsl:text>}</xsl:text>
-    <xsl:text>; \text</xsl:text>
+    <xsl:text>; \foreignlanguage{</xsl:text>
     <xsl:value-of select="$export-lang"/>
-    <xsl:text>{</xsl:text>
+    <xsl:text>}{</xsl:text>
     <xsl:apply-templates select="./x:rdg | ./x:rdgGrp"/>
     <xsl:text>}}}</xsl:text>
 </xsl:template>
@@ -580,10 +591,10 @@
         <xsl:when test="./node()">
             <xsl:apply-templates select="./node()"/>
         </xsl:when>
-        <xsl:otherwise><xsl:text>\textenglish{\textsc{om.}}</xsl:text></xsl:otherwise>
+        <xsl:otherwise><xsl:text>\foreignlanguage{english}{\textsc{om.}}</xsl:text></xsl:otherwise>
     </xsl:choose>
     <xsl:text> </xsl:text>
-    <xsl:text>\textenglish{</xsl:text>
+    <xsl:text>\foreignlanguage{english}{</xsl:text>
     <xsl:call-template name="splitwit"/>
     <xsl:text>}</xsl:text>
     <xsl:choose>
@@ -600,10 +611,10 @@
         <xsl:when test="x:rdg[@type='main']/node()">
             <xsl:apply-templates select="x:rdg[@type='main']/node()"/>
         </xsl:when>
-        <xsl:otherwise><xsl:text>\textenglish{\textsc{om.}}</xsl:text></xsl:otherwise>
+        <xsl:otherwise><xsl:text>\foreignlanguage{english}{\textsc{om.}}</xsl:text></xsl:otherwise>
     </xsl:choose>
     <xsl:text> </xsl:text>
-    <xsl:text>\textenglish{</xsl:text>
+    <xsl:text>\foreignlanguage{english}{</xsl:text>
     <xsl:call-template name="splitwit"/>
     <xsl:text>}</xsl:text>
 
