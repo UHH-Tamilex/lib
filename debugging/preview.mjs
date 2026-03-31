@@ -15,6 +15,47 @@ const getXSLTSheet = async doc => {
     }
 };
 
+const compileImports = async (xsltsheet,prefix='') => {
+    const imports = xsltsheet.querySelectorAll('import');
+    if(!imports) return xsltsheet;
+    for(const x of imports) {
+        const href = prefix + x.getAttribute('href');
+        const split = href.split('/');
+        split.pop();
+        const newprefix = split.join('/') + '/';
+        const i = await loadDoc(href,'default');
+        for(const attr of i.documentElement.attributes) {
+          if(!xsltsheet.documentElement.getAttributeNS(attr.namespaceURI,attr.localName))
+            xsltsheet.documentElement.setAttributeNS(attr.namespaceURI,attr.name,attr.value);
+        }
+        while(i.documentElement.firstChild) {
+
+            if(i.documentElement.firstChild.nodeName === 'xsl:param') {
+                if(xsltsheet.querySelector(`variable[name="${i.documentElement.firstChild.getAttribute('name')}"]`)) { 
+                    i.documentElement.firstChild.remove();
+                    continue;
+                }
+            }
+            if(i.documentElement.firstChild.nodeName === 'xsl:import') {
+                const ii = await loadDoc(newprefix + i.documentElement.firstChild.getAttribute('href'),'default');
+                const embed = await compileImports(ii,newprefix);
+                while(embed.documentElement.firstChild)
+                        x.before(embed.documentElement.firstChild);
+                for(const attr of embed.documentElement.attributes) {
+                  if(!xsltsheet.documentElement.getAttributeNS(attr.namespaceURI,attr.localName))
+                    xsltsheet.documentElement.setAttributeNS(attr.namespaceURI,attr.name,attr.value);
+                }
+                i.documentElement.firstChild.remove();
+                continue;
+            }
+
+            x.before(i.documentElement.firstChild);
+        }
+        x.remove();
+    }
+    return xsltsheet;
+};
+/*
 const compileImports = async (xsltsheet,relurl) => {
     const imports = xsltsheet.querySelectorAll('import');
     if(!imports) return xsltsheet;
@@ -52,7 +93,7 @@ const compileImports = async (xsltsheet,relurl) => {
     }
     return xsltsheet;
 };
-
+*/
 const XSLTransform = async (xsltsheet, doc) => {
     const xproc = new XSLTProcessor();
     const compiled = await compileImports(xsltsheet);

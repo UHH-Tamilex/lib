@@ -177,7 +177,7 @@ section div.wide {
 .msid + .msid {
     margin-left: 0.2rem;
 }
-.msid a:link, .msid a:active,
+.msid a:link, a:link.msid, .msid a:active,
 a.alignment-pointer:link, a.alignment-pointer:active {
     text-decoration: none;
     text-shadow: none;

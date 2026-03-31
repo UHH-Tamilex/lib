@@ -47,12 +47,12 @@ const docClick = e => {
     const wordsplit = e.target.closest('.mini_wordsplit');
     const lg = e.target.closest('.lg, p');
     if(wordsplit) {
-        Splitter.addWordSplits(lg.querySelector('[id]').id || lg.id);
+        Splitter.addWordSplits(lg.querySelector('[id]')?.id || lg.id);
         return;
     }
     const apparatus = e.target.closest('.mini_apparatus');
     if(apparatus) {
-        Apparatuser.addVariants(lg.querySelector('[id]').id || lg.id);
+        Apparatuser.addVariants(lg.querySelector('[id]')?.id || lg.id);
     }
     const alignbutton = e.target.closest('.alignedit');
     if(alignbutton)
