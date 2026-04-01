@@ -71,7 +71,7 @@
       <xsl:otherwise/>
     </xsl:choose>
   </xsl:param>
-  <xsl:param name="rdggrp" select=".[local-name() = 'rdgGrp']"/>
+  <xsl:param name="rdggrp" select="current()[local-name() = 'rdgGrp']"/>
   <xsl:param name="corresp"/>
   <xsl:call-template name="splitloop">
     <xsl:with-param name="rdggrp" select="$rdggrp"/>
@@ -90,7 +90,7 @@
 
 <xsl:template name="splitwit2">
   <xsl:param name="mss" select="@wit | @select"/>
-  <xsl:param name="rdggrp" select=".[local-name() = 'rdgGrp']"/>
+  <xsl:param name="rdggrp" select="current()[local-name() = 'rdgGrp']"/>
   <xsl:param name="corresp"/>
   <xsl:for-each select="str:split($mss,' ')">
     <xsl:call-template name="splitloop">
@@ -559,7 +559,7 @@
 
 <xsl:template name="reading">
   <xsl:param name="corresp" select="ancestor::*[@corresp]/@corresp"/>
-  <xsl:param name="rdggrp" select=".[local-name() = 'rdgGrp']"/>
+  <xsl:param name="rdggrp" select="current()[local-name() = 'rdgGrp']"/>
   <span>
     <xsl:attribute name="class">rdg</xsl:attribute>
     <span>
