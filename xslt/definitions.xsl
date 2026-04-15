@@ -565,6 +565,7 @@
     <tst:entry key="#Cint" short="Cint"><x:title xml:lang="ta">Cīvakacintāmaṇi</x:title></tst:entry>
     <tst:entry key="#Cre-A" short="Cre-A"><x:title xml:lang="ta">Kriyāviṉ Tarḵālat Tamiḻ Akarāti</x:title></tst:entry>
     <tst:entry key="#Ilam" short="Iḷam"><x:persName xml:lang="ta">Iḷampūraṇar</x:persName></tst:entry>
+    <tst:entry key="#io" short="i.o.">isolated occurence</tst:entry>
     <tst:entry key="#Kali" short="Kali"><x:title xml:lang="ta">Kalittokai</x:title></tst:entry>
     <tst:entry key="#Kall" short="Kall"><x:persName xml:lang="ta">Kallāṭaṉār</x:persName></tst:entry>
       <tst:entry key="#KT" short="Kall"><x:title xml:lang="ta">Kuṟuntokai</x:title></tst:entry>
