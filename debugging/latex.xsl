@@ -20,8 +20,8 @@
 
 <xsl:template name="langstart">
     <xsl:choose>
-      <xsl:when test="./@xml:lang='ta'"><xsl:text>\foreignlanguage{tamil}{</xsl:text></xsl:when>
-      <xsl:when test="./@xml:lang='en'"><xsl:text>\foreignlanguage{english}{</xsl:text></xsl:when>
+      <xsl:when test="./@xml:lang='ta'"><xsl:text>\texttamil{</xsl:text></xsl:when>
+      <xsl:when test="./@xml:lang='en'"><xsl:text>\textenglish{</xsl:text></xsl:when>
         <xsl:otherwise/>
     </xsl:choose>
 </xsl:template>
@@ -110,8 +110,11 @@
 \usepackage[english]{babel}
 \babelfont{rm}{Brill-Roman.ttf}
 \babelfont[tamil]{rm}{TSTTamil.otf}[Script=Tamil,Ligatures=Historic,BoldFont={NotoSerifTamil-Bold.ttf}]
+
+\newcommand{\textenglish}[1]{\foreignlanguage{english}{#1}}
+\newcommand{\texttamil}[1]{\foreignlanguage{tamil}{#1}}
 \newICUfeature{AllAlternates}{1}{+aalt}
-\newcommand{\vowelsign}{\\foreignlanguage{tamil}\addfontfeature{AllAlternates=1}}
+\newcommand{\vowelsign}[1]{\texttamil{\addfontfeature{AllAlternates=1}#1}}
 
 \setlength{\parskip}{12pt}
 
@@ -278,7 +281,7 @@
 </xsl:template>
 
 <xsl:template match="x:unclear">
-<xsl:text>\foreignlanguage{english}{\color{gray}(}</xsl:text><xsl:apply-templates/><xsl:text>\foreignlanguage{english}{\color{gray})}</xsl:text>
+<xsl:text>\textenglish{\color{gray}(}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{gray})}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:subst">
@@ -305,7 +308,7 @@
 </xsl:template>
 
 <xsl:template match="x:sic">
-    <xsl:text>\foreignlanguage{english}{\color{gray}¿}</xsl:text><xsl:apply-templates/><xsl:text>\foreignlanguage{english}{\color{gray}?}</xsl:text>
+    <xsl:text>\textenglish{\color{gray}¿}</xsl:text><xsl:apply-templates/><xsl:text>\textenglish{\color{gray}?}</xsl:text>
 </xsl:template>
 
 <xsl:template match="x:surplus">
@@ -326,7 +329,7 @@
 </xsl:template>
 
 <xsl:template match="x:lb">
-    <xsl:text>\foreignlanguage{english}{\color{gray}⸤}</xsl:text>
+    <xsl:text>\textenglish{\color{gray}⸤}</xsl:text>
     <!--
         <xsl:text>\textsc{(</xsl:text>
         <xsl:choose>
@@ -371,7 +374,7 @@
 </xsl:template>
 
 <xsl:template match="x:gap">
-    <xsl:text>\foreignlanguage{english}{{\color{gray}[}</xsl:text>
+    <xsl:text>\textenglish{{\color{gray}[}</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -392,7 +395,7 @@
 </xsl:template>
 
 <xsl:template match="x:space">
-    <xsl:text>\foreignlanguage{english}{{\color{gray}[}</xsl:text>
+    <xsl:text>\textenglish{{\color{gray}[}</xsl:text>
     <xsl:variable name="quantity">
         <xsl:choose>
             <xsl:when test="@quantity"><xsl:value-of select="@quantity"/></xsl:when>
@@ -509,7 +512,7 @@
     <xsl:text>\lemma{</xsl:text>
     <xsl:apply-templates select=".//x:lem/node()"/>
     <xsl:text>}\Afootnote{</xsl:text>
-    <xsl:text>\foreignlanguage{english}{</xsl:text>
+    <xsl:text>\textenglish{</xsl:text>
     <xsl:variable name="mss" select="./x:lem/@wit | ./x:rdgGrp[@type='lemma']/@select"/>
     <xsl:choose>
         <xsl:when test="$mss">
@@ -524,7 +527,7 @@
         </xsl:otherwise>
     </xsl:choose>
     <xsl:text>}</xsl:text>
-    <xsl:text>; \foreignlanguage{tamil}{</xsl:text>
+    <xsl:text>; \texttamil{</xsl:text>
     <xsl:apply-templates select="./x:rdg | ./x:rdgGrp"/>
     <xsl:text>}}}</xsl:text>
 </xsl:template>
@@ -535,10 +538,10 @@
         <xsl:when test="./node()">
             <xsl:apply-templates select="./node()"/>
         </xsl:when>
-        <xsl:otherwise><xsl:text>\foreignlanguage{english}{\textsc{om.}}</xsl:text></xsl:otherwise>
+        <xsl:otherwise><xsl:text>\textenglish{\textsc{om.}}</xsl:text></xsl:otherwise>
     </xsl:choose>
     <xsl:text> </xsl:text>
-    <xsl:text>\foreignlanguage{english}{</xsl:text>
+    <xsl:text>\textenglish{</xsl:text>
     <xsl:call-template name="splitwit"/>
     <xsl:text>}</xsl:text>
     <xsl:choose>
@@ -555,10 +558,10 @@
         <xsl:when test="x:rdg[@type='main']/node()">
             <xsl:apply-templates select="x:rdg[@type='main']/node()"/>
         </xsl:when>
-        <xsl:otherwise><xsl:text>\foreignlanguage{english}{\textsc{om.}}</xsl:text></xsl:otherwise>
+        <xsl:otherwise><xsl:text>\textenglish{\textsc{om.}}</xsl:text></xsl:otherwise>
     </xsl:choose>
     <xsl:text> </xsl:text>
-    <xsl:text>\foreignlanguage{english}{</xsl:text>
+    <xsl:text>\textenglish{</xsl:text>
     <xsl:call-template name="splitwit"/>
     <xsl:text>}</xsl:text>
 
