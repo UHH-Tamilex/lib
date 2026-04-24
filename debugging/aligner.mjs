@@ -575,7 +575,6 @@ const findGrammar = translation => {
     //if(gram == -1) return null;
     const gram = translation.lastIndexOf('(');
     if(gram === -1) return null;
-
     //const hyphen = translation.endsWith('-') ? '-' : '';
     const trimmed = translation.slice(0,gram);// + hyphen;
 
@@ -609,9 +608,7 @@ const findGrammar = translation => {
     }
     else {
       for(const abbr of lexKeys) {
-          console.log(abbr);
           const found = hay.indexOf(abbr);
-          console.log(found);
           if(found === -1) continue;
           
           hay = hay.slice(0,found) + hay.slice(found + abbr.length);
