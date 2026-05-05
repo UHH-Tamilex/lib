@@ -198,35 +198,40 @@ const updateParticles = (obj) => {
 const updateMarks = obj => {
     const sandhi = obj.sandhi;
     const nosandhi = obj.tokenized;
+    let m=0;
     for(let n=0;n<sandhi.length;n++) {
-        switch (nosandhi[n]) {
+        switch (nosandhi[m]) {
+            case ' ':
+              m = m + 1;
+              break;
             case '~':
-               nosandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
+               nosandhi[m] = `<c type="glide">${sandhi[n]}</c>`;
                sandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
                break;
             case '+':
-                nosandhi[n] = `<c type="geminated">${sandhi[n]}</c>`;
+                nosandhi[m] = `<c type="geminated">${sandhi[n]}</c>`;
                 sandhi[n] = `<c type="geminated">${sandhi[n]}</c>`;
                 break;
             case '*':
             case '’':
             case '\'':
-                nosandhi[n] = '<c type="elided">u</c>';
+                nosandhi[m] = '<c type="elided">u</c>';
                 break;
             case '(m)':
-                nosandhi[n] = '<c type="uncertain">m</c>';
+                nosandhi[m] = '<c type="uncertain">m</c>';
                 break;
             case '(a)':
-                nosandhi[n] = '<c type="uncertain">a</c>';
+                nosandhi[m] = '<c type="uncertain">a</c>';
                 break;
             case '[i]':
-                nosandhi[n] = '<c type="inserted">i</c>';
+                nosandhi[m] = '<c type="inserted">i</c>';
                 sandhi[n] = '<c type="inserted">i</c>';
                 break;
             case '[m]':
-                nosandhi[n] = '<c type="inserted">m</c>';
+                nosandhi[m] = '<c type="inserted">m</c>';
                 sandhi[n] = `<c type="inserted">${sandhi[n]}</c>`;
         }
+        m = m + 1;
     }
 };
 
