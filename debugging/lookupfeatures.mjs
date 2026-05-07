@@ -47,7 +47,9 @@ const lookupCitationDefs = async (str,grammar) => {
     return mostPopular3(res[0].values.map(r => r[0]));
 };
 
-const lookupTranslation = async str => {
+const lookupTranslation = async (str,translation) => {
+    if(!_state.fullindex)
+        _state.fullindex = await openDb('https://uhh-tamilex.github.io/lexicon/lookupindex.db');
     /*
     if(!_state.lemmaindex) 
         _state.lemmaindex = await openDb('lib/debugging/index.db');
@@ -59,7 +61,7 @@ const lookupTranslation = async str => {
     //const res = (await _state.lemmaindex('exec',{sql: `SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = $word`, bind: {$word: str}, rowMode: 'object'})).result.resultRows;
     
     //const res = _state.lemmaindex.exec(`SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = "${str}"`);
-    const res = _state.fullindex.exec(`SELECT ${importantKeys.join(', ')} FROM [citations] WHERE def = "${str}"`);
+    const res = _state.fullindex.exec(`SELECT ${importantKeys.join(', ')} FROM [citations] WHERE form = "${str}" AND def = "${translation}"`);
     if(res.length === 0) return null;
 
     const obj = res[0].values.length === 1 ? 
@@ -89,7 +91,7 @@ const lookupFeatures = async (str, translation, grammar) => {
     }
     else if(!grammar) { // translation given, grammar empty
         // TODO: just use the full db for this
-        return await lookupTranslation(str);
+        return await lookupTranslation(str,translation);
     }
     else if(!translation) { // grammar given, translation empty
         const gramobj = {};
@@ -127,7 +129,7 @@ const lookupFeatures = async (str, translation, grammar) => {
         // lookup in fullindex
     */
 };
-
+/*
 const mostPopular = (arr) => {
     const ret = {
         el: null,
@@ -142,6 +144,24 @@ const mostPopular = (arr) => {
         }
     }
     return ret.el;
+};
+*/
+
+const mostPopular = (arr) => {
+    if(arr.length === 1)
+        return arr[0];
+
+    const counts = new Map();
+    for(const obj of arr) {
+        if(obj.filter(a => a !== null).length === 0) continue;
+        //const str = importantKeys.map(k => obj[k]).join(';');
+        const str = obj.join(';');
+        const curcount = counts.get(str);
+        if(curcount) curcount.count = curcount.count + 1;
+        else counts.set(str,{obj: obj,count: 1});
+    }
+    const best = [...counts.values()].toSorted((a,b) => a.count - b.count).pop().obj;
+    return best;
 };
 
 const mostPopular2 = (arr) => {
