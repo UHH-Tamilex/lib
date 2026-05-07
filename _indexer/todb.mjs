@@ -138,7 +138,7 @@ const cleanParticle = (el,form) => {
     return ['enclitic',particle];
 };
 
-const splitRoles = (str) => {
+const splitRoles = str => {
     let newstr = str;
     const ret = [];
     for(const val of dbValues) {
@@ -246,9 +246,11 @@ const findLemma = (curword,curroles) => {
       fromlemma: r[1] ? r[2] : null
     };
     const gramabbrs = (findGrammar(`(${r[3]})`)).gram;
+    console.log(gramabbrs);
     const gramobjs = gramabbrs.map(g => {
        return { textContent: gramMap.get(g) };
     });
+    console.log(gramobjs);
     obj.roles = getRoles(gramobjs);
     return obj;
   });
