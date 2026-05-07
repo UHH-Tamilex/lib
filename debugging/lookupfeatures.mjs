@@ -47,17 +47,19 @@ const lookupCitationDefs = async (str,grammar) => {
     return mostPopular3(res[0].values.map(r => r[0]));
 };
 
-const lookupLemmata = async str => {
+const lookupTranslation = async str => {
+    /*
     if(!_state.lemmaindex) 
         _state.lemmaindex = await openDb('lib/debugging/index.db');
-
+    */
     const cached = _state.cache.get(str);
     if(cached) return cached;
 
     //const res = (await _state.lemmaindex('exec',{sql: `SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = $word`, bind: {$word: str}, rowMode: 'object'})).result.resultRows;
     //const res = (await _state.lemmaindex('exec',{sql: `SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = $word`, bind: {$word: str}, rowMode: 'object'})).result.resultRows;
-
-    const res = _state.lemmaindex.exec(`SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = "${str}"`);
+    
+    //const res = _state.lemmaindex.exec(`SELECT ${importantKeys.join(', ')}, citations FROM [dictionary] WHERE word = "${str}"`);
+    const res = _state.fullindex.exec(`SELECT ${importantKeys.join(', ')} FROM [citations] WHERE def = "${str}"`);
     if(res.length === 0) return null;
 
     const obj = res[0].values.length === 1 ? 
@@ -86,7 +88,8 @@ const lookupFeatures = async (str, translation, grammar) => {
         return await lookupCitations(str);
     }
     else if(!grammar) { // translation given, grammar empty
-        return await lookupLemmata(str);
+        // TODO: just use the full db for this
+        return await lookupTranslation(str);
     }
     else if(!translation) { // grammar given, translation empty
         const gramobj = {};
