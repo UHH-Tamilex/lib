@@ -17,6 +17,7 @@ const dbValues = Object.values(dbSchema).reduce((acc,cur) => {
         return acc;
     },[]);
 dbValues.sort((a,b) => b.length - a.length);
+const revGramMap = new Map(gramAbbreviations);
 
 const dbKeys = Object.keys(dbSchema);
 const importantKeys = ['pos','number','gender','nouncase','person','aspect','voice'];
@@ -246,11 +247,9 @@ const findLemma = (curword,curroles) => {
       fromlemma: r[1] ? r[2] : null
     };
     const gramabbrs = (findGrammar(`(${r[3]})`)).gram;
-    console.log(gramabbrs);
     const gramobjs = gramabbrs.map(g => {
-       return { textContent: gramMap.get(g) };
+       return { textContent: revGramMap.get(g) };
     });
-    console.log(gramobjs);
     obj.roles = getRoles(gramobjs);
     return obj;
   });
