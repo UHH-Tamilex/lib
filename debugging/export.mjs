@@ -481,8 +481,10 @@ const init = (curDoc,libRoot) => {
     _state.curDoc = curDoc;
     _state.libRoot = libRoot;
     const popup = document.getElementById('export-popup');
-    popup.querySelector('.closeicon').addEventListener('click',closePopup);
-    popup.querySelector('button').addEventListener('click',exportFile);
+    if(popup) {
+      popup.querySelector('.closeicon').addEventListener('click',closePopup);
+      popup.querySelector('button').addEventListener('click',exportFile);
+    }
 };
 
 const Exporter = {
