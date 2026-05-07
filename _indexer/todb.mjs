@@ -247,7 +247,7 @@ const findLemma = (curword,curroles) => {
     };
     const gramabbrs = (findGrammar(`(${r[3]})`)).gram;
     const gramobjs = gramabbrs.map(g => {
-       return { textContent: gramAbbreviations.get(g) };
+       return { textContent: gramMap.get(g) };
     });
     obj.roles = getRoles(gramobjs);
     return obj;
