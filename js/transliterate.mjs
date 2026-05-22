@@ -101,7 +101,7 @@ const getEditionScript = () => {
     const textlang = document.querySelector('.teitext')?.getAttribute('lang');
     if(!textlang) return null;
     const scriptsplit = textlang.split('-');
-    if(scriptsplit[3] !== 't') return null;
+    if(scriptsplit[2] !== 't') return null;
     const script = scriptsplit.pop();
     if(script === 'Tibt') return 'dbucan';
     if(_state.isonames.has(script)) return script;
