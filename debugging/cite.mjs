@@ -137,6 +137,39 @@ const getLineNums = (doc, id, nums) => {
         ];
 };
 
+const findNum = el => {
+  const numel = el.querySelector('num');
+  if(numel) return numel.innerHTML;
+  
+  const num = numel.innerHTML.match(/[\d.]+/);
+  if(num) return num.replace(/\.$/,'');
+
+  return null;
+};
+
+Citer.makeTitle = (doc,id) => {
+  const titleblock = doc.querySelector('titleStmt > title');
+  if(!titleblock) return id;
+
+  const title = titleblock.querySelector('title')?.innerHTML;
+  if(!title) return id;
+
+  const num = findNum(titleblock);
+  if(!num) return id;
+
+  const titlestr = `<title xml:lang='ta'>${title}</title> <num>${num}</num>`;
+  if(!id.includes('-'))
+    return titlestr;
+
+  if(id.endsWith('-kilavi') || id.endsWith('-kiḷavi'))
+    return titlestr + ' <term xml:lang="ta">kiḷavi</term>';
+
+  if(id.endsWith('-intro'))
+    return titlestr + ' <term xml:lang="en">introduction</term>';
+
+  return titlestr + id;
+};
+
 Citer.docSelect = e => {
     const sel = document.getSelection();
     if(sel.isCollapsed) return;
@@ -147,6 +180,7 @@ Citer.docSelect = e => {
     if(!edblock) return;
     const nums = getWords(edblock, range);
     const id = edblock.closest('[id]').id;
+    const title = Citer.makeTitle(edblock.ownerDocument, id);
     const q = Citer.makeCitation(Citer.thisDoc, id, nums);
     
     const linenums = getLineNums(Citer.thisDoc, id, nums);
@@ -157,8 +191,8 @@ Citer.docSelect = e => {
     const link = base + '?highlight=' + encodeURIComponent(`[id=${id}] .l:nth-of-type(${linenums[0]})`);
     const out = `<cit source="${base}?id=${id}&amp;w=${nums.join(',')}">
     ${qserial}
-    <q xml:lang="en"><!-- English translation here --></q>
-    <ref target="${link}">${id}, ${linenums[0] === linenums[1] ? 'line ' + linenums[0] : 'lines ' + linenums.join('–')}</ref>
+    <q xml:lang="en">English translation here</q>
+    <ref target="${link}">${title}, ${linenums[0] === linenums[1] ? 'line ' + linenums[0] : 'lines ' + linenums.join('–')}</ref>
 </cit>`;
 
     const popup = showPopup('citation-popup');
