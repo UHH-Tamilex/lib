@@ -140,9 +140,8 @@ const getLineNums = (doc, id, nums) => {
 const findNum = el => {
   const numel = el.querySelector('num');
   if(numel) return numel.innerHTML;
-  
-  const num = numel.innerHTML.match(/[\d.]+/);
-  if(num) return num.replace(/\.$/,'');
+  const num = el.textContent.match(/[0-9.]+/);
+  if(num) return num[0].replace(/\.$/,'');
 
   return null;
 };
@@ -180,7 +179,7 @@ Citer.docSelect = e => {
     if(!edblock) return;
     const nums = getWords(edblock, range);
     const id = edblock.closest('[id]').id;
-    const title = Citer.makeTitle(edblock.ownerDocument, id);
+    const title = Citer.makeTitle(Citer.thisDoc, id);
     const q = Citer.makeCitation(Citer.thisDoc, id, nums);
     
     const linenums = getLineNums(Citer.thisDoc, id, nums);
