@@ -212,6 +212,9 @@ Citer.closePopup = e => {
 Citer.startCite = e => {
     if(!e.target.classList.contains('pressed')) {
         e.target.classList.add('pressed');
+        if(!document.querySelector('span.word')) {
+          document.getElementById('wordsplitbutton').click();
+        }
         document.addEventListener('mouseup',Citer.docSelect);
         for(const block of document.querySelectorAll('.text-block.edition'))
             block.style.cursor = 'copy';
