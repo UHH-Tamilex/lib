@@ -341,6 +341,7 @@ const processReadings = (n,otherdocs,otherrdgs,word,opts) => {
         if(newstr === lemma) {
             posapp.all.add(id);
             const realrdg = opts.witnesses && otherrdgs.get(id)?.length ? 
+                // TODO: operate on text nodes only (or XML-safe regex?)
                 cleanPunct(otherrdgs.get(id)[n]) :
                 trimmed;
             if(realrdg !== lemmatrimmed) {
@@ -351,6 +352,7 @@ const processReadings = (n,otherdocs,otherrdgs,word,opts) => {
         }
         else {
             const realrdg = opts.witnesses && otherrdgs.get(id) ? 
+                // TODO: operate on text nodes only (or XML-safe regex?)
                 cleanPunct(otherrdgs.get(id)[n]) :
                 trimmed;
             const negwits = negapp.get(newstr) || new Map();
@@ -777,6 +779,32 @@ const collectWitGroups = listWit => {
 };
 
 const markIgnoredGaps = (doc,base,maxlen) => {
+  const markWsAsIgnored = arr => {
+    const ignoreloop = arr2 => {
+      const toignore = [];
+      for(const el of arr2) {
+        const lem = el.getAttribute('lemma');
+        const rdg = lem !== null ? lem : el.textContent;
+        if(rdg === '') break;
+        
+        const n = el.getAttribute('n');
+        const basew = base.querySelector(`w[n="${n}"]`);
+        const baselem = basew.getAttribute('lemma');
+        const baserdg = baselem !== null ? baselem : basew.textContent;
+        if(baserdg === rdg) toignore.push(el);
+        else return;
+    }
+    for(const w of toignore)
+      w.setAttribute('ignored','1');
+    };
+
+    for(const el of arr)
+      el.setAttribute('ignored','1');
+    const firstcl = arr[0].closest('cl');
+    const lastcl = arr.at(-1).closest('cl');
+    ignoreloop(firstcl.querySelectorAll('w'));
+    ignoreloop([...lastcl.querySelectorAll('w')].reverse());
+  };
   const teis = doc.querySelectorAll('TEI');
   const basews = base.querySelectorAll('w');
   const allgroups = new Map();
@@ -798,15 +826,14 @@ const markIgnoredGaps = (doc,base,maxlen) => {
 
       if(ws[n].textContent.length > 0) {
         if(curlen > maxlen) {
-          for(const el of curgroup)
-            el.setAttribute('ignored','1');
+          markWsAsIgnored(curgroup);
           const groupkey = `${groupstart}-${index}`;
           if(allgroups.has(groupkey)) {
             const existinggroup = allgroups.get(groupkey);
             existinggroup.witness.add(thisn);
           }
           else
-            allgroups.set(`${groupstart}-${index}`, 
+            allgroups.set(`${groupstart}-${index}`,
               {start: groupstart, end: index, witness: new Set([thisn]), excerpt: excerpt});
         }
         curgroup = [];
