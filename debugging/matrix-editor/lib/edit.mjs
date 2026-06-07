@@ -1391,7 +1391,7 @@ edit.removeCol = {
     const end = Math.max(...nums);
     
     const last = Find.firstword(end);
-    if(!last.nextElementSibling)
+    if(!last?.nextElementSibling)
       opts.mode = 'append';
     
     const oldhtml = remove(Find.trs,Find.firsttd);
