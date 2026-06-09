@@ -169,8 +169,8 @@ const preProcess = (block, texts, opts) => {
         if(!blockel) continue;
 
         const lang = blockel.closest(`[${langsel}]`)?.getAttribute('xml:lang') ||
-                     blockel.documentElement.querySelector(`[${langsel}]`)?.getAttribute('xml:lang') ||
-                     'ta';
+                     blockel.getRootNode().querySelector(`[${langsel}]`)?.getAttribute('xml:lang') ||
+                     'sa';
         // TODO: is there a better way
         blockel = (blockel.querySelector('*[type="edition"]') || blockel).cloneNode(true);
 
