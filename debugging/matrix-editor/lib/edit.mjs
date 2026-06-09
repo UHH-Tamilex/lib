@@ -214,12 +214,14 @@ const edit = {
           else
             listWit.appendChild(witness.cloneNode(true));
         }
-
+        const normalized = Check.normalizedView();
+        if(normalized) view.showUnnormalized();
         while(_state.matrix.boxdiv.firstChild)
           _state.matrix.boxdiv.removeChild(_state.matrix.boxdiv.firstChild);
         _state.matrix.makeTable();
         treeFileLoad(null,null,{target: {result: tree}, noshow: true });
         bc.close();
+        if(normalized) view.showNormalized();
         document.getElementById('blackout').remove();
       };
     // TODO: undo
