@@ -148,8 +148,29 @@ const scriptandfilter = (el,type,filters,lang) => {
   else
     //transliterated = script !== 'iast' ? Sanscript.t(str,script,'iast') : str;
     transliterated = charset === wylish ? Sanscript.t(str.toLowerCase(),'wylie','wylish') :
-                                         Sanscript.t(str.toLowerCase(),script,'slpish');
+                                 script === 'iast' ? Sanscript.t(str.toLowerCase(),'iast','slpish') :
+                                         Sanscript.t(Sanscript.t(str.toLowerCase(),script,'iast'),'iast','slpish');
     return [...filterAll(transliterated.replaceAll(/\s+/g,' '),filters),charset];
+};
+
+const findBlockEl = (textel,blockid,idsel,langsel) => {
+    if(blockid === null) {
+      const lang = textel.closest(`[${langsel}]`)?.getAttribute('xml:lang') ||
+                 textel.getRootNode().querySelector(`[${langsel}]`)?.getAttribute('xml:lang') ||
+                 'sa';
+      return {block: textel, lang: lang};
+    }
+
+    const blockel = textel.querySelector(`*[${idsel}="${blockid}"], *[corresp~="#${blockid}"]`);
+    if(!blockel) return null;
+
+    const lang = blockel.closest(`[${langsel}]`)?.getAttribute('xml:lang') ||
+                 blockel.getRootNode().querySelector(`[${langsel}]`)?.getAttribute('xml:lang') ||
+                 'sa';
+    // TODO: is there a better way
+    const clone = (blockel.querySelector('*[type="edition"]') || blockel).cloneNode(true);
+    
+    return {block: clone, lang: lang};
 };
 
 const preProcess = (block, texts, opts) => {
@@ -160,19 +181,13 @@ const preProcess = (block, texts, opts) => {
     const ignoretags = opts.ignoretags || [];
     const missingchar = opts.missingchar || '‡';
     const spacechar = opts.spacechar || '⊔';
-
     const ret = [];
     for(const text of texts) {
         const {textel, type, par} = text.text;
         const siglum = text.siglum;
-        let blockel = textel.querySelector(`*[${idsel}="${block}"], *[corresp~="#${block}"]`);
-        if(!blockel) continue;
 
-        const lang = blockel.closest(`[${langsel}]`)?.getAttribute('xml:lang') ||
-                     blockel.getRootNode().querySelector(`[${langsel}]`)?.getAttribute('xml:lang') ||
-                     'sa';
-        // TODO: is there a better way
-        blockel = (blockel.querySelector('*[type="edition"]') || blockel).cloneNode(true);
+        const {block: blockel, lang: lang} = findBlockEl(textel,block,idsel,langsel);
+        if(!blockel) continue;
 
         processTags(blockel,ignoretags,missingchar,spacechar);
         if(type) {
