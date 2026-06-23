@@ -47,9 +47,7 @@ const docClick = e => {
     const wordsplit = e.target.closest('.mini_wordsplit');
     const lg = e.target.closest('.lg, .p');
     if(!lg) return;
-    const id = lg.classList.contains('edited') ? 
-      lg.querySelector('[id]')?.id : 
-      lg.id || lg.querySelector('[id]')?.id;
+    const id = lg.id;
     if(wordsplit) {
         Splitter.addWordSplits(id);
         return;
@@ -57,6 +55,7 @@ const docClick = e => {
     const apparatus = e.target.closest('.mini_apparatus');
     if(apparatus) {
         Apparatuser.addVariants(id);
+        return;
     }
     const alignbutton = e.target.closest('.alignedit');
     if(alignbutton)
