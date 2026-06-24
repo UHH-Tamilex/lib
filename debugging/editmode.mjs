@@ -45,9 +45,9 @@ const revealButtons = () => {
 
 const docClick = e => {
     const wordsplit = e.target.closest('.mini_wordsplit');
-    const lg = e.target.closest('.lg, .p');
+    const lg = e.target.closest('.lg, .p, p');
     if(!lg) return;
-    const id = lg.id;
+    const id = lg.id || lg.querySelector('.lg, .p, p')?.id;
     if(wordsplit) {
         Splitter.addWordSplits(id);
         return;
