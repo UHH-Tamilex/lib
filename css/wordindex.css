@@ -140,6 +140,9 @@ details.dict details.dict[open] {
   display: none;
 }
 
+a.lemma-name[href] {
+  text-decoration: none;
+}
 /*
 .spinner {
   width: 40px;
