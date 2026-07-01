@@ -16,6 +16,7 @@ Splitter.sharedState = _state;
 Apparatuser.sharedState = _state;
 
 const startEditMode = async (Transliterator,libRoot) => {
+    if(!window.location.pathname.endsWith('.xml')) return;
     injectCSS(Annotator.css);
     revealButtons();
     _state.curDoc = await loadDoc(window.location.pathname);
