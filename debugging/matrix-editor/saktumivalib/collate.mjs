@@ -186,8 +186,9 @@ const preProcess = (block, texts, opts) => {
         const {textel, type, par} = text.text;
         const siglum = text.siglum;
 
-        const {block: blockel, lang: lang} = findBlockEl(textel,block,idsel,langsel);
-        if(!blockel) continue;
+        const res = findBlockEl(textel,block,idsel,langsel);
+        if(!res) continue;
+        const {block: blockel, lang: lang}  = res;
 
         processTags(blockel,ignoretags,missingchar,spacechar);
         if(type) {
@@ -710,7 +711,7 @@ const processFile = (teixml, filename, state, idsel = '*|id') => {
     const textsigla = texts.map(t => t.getAttribute('corresp')?.replace(/^#/,'')).filter(e => e);
     if(!overallsiglum && textsigla.length === 0) {
         warnings.push(`No siglum for ${filename}. Using filename as siglum.`);
-        overallsiglum = filename;
+        overallsiglum = filename.split('/').pop();
     }
 
     for(const siglum of new Set([overallsiglum,...textsigla])) {
