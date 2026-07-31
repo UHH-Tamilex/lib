@@ -9,7 +9,7 @@ const realNextSibling = (walker) => {
     }
     return null;
 };
-const countWalker = el => {
+const countWalker = (el,countgaps=true) => {
     const walker = el.ownerDocument.createTreeWalker(el,0xFFFFFFFF);
     let count = 0;
     let cur = walker.currentNode;
@@ -20,7 +20,7 @@ const countWalker = el => {
                 cur = realNextSibling(walker);
                 continue;
             }
-            else if(cur.nodeName === 'gap')
+            else if(cur.nodeName === 'gap' && countgaps)
                 count = count + parseInt(cur.getAttribute('quantity') || 1);
         }
         if(cur.nodeType === 3)
@@ -32,9 +32,9 @@ const countWalker = el => {
     }
     return count;
 };
-const countLines = lines => {
+const countLines = (lines,countgaps=true) => {
     return [...lines].reduce((acc,cur) => {
-        const count = countWalker(cur);
+        const count = countWalker(cur,countgaps);
         const add = acc.length > 0 ? acc.at(-1) : 0;
         acc.push(count + add);
         return acc;
@@ -123,9 +123,9 @@ const entryLength = el => {
     }
 };
 
-const findLines = (doc,id,standOff) => {
+const findLines = (doc,id,standOff,countgaps=true) => {
     const lines = getLineEls(doc,id);
-    const linecounts = countLines(lines);
+    const linecounts = countLines(lines,countgaps);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');
     const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
