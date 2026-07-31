@@ -103,7 +103,7 @@ const getLineEls = (doc,id) => {
     return [...lg.querySelectorAll('l')];
 };
 
-const entryLength = el => {
+const entryLength = (el,firstonly=false) => {
     const doOne = entry => {
         const firstForm = entry.querySelector('form').cloneNode(true);
 
@@ -115,7 +115,7 @@ const entryLength = el => {
         0);
         return gaplen + firstForm.textContent.trim().length;
     };
-    if(el.nodeName === 'entry')
+    if(firstonly || el.nodeName === 'entry')
         return doOne(el);
     else {
         const entries = el.querySelector('entry').querySelectorAll('entry');
@@ -136,7 +136,7 @@ const findLines = (doc,id,standOff) => {
     let wordcount = 0;
     for(let n=0; n<entries.length;n++) {
         entries[n].setAttribute('linenum',linenum);
-        wordcount = wordcount + entryLength(entries[n]);
+        wordcount = wordcount + entryLength(entries[n],true);
         if(wordcount >= realcounts[linenum])
           linenum = linenum + 1;
         /*if(wordcount >= realcounts[0]) {
