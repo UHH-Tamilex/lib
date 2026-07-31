@@ -582,7 +582,7 @@ const addToDb = (fname,db) => {
     const standOffs = doc.querySelectorAll('standOff[type="wordsplit"]');
     for(const standOff of standOffs) {
         const citation = standOff.getAttribute('corresp').replace(/^#/,'');
-        findLines(doc,citation,standOff,false);
+        findLines(doc,citation,standOff);
         const entries = standOff.querySelectorAll('entry:has(> form)');
         //const textAlignment = restoreAlignment(doc.getElementById(citation), standOff);
         

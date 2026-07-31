@@ -9,7 +9,7 @@ const realNextSibling = (walker) => {
     }
     return null;
 };
-const countWalker = (el,countgaps=true) => {
+const countWalker = el => {
     const walker = el.ownerDocument.createTreeWalker(el,0xFFFFFFFF);
     let count = 0;
     let cur = walker.currentNode;
@@ -20,7 +20,7 @@ const countWalker = (el,countgaps=true) => {
                 cur = realNextSibling(walker);
                 continue;
             }
-            else if(cur.nodeName === 'gap' && countgaps)
+            else if(cur.nodeName === 'gap')
                 count = count + parseInt(cur.getAttribute('quantity') || 1);
         }
         if(cur.nodeType === 3)
@@ -32,9 +32,9 @@ const countWalker = (el,countgaps=true) => {
     }
     return count;
 };
-const countLines = (lines,countgaps=true) => {
+const countLines = lines => {
     return [...lines].reduce((acc,cur) => {
-        const count = countWalker(cur,countgaps);
+        const count = countWalker(cur);
         const add = acc.length > 0 ? acc.at(-1) : 0;
         acc.push(count + add);
         return acc;
@@ -104,7 +104,7 @@ const getLineEls = (doc,id) => {
 };
 
 const entryLength = el => {
-    const doOne = (entry) => {
+    const doOne = entry => {
         const firstForm = entry.querySelector('form').cloneNode(true);
 
         for(const i of firstForm.querySelectorAll('[type="ignored"]'))
@@ -123,24 +123,26 @@ const entryLength = el => {
     }
 };
 
-const findLines = (doc,id,standOff,countgaps=true) => {
+const findLines = (doc,id,standOff) => {
     const lines = getLineEls(doc,id);
-    const linecounts = countLines(lines,countgaps);
+    const linecounts = countLines(lines);
     
     const alignmentel = standOff.querySelector('interp[select="0"]');
     const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
 
     const realcounts = matchCounts(alignment,linecounts);
     const entries = [...standOff.querySelectorAll(':scope > entry, :scope > superEntry')];
-    let linecount = 0;
+    let linenum = 0;
     let wordcount = 0;
     for(let n=0; n<entries.length;n++) {
-        entries[n].setAttribute('linenum',linecount);
+        entries[n].setAttribute('linenum',linenum);
         wordcount = wordcount + entryLength(entries[n]);
-        if(wordcount >= realcounts[0]) {
+        if(wordcount >= realcounts[linenum])
+          linenum = linenum + 1;
+        /*if(wordcount >= realcounts[0]) {
             linecount = linecount + 1;
             realcounts.shift();
-        }
+        }*/
     }
 };
 
