@@ -113,7 +113,7 @@ const entryLength = (el,firstonly=false) => {
         const gaplen = [...firstForm.querySelectorAll('gap')].reduce(
            (acc,cur) => acc + cur.getAttribute('quantity') || 1,
         0);
-        return gaplen + firstForm.textContent.trim().length;
+        return parseInt(gaplen) + firstForm.textContent.trim().length;
     };
     if(firstonly || el.nodeName === 'entry')
         return doOne(el);
@@ -126,7 +126,7 @@ const entryLength = (el,firstonly=false) => {
 const findLines = (doc,id,standOff) => {
     const lines = getLineEls(doc,id);
     const linecounts = countLines(lines);
-    
+
     const alignmentel = standOff.querySelector('interp[select="0"]');
     const alignment = alignmentel.textContent.trim().split(',').map(s => decodeRLE(s));
 
