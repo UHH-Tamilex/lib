@@ -200,6 +200,8 @@ const updateMarks = obj => {
     const nosandhi = obj.tokenized;
     let n=0;
     for(let m=0;m<nosandhi.length;m++) {
+        if(n>=sandhi.length) break;
+
         switch (nosandhi[m]) {
             case '~':
                nosandhi[m] = `<c type="glide">${sandhi[n]}</c>`;
