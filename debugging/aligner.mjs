@@ -198,12 +198,9 @@ const updateParticles = (obj) => {
 const updateMarks = obj => {
     const sandhi = obj.sandhi;
     const nosandhi = obj.tokenized;
-    let m=0;
-    for(let n=0;n<sandhi.length;n++) {
+    let n=0;
+    for(let m=0;m<nosandhi.length;m++) {
         switch (nosandhi[m]) {
-            case ' ':
-              m = m + 1;
-              break;
             case '~':
                nosandhi[m] = `<c type="glide">${sandhi[n]}</c>`;
                sandhi[n] = `<c type="glide">${sandhi[n]}</c>`;
@@ -230,8 +227,12 @@ const updateMarks = obj => {
             case '[m]':
                 nosandhi[m] = '<c type="inserted">m</c>';
                 sandhi[n] = `<c type="inserted">${sandhi[n]}</c>`;
+                break;
+            case ' ':
+              break;
+            default:
+              n = n + 1;
         }
-        m = m + 1;
     }
 };
 
