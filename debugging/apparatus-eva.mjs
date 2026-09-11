@@ -100,7 +100,8 @@ const formatApparatus = (entries,blockid) => {
 };
 
 const alignAppToText = (app,text) => {
-    const edlines = [...text.querySelectorAll('l')].map(l => {
+    const ls = text.nodeName === 'lg' ? [...text.querySelectorAll('l')] : [text];
+    const edlines = ls.map(l => {
         const clone = l.cloneNode(true);
         const choices = clone.querySelectorAll('choice');
         for(const choice of choices) {
