@@ -1,5 +1,5 @@
 import { Transliterate } from './transliterate.mjs';
-import { AlignmentViewer } from './alignment.mjs';
+import AlignmentViewer from './alignment.mjs';
 import { ApparatusViewer } from './apparatus.mjs';
 import { MiradorWrapper } from './miradorwrapper.mjs';
 import { GitHubFunctions } from './githubfunctions.mjs';

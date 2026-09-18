@@ -1,7 +1,7 @@
 import { Transliterate } from './transliterate.mjs';
 import { GitHubFunctions } from './githubfunctions.mjs';
 import { ApparatusViewer } from './apparatus.mjs';
-import { AlignmentViewer } from './alignment.mjs';
+import AlignmentViewer from './alignment.mjs';
 //import WordLookup from './wordlookup.mjs';
 import './tooltip.mjs';
 import './removehyphens.mjs';
