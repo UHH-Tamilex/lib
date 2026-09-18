@@ -8,12 +8,13 @@ import './removehyphens.mjs';
 import startEditMode from '../debugging/editmode.mjs';
 
 const cachedContent = new Map();
+const aViewer = new AlignmentViewer();
 
 const lookup = async (e) => {
     const apointer = e.target.closest('.alignment-pointer');
     if(apointer) {
         e.preventDefault();
-        AlignmentViewer.viewer(apointer.href);
+        aViewer.show(apointer.href);
         return;
     }
     /*

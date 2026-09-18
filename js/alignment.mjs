@@ -83,7 +83,7 @@ const alignmentXSLT = `<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.or
 
 const killViewer = e => {
     if(!e.target.closest('#alignment-viewer'))
-        e.target.getRootNode().getElementById('blackout').remove();
+        e.target.getRootNode().querySelector('#alignment-blackout').remove();
 };
 
 const viewerMouseover = e => {
@@ -144,7 +144,7 @@ class AlignmentViewer {
       const xsheet = parseXML(alignmentXSLT);
       const hdoc = await XSLTransform(xsheet, xdoc);
       const blackout = document.createElement('div');
-      blackout.id = 'blackout';
+      blackout.id = 'alignment-blackout';
       const viewer = document.createElement('div');
       viewer.id='alignment-viewer';
       replaceHeaders(this.document,hdoc);

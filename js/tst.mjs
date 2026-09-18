@@ -11,6 +11,7 @@ const _state = Object.seal({
     manifest: null,
     mirador: null,
 });
+const aViewer = new AlignmentViewer();
 
 const init = () => {
 
@@ -176,7 +177,7 @@ const findFacs = (startel) => {
 };
 
 const events = {
-
+  
     docClick: function(e) {
         const locel = e.target.closest('[data-loc]');
         if(locel && !e.target.closest('.app')) {
@@ -194,7 +195,7 @@ const events = {
         const apointer = e.target.closest('.alignment-pointer');
         if(apointer) {
             e.preventDefault();
-            AlignmentViewer.viewer(apointer.href);
+            aViewer.show(apointer.href);
             return;
         }
 
