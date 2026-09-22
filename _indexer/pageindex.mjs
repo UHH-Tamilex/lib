@@ -30,7 +30,7 @@ const go = () => {
         const parser = new (new Jsdom.JSDOM('')).window.DOMParser();
         const xmlDoc = parser.parseFromString(xmlTxt,'text/xml');
         const titleStmt = xmlDoc.querySelector('titleStmt');
-        for(const rdg of titleStmt.querySelector('rdg')) rdg.remove();
+        for(const rdg of titleStmt.querySelectorAll('rdg')) rdg.remove();
         const title = titleStmt.querySelector('title').textContent
                       .replaceAll(/\d+/g,"<span class='num trad'>$&</span>");
         list.push(`<li><a href="${f}">${title}</a></li>`);
