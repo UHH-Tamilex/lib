@@ -273,6 +273,18 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
             ret[ret.length-1] = a[e];
         return ret;
     };
+    const getSlices  = (alignment, start, end, wordsplit, n) => {
+      const slice0 = jiggleSlice(alignment[0],start,end);
+      if(n === 0) {
+        const slice1 = jiggleSlice(alignment[1],start,end);
+        return [slice0, slice1];
+      }
+      const wordjoin = tamilSplit(wordsplit[n].replaceAll('|',''));
+      const toktext = slice0.filter(c => c != '');
+      const aligned = needlemanWunsch(toktext,wordjoin,wordsplitscore);
+      return [aligned[0], aligned[1]];
+    };
+
     let start = 0;
     for(let n=0;n<tam.length;n++) {
         // TODO: should we remove hyphens or not?
@@ -309,8 +321,7 @@ const getWordlist = async (tam,eng,alignment,notes,lookup) => {
             const transsplit = getTransSplit(entry.translation);
             entry.superEntry = [];
             for(let n=0;n<wordsplit.length;n++) {
-                const slice0 = jiggleSlice(alignment[0],start,end);
-                const slice1 = jiggleSlice(alignment[1],start,end);
+                const [slice0, slice1] = getSlices(alignment, start, end, wordsplit, n);
                 const {words: strand, warnings: morewarnings} = await getWordlist(
                         wordsplit[n].split(/(?<!\.)\|/),
                         transsplit[n].split(/(?<!\.)\|/),
