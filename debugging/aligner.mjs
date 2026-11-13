@@ -164,6 +164,7 @@ const tamilSplit = (str) => {
 };
 
 const updateNotes = (obj,notes) => {
+    if(!obj.translation) return;
     if(obj.translation.endsWith('*')) {
         obj.translation = obj.translation.slice(0,-1);
         if(notes) obj.wordnote = notes.shift();
@@ -574,6 +575,7 @@ const findParticle = (word,translation) => {
 const findAffix = (word,translation) => {
     for(const [affix,obj] of caseAffixes) {
         const wordmatch = word.match(obj.regex);
+        if(!translation) continue;
         const transmatch = translation.match(obj.translationregex);
         if(wordmatch && transmatch) {
             const ret = {
@@ -590,6 +592,7 @@ const findAffix = (word,translation) => {
 const findGrammar = translation => {
     //const gram = translation.search(/\(.+?\)-?$/);
     //if(gram == -1) return null;
+    if(!translation) return null;
     const gram = translation.lastIndexOf('(');
     if(gram === -1) return null;
     //const hyphen = translation.endsWith('-') ? '-' : '';
